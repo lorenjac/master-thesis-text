@@ -1,0 +1,106 @@
+\chapter{Introduction}
+\label{ch:intro}
+
+% 1. Databases + KVS
+% 2. NVRAM
+% 3. Recent Research + Concurrency
+% 4. Aufgabenstellung
+% 5. Evaluation
+% 6. Übersicht
+
+% Databases / In-Memory Databases / Key-Value Stores
+
+Many modern technologies such as search engines or artificial intelligence rely
+on databases to store large amounts of data and provide fast access. Further,
+in order to perform essential tasks, such databases must also be reliable.
+
+The predominant method to access data in a database is by using transactions. A
+transaction is a sequence of operations on data that appears as single atomic
+operation. Therefore, an important factor in delivering the mentioned
+technologies is \textit{transaction throughput}.
+
+There are several ways to increase transaction throughput. One approach is to
+hold large portions or even the entire database in fast volatile memory as 
+in \textit{main-memory databases}. In this case, recovery is crucial as
+all data in volatile memory are lost in a crash. However, recovery usually
+involves access to slower persistent storage media which again impairs
+throughput.
+
+Another approach to improve transaction throughput is to utilize multi-core
+architectures by allowing transactions to execute concurrently. This way, an
+incoming transaction does not have to wait until a running transaction
+terminates. This however, introduces potential consistency issues due to race
+conditions. Such conflicts must be prevented or resolved by a dedicated
+\textit{concurrency control} such as locking or multiversioning.
+
+An important class of databases that often feature both in-memory operation and
+concurrent transactions are \textit{key-value stores}. Unlike relational
+databases, a key-value store consists of a single associative collection.
+Lacking query languages and data schemas, key-value stores avoid a lot of
+overhead that may not be required in certain circumstances. A prominent use 
+case is in-memory caching. Still, recovery can be taxing, especially in 
+conjunction with concurrency.
+
+% Byte-Addressable Non-Volatile Memory
+
+Recent research suggests that byte-addressable non-volatile memory (NVM) with
+parameters close to DRAM will be available in the near future. Notable
+technologies currently in research are phase-change memory (PCM),
+magnetoresistive RAM (MRAM), and 3D XPoint. It is suggested that, due to its
+characteristics, NVM is a strong candidate for persistent main memories (also
+NVRAM).
+
+On the downside, persistence would be no longer managed by the operating system
+but the underlying hardware. This can be a threat to transactional semantics in
+case of crash or power failure. Enforcing persistence (e.g. by cache flushes)
+on the other hand can have adverse effects on performance. Also write 
+latencies are expected to be slightly higher compared to DRAM.
+
+% Motivation
+
+The use of NVRAM can have many implications to both operating systems and
+applications. With respect to main-memory databases, recovery would be much
+less of a bottleneck as disk I/O could be eliminated. Also, file systems or 
+indices no longer excel from being block-oriented and should be revisited.
+
+% For main-memory databases, in particular, recovery could be much 
+% less of a bottleneck.
+
+Another possible implication that has not seen much attention is concerned with
+concurrency. Contrary to locking, multiversioning can be seen as implicit
+in-memory logging that would be persistent if used with NVRAM. It is an open
+question, whether (1) NVRAM has any consequence on the choice of concurrency
+control and (2) this can be translated into an advantage over locking.
+
+% Task
+
+The task of the thesis is to explore the implications of NVRAM on concurrency
+control in key-value stores. For this purpose a protoype of an in-memory
+key-value store is developed and evaluated.
+
+% Overview
+
+\paragraph{Overview}
+
+The thesis is structured as follows. First, chapter \ref{ch:domain} lays an 
+adequate foundation on key-value stores, transaction processing, and NVRAM. 
+The chapter consists of two parts. The first part introduces fundamental terms 
+about key-value stores and transaction processing. The second part captures 
+the current state of the art on NVRAM and the design of key-value stores.
+
+Once the groundwork has been laid, chapter \ref{ch:concept} presents the 
+concept of this work. This chapter gives an overview of the concepts and 
+mechanisms involved in the design of the intended key-value store. The focus 
+of this chapter lies in the partial design exploration of concurrency controls 
+for NVRAM-aware key-value stores.
+
+Based on the concept presented in the previous chapter, a prototype of an
+NVRAM-aware key-value store is implemented. This process is documented in 
+chapter \ref{ch:impl}.
+
+An evaluation of the implementation based on microbenchmarks follows in 
+chapter \ref{ch:eval}.
+
+The \hyperref[ch:summary]{last chapter} provides a summary of this thesis and 
+gives an outlook onto future works in the field.
+

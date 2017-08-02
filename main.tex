@@ -1,0 +1,112 @@
+% Copyright (C)  2013 Jana Traue (jana.traue[at]tu-cottbus.de)
+%
+% Permission is granted to copy, distribute and/or modify this document
+% under the terms of the GNU Free Documentation License, Version 1.3
+% or any later version published by the Free Software Foundation;
+% with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+% A copy of the license is included in the file entitled "LICENSE".
+%
+% =============================================================================
+% LATEX main file
+% =============================================================================
+
+% -----------------------------------------------------------------------------
+% include header: used packages, define commands, ....
+% -----------------------------------------------------------------------------
+
+\include{contents/global/header}
+
+% -----------------------------------------------------------------------------
+% set graphics path
+% -----------------------------------------------------------------------------
+
+\graphicspath{{figures/}}
+
+% -----------------------------------------------------------------------------
+% actual document
+% -----------------------------------------------------------------------------
+
+\begin{document}
+
+% -----------------------------------------------------------------------------
+% title page
+% -----------------------------------------------------------------------------
+
+% numbering with letters
+\pagenumbering{alph}
+
+% title page
+\include{contents/global/titlepage}
+
+% -----------------------------------------------------------------------------
+% front matter: table of contents, ...
+% -----------------------------------------------------------------------------
+
+\frontmatter		% start numbering pages
+\pagenumbering{roman}	% numbering with roman numbers
+
+% assertion
+\include{contents/global/assertion}
+
+% table of contents
+\include{contents/global/tableofcontents}
+
+% list of all todos
+% \include{contents/todo}
+
+% -----------------------------------------------------------------------------
+% main matter: all chapters
+% -----------------------------------------------------------------------------
+
+\mainmatter
+\pagenumbering{arabic}	% numbering with arabic numbers
+
+\include{contents/intro/main}
+\include{contents/nvram/main}
+\include{contents/kvs/main}
+\include{contents/dse/main}
+\include{contents/concept/main}
+\include{contents/impl/main}
+\include{contents/eval/main}
+\include{contents/summary/main}
+
+% -----------------------------------------------------------------------------
+% appendix
+% -----------------------------------------------------------------------------
+
+\cleardoublepage{}
+
+% appendix
+\appendix
+
+% acronyms
+\include{contents/global/acronyms}
+
+% figures
+\listoffigures
+
+% tables
+% \listoftables
+
+% -----------------------------------------------------------------------------
+% bibliography
+% -----------------------------------------------------------------------------
+
+% for testing, prints all entries of your bibliography
+%\nocite{*}
+
+% english bibliography styles
+\begin{en}
+\bibliographystyle{unsrt}
+%\bibliographystyle{alpha}
+\end{en}
+
+% german bibliography styles
+\begin{de}
+% \bibliographystyle{babunsrt}	% Babble Bibliography support
+\bibliographystyle{gerunsrt}	% Items sorted in citation order
+\end{de}
+
+%\bibliography{bib/example}
+
+\end{document}

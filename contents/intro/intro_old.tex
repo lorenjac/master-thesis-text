@@ -1,0 +1,76 @@
+\chapter{Introduction}
+
+% 1. Databases + KVS
+% 2. NVRAM
+% 3. Recent Research + Concurrency
+% 4. Aufgabenstellung
+% 5. Evaluation
+% 6. Übersicht
+
+% Databases / In-Memory Databases / Key-Value Stores
+
+Modern database systems serve many purposes ranging from archiving to 
+high-performance computing. Technologies such as search engines, trading 
+and artificial intelligence rely on vast amounts of data that need to be 
+processed with minimal latency. This also requires databases to be fault-
+tolerant and recover quickly in case of failure.
+
+With transactions being the predominant method to access data, a key factor 
+in delivering these technologies is transaction throughput. Traditional 
+databases store their data on mechanical disks. While this provides the 
+necessary storage capacities, it also impairs the performance of transactions
+accessing the data. In an attempt to eliminate disk I/O, main-memory databases
+retain large parts or the entire database in faster but volatile main memory.
+This enables significantly faster access but also makes recovery 
+
+An important class of databases are key-value stores.
+
+% Byte-Addressable Non-Volatile Memory
+
+Recent research suggests novel non-volatile memory (NVM) technologies to 
+complement or replace DRAM in the near future. Notable technologies include 
+phase-change memory (also known as PCM or PRAM), magnetoresistive RAM (MRAM), 
+and 3D XPoint. These technologies enable byte-addressable storage and are 
+projected to be nearly as fast as traditional DRAM. It is also expected that 
+NVM is more dense and cheaper to produce than DRAM. This makes way for new 
+memory architectures and programming models.
+
+% Transactions / Throughput / Concurrency
+
+In order to increase throughput on multi-core architectures, most database 
+systems support the concurrent execution of transactions. This way, incoming 
+transactions do not have to wait for an active transaction to complete. 
+However, concurrency comes at the cost of controlling which transactions may 
+execute without conflicting with each other. Otherwise consistency cannot be 
+guaranteed.
+
+A traditional approach to ensure consistency is to lock all resources that are 
+accessed by a transaction. When that transaction completes, all its acquired 
+locks are released. A transaction that requests access to a locked resource 
+has to wait until its lock is released. This method, however, may suffer from 
+lock contention and deadlocks. Another approach that has seen a wide adoption 
+is multiversion concurrency control. Instead of locking a resource and 
+applying updates in-place, MVCC creates a new version on each update and keeps 
+older versions, so that running transactions can still access them. This 
+scheme has been implemented in both commercial and non-commercial transaction-
+processing systems. These range from general-purpose database systems to high-
+performance in-memory databases.
+
+
+% TODO rework
+On an architecture point of view, NVM enables new memory hierarchies by replacing disks or even DRAM. This would encourage in-memory databases based on NVM and would enable near-instantaneous restarts. It could also facilitate programming models with persistent objects.
+
+% TODO rework
+However, NVM also introduces new problems such as consistency in case of power failure and slower access. When power fails it is unclear which data have been persisted and which still are still in-flight. Such inconsistencies that did not exist for DRAM, are usually countered by flushing store buffers, caches, and write queues upon each operation that is required to be persistent. Forcing persistence however, leads to cache misses which are generally expensive. Another drawback is access time, where reading is estimated to be about as fast as with DRAM but writing is expected to significantly slower.
+
+% TODO rework
+This thesis explores different memory architectures based on NVM and evaluates its implications for concurrency control. In this regard, two fundamental control schemes, namely locking and MVCC are studied. The size of the resulting design space poses a major challenge. Not only are there many possible memory topologies to choose from but there are also different variants of MVCC. In order to deal with the complexity, several designs are evaluated on the basis of a prototype key value store. A key value store (KVS) is an appropriate tool for evaluation as it provides a very compact interface of a database. In fact, some databases rely on key value stores.
+
+% TODO rework
+The aim of this work is to find efficient concurrency control mechanisms for different memory configurations based on NVM. An important question in this regard is whether MVCC still is a valid choice over two-phase locking.
+
+% TODO rework
+The experiments are carried out on the basis of a prototype KVS. Comparing existing KVS instead would be less conclusive as structural differences are bound to yield distorted results. For meaningful results different workloads as in TATP or TPC-C are applied. As NVM is not yet commercially available, its expected latency characteristics must be simulated. This can be done via BIOS configuration, machine emulators such as GEM5, or CPU stall instructions.
+
+% TODO rework
+The implications of NVM for concurrency control has not seen much attention in recent research. Therefore the aim of this work is to provide the groundwork for database research interested in NVM technologies. Furthermore, this work provides a guide for database developers and users to properly leverage modern memory technologies according to their needs.

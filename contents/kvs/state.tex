@@ -1,0 +1,38 @@
+\section{State of the Art}
+
+% \subsection{Byte-Addressable Non-Volatile Memory}
+
+% 1) Idea / Motivation
+% 2) Technologies (example for PCM / 3D XPoint)
+% 3) Implications (bailey2013)
+%       Transactional Semantics
+%           OS no longer manages persistence
+%           hardware is unaware
+%       Virtual Memory
+%       Filesystems
+%       Unwanted Persistence
+%           remaining confidential data (security)
+%           remaining crash data (safety)
+%       Databases
+%           cheaper logging/checkpointing
+%           cheaper recovery (rollback, restart)
+% 4) Ensuring Persistence
+
+% \subsection{Key-Value Stores}
+
+% 1) Key-Value Stores
+%       redis, memcached, aerospike, ... (used at Amazon, Google, ...)
+%       echo, nvht, berkeley db, flatfs
+% 2) Applications
+%       databases, caches, file systems
+% 3) Data Structures
+%       b-trees
+%       hash tables
+%       radix tree (proposed but not seen in action)
+%       (non-)blocking???
+% 4) Concurrency Control
+%       locking
+%           two-phase locking (2PL)
+%       MVCC
+%           (serializable) Snapshot Isolation
+%           custom MVCC (neumann2015)
