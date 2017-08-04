@@ -146,7 +146,7 @@
 \usepackage{listings}		% include listings
 %
 % ------------------------------------------------------------------------------
-% tables 
+% tables
 \usepackage{tabularx}
 \usepackage{longtable}
 \usepackage{arydshln}   % gestrichelte Linien in Tabellen
@@ -237,31 +237,24 @@
 %
 %
 % ------------------------------------------------------------------------------
-% todo notes 
+% todo notes
 %
 \usepackage[colorinlistoftodos]{todonotes}
 %
 % ==============================================================================
 % custom commands
 % ==============================================================================
-%
-%
-% ------------------------------------------------------------------------------
+
 % for source code
-%
 \newcommand{\package}[1]{\textbf{#1}}
 \newcommand{\code}[1]{\texttt{#1}}
-%
-% \EMMA wird im Text durch EMMA ersetzt
+
+% \TEXT wird im Text durch TEXT ersetzt
 % Im normalen Text muss ein Leerzeichen folgen, es sei denn es ist das letzte
 % Wort vor einem Satzzeichen. Dass dies richtig erkannt wird, macht das xspace.
-\newcommand{\EMMA}{\ac{EMMA}\xspace}
-%
-%
+\newcommand{\kvs}{key-value store\xspace}
+\newcommand{\kvsp}{key-value stores\xspace}
+
 % ==============================================================================
 % hyphenations
 % ==============================================================================
-%
-\hyphenation{video-conference-system super-user}
-\hyphenation{meta-model}
-%
