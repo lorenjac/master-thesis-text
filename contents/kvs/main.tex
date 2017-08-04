@@ -1,28 +1,28 @@
 \chapter{Key-Value Stores}
-\label{ch:domain}
+\label{ch:kvs}
 
 % Context
 
-Recent research suggests the use of novel non-volatile memory as persistent 
-main memory. Apart from being byte-addressable, the upcoming modules are 
-projected to be almost as fast as DRAM and provide a higher capacity. Among 
-others, this could have considerable consequences for databases such as 
-key-value stores. Imagine recovery without retrieving checkpoints from disk. 
-Nevertheless, this work aims to assess the influence of NVRAM on the design of 
-concurrency control. 
+Recent research suggests the use of novel non-volatile memory as persistent
+main memory. Apart from being byte-addressable, the upcoming modules are
+projected to be almost as fast as DRAM and provide a higher capacity. Among
+others, this could have considerable consequences for databases such as
+key-value stores. Imagine recovery without retrieving checkpoints from disk.
+Nevertheless, this work aims to assess the influence of NVRAM on the design of
+concurrency control.
 
 % Overview (coarse)
 
-This chapter provides a brief overview on key-value stores with regard to 
-upcoming NVRAM. But before giving insight into the current state of the art, 
-a few fundamental terms must be introduced. For this purpose the chapter has 
+This chapter provides a brief overview on key-value stores with regard to
+upcoming NVRAM. But before giving insight into the current state of the art,
+a few fundamental terms must be introduced. For this purpose the chapter has
 been separated into two parts.
 
 % Overview (fine)
 
-The first part introduces the concept of key-value stores with an emphasis on 
-managing concurrent transactions. Important aspects in this regard are 
-concurrency control and serializability. In the second part, a comprehensive 
+The first part introduces the concept of key-value stores with an emphasis on
+managing concurrent transactions. Important aspects in this regard are
+concurrency control and serializability. In the second part, a comprehensive
 analysis on novel non-volatile memory and modern key-value stores is conducted.
 
 % Basics
@@ -38,4 +38,3 @@ analysis on novel non-volatile memory and modern key-value stores is conducted.
 \subsection{Locking}
 \subsection{Multiversioning}
 \subsection{Serializable MVCC}
-
