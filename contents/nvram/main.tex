@@ -1,6 +1,211 @@
 \chapter{Non-Volatile RAM}
 \label{ch:nvram}
 
-\section{Overview}
-\section{Memory Model}
+Current non-volatile storage technologies such as harddisks or \acp{SSD} are
+block-oriented. Also accessing these devices can be up to three orders of
+magnitude slower than accessing \ac{DRAM}. Recent research however, suggests
+that fast and byte-addressable \ac{NVM} will be available in the near future.
+Based on its projected characteristics, this new class of memory is referred to
+as \ac{NVRAM}.
+
+\todo{Short chapter overview}
+\todo{re-consider choice of PCM over STT-RAM}
+
+\paragraph{Terminology}
+
+As of this writing there is no consensus as to how byte-addressable non-volatile
+memory should be referred to. This thesis exclusively uses term \ac{NVRAM}.
+There are two reasons for this decision. For one, alternative terms such as
+\ac{BPRAM} or \ac{PM} suggest that non-volatile memory is also persistent which
+however, may not always be correct\todo{proof?}. Another reason is that some
+terms such as \ac{SCM}, \ac{NVM} and \ac{PM} may not reflect the property of
+bytewise addressing which is central to these technologies. \ac{NVRAM} on the
+other hand, explicitly denotes all of the required properties.
+
+% When referring to hardware or processor architecture, this work implicitly
+% refers to the Intel Core architecture and the most recent instruction set
+% Intel 64 (also x86-64, x64 or AMD64).
+
+\section{State of the Art}
+
+% general properties (non-volatile, byte-addressable)
+
+The main properties of NVRAM are non-volatility and access on a byte granule.
+
+% technologies (PCM, STT-RAM, RRAM)
+% latency
+% density
+% endurance
+
+% design factors (latency vs capacity vs power)
+
+% integration
+% consensus that NVRAM will be attached as NVDIMM to system memory interface
+% how will it be accessed
+%   direct mapped
+%       mapping would somehow have to be deterministic
+%       or provide designated function for retrieving non-volatile address space
+%   device driver
+%       file system (map to virtual memory using mmap)
+%           ordinary
+%           with DAX (direct memory access) [Intel, oukid2017]
+%               circumvents page cache for memory-like storage devices
+
+\paragraph{Integration}
+
+Before \ac{NVRAM}, there have been multiple attempts to creating fast
+non-volatile system memory. Notable examples include battery-backed \ac{DRAM}
+\cite{molina1992main, condit2009better, bailey2013exploring} and NAND-based
+\acp{SSD} which were attached to the system memory interface \cite{wu1994envy,
+shi2010write}. There have also been attempts to combine the low latencies of
+\ac{DRAM} and the large capacities of NAND flash \cite{oe2016feasibility}. The
+latter has led to the \ac{NVDIMM} specification by \ac{JEDEC}. It introduces
+\texttt{NVDIMM-F} and \texttt{NVDIMM-N} which define how to integrate and
+interact with combinations of \ac{DRAM} and NAND. In an effort to support recent
+\ac{NVM} technologies such as \ac{PCM}, \ac{JEDEC} has announced
+\texttt{NVDIMM-P}\cite{jedec2017nvdimm}. Therefore, it is assumed that
+\ac{NVRAM} will be available as traditional DIMM modules which are connected to
+the memory interface.
+
+Operating systems need to find ways to efficiently manage \ac{NVRAM}. Similarly
+to previous variants of \ac{NVDIMM}, it is proposed that \ac{NVRAM} is accessed
+through a dedicated device driver \cite{intel2017nvdimm}. Another approach would
+be to map \ac{NVRAM} directly into virtual memory \todo{elaborate!}.
+
+At this stage, there are two ways to access the device: raw device access and
+file systems. While raw device access appears unwieldy, file systems provide a
+great deal of flexibility. Not only do file systems provide a more suitable
+abstraction for user-level applications but they also enable memory-mapped IO
+through virtual memory. Therefore, file systems are the currently preferred
+method of accessing \ac{NVRAM} \cite{oukid2017data}. Still, there are a couple
+of issues to address.
+
+While traditional file systems will continue to work, they may not be
+well-suited for \ac{NVRAM} as they were designed for external block-oriented
+storage. Therefore, several \ac{NVRAM}-aware file systems such as \texttt{pmfs},
+\texttt{bpfs}, and \texttt{scmfs} have been proposed \cite{dulloor2014system,
+condit2009better, wu2011scmfs}. \todo{elaborate on differences}
+
+A key feature of main memory is store/load semantics.
+
+% file systems use operating system page cache
+% was used to buffer modified pages to reduce disk IO
+% no longer required + breaks store/load semantics
+% nvram-aware file systems provide means to expose memory regions
+% in linux/ext4: using DAX => circumvents page cache,
+% nvram-aware file systems also proposed to expose actual memory regions for direct memory access
+
+% use cases
+%   operating systems
+%       processes stay in memory and can be toggled
+%   databases
+%       fast disk caches for large databases
+%           for data
+%           for recovery (e.g. logging)
+%       fast recovery for in-memory databases
+%           no more disk IO for logging etc.
+%           instant restart
+
+% challenges
+% some applications (at least in part) rely on information to be volatile (corrupt data from crash, security relevant data, garbage collection)
+% memory mapping is volatile and often random (see ASLR)
+% consistency in case of crash
+
+\section{Preserving Consistency}
+
+As pointed out earlier, \ac{NVRAM} is vulnerable to inconsistent data in case of
+a crash or power failure. Unlike \acp{HDD} or \acp{SSD}, \acl{NVRAM} is part of
+the memory address space and accessed through virtual memory rather than IO
+ports. Therefore, all data operations on \ac{NVRAM} must pass through the memory
+hierarchy of the \ac{CPU}. However, there are two essential mechanisms of modern
+processors that can break the consistency of data stored in \ac{NVRAM}:
+\emph{instruction reordering} and \emph{deferred write-back}.
+
+% However, the memory hierarchy is designed for volatile memory which has weaker
+% semantics than non-volatile counterpart. As modern \acp{CPU} have no way to
+% distinguish between both types of memory, \ac{NVRAM} is treated as if it were
+% \ac{DRAM}.
+
+\paragraph{Instruction Reordering}
+
+\todo[inline]{explain principle}
+\todo[inline]{explain example for x86}
+
+In order to optimimize instruction throughput of modern processors, instructions may be reordered. This is usually done in a bilateral approach. While compilers may optimize intructions orders statically, modern processors are able to reorder instructions at runtime. However, reordering is only possible if there are no data dependencies between
+
+\todo[inline]{reasoning?}
+\todo[inline]{requirements?}
+\todo[inline]{example for failure?}
+
+This leads to the conclusion that, preserving data consistency on \ac{NVRAM} requires the system or programmer to enforce strict ordering of memory operations.
+
+\paragraph{Deferred Write-Back}
+
+\todo[inline]{explain principle}
+\todo[inline]{explain example for x86}
+
+Second, many processor architectures do not immediately execute memory
+operations but store them in dedicated store and load buffers, respectively. A
+store operation is only executed when its store buffer is full or a fence
+operation was issued. During this period the store is completely volatile.
+
+Third, unless configured otherwise, processor caches keep cache lines until they
+are either evicted to lower cache levels or written back to memory.
+
+Fourth, once the affected cache line of a store is flushed, the store is
+propagated to the memory controller where it is once more buffered and written
+onto the device, eventually. During this stage the in-flight data is still
+volatile and thus vulnerable to power loss.
+
+This behaviour has two consequences: memory operations may be executed in a
+wrong order and in-flight stores may not never the device in case of a crash
+or power loss.
+
+Modern processors queue memory operations in small buffers in order to achieve
+efficient bulk transfers. On Intel \code{x86} architectures there are separate
+buffers for load and store operations, respectively. Such buffers are referred
+to as \ac{MOB}. Whenever a store operation is issued, it is added to an
+available store buffer. Once satisfied, the buffer is flushed and the stores are
+propagated into the first level data cache.
+
+\subsection{Approaches with Existing Hardware}
+
+With existing hardware
+% fences
+
+% caches
+
+Instead of waiting for a cache line to be evicted, it can be flushed using
+designated instructions. The \code{x86} instruction set provides multiple
+instructions to do so: \code{CLFLUSH}, \code{CLFLUSHOPT}, and \code{CLWB}.
+While \code{CLFLUSH}
+
+% write-pending queues
+
+While other levels of the memory hierarchy may be flushed through machine
+instructions, there is no such instruction for memory controllers. Therefore,
+\code{PCOMMIT} a special instruction to flush memory controller buffers was
+proposed. Only recently, this instruction has been deprecated in favor of
+\ac{ADR}. \ac{ADR} is a platform feature that guarantees that, in case of power
+loss, all memory controllers flush their buffers using the remaining power of
+the system. It works by exploiting the fact that even in case of a power failure
+there is sufficient time and power to flush the write buffers of all memory
+controllers. For this to work, the power supply unit has to detect a power
+failure and issue a signal to the memory controllers.
+
+\subsection{Alternative Approaches}
+
+\todo[inline]{Epoch Barriers, condit, SOSP 2009}
+\todo[inline]{Whole System Persistence, narayanan, 2012}
+\todo[inline]{Strand Persistency, pelley, ISCA 2014}
+
 \section{Phase-Change Memory}
+
+\todo{explain why PCM instead of STT-RAM / RRAM}
+
+density: DRAM < STT-RAM < PCM (higher is better)
+endurance: PCM < STT-RAM < DRAM (higher is better)
+latency: DRAM <= STT-RAM < PCM (lower is better)
+dypower: STT-RAM < DRAM < PCM (lower is better)
+
+implication: PCM
