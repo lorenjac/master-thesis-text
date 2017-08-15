@@ -1,0 +1,28 @@
+% =============================================================================
+% When using latexmk, add this to .~/latexmkrc (otherwise glossary is empty)
+% =============================================================================
+%
+% add_cus_dep('glo', 'gls', 0, 'run_makeglossaries');
+% add_cus_dep('acn', 'acr', 0, 'run_makeglossaries');
+%
+% sub run_makeglossaries {
+%   if ( $silent ) {
+%     system "makeglossaries -q '$_[0]'";
+%   }
+%   else {
+%     system "makeglossaries '$_[0]'";
+%   };
+% }
+%
+% push @generated_exts, 'glo', 'gls', 'glg';
+% push @generated_exts, 'acn', 'acr', 'alg';
+% $clean_ext .= ' %R.ist %R.xdy';
+%
+% =============================================================================
+
+\newglossaryentry{tx}
+{
+    name=transaction,
+    % plural=transactions,
+    description={A sequence of operations that appears as a single atomic operation. It either succeeds or fails without any side effects.}
+}
