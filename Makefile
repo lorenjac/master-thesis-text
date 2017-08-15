@@ -6,6 +6,9 @@
 # with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 # A copy of the license is included in the file entitled "LICENSE".
 
+#pdf:
+# latexmk -pdf main.tex
+
 # latexmk does a good job cleaning up, but some files still remain
 # this is a list of all extensions of temporary files
 EXTENSIONS:=aux bbl blg cut dvi log out pdfsync ps synctex.gz tdo toc tex~ backup
@@ -15,10 +18,14 @@ EXTENSIONS:=aux bbl blg cut dvi log out pdfsync ps synctex.gz tdo toc tex~ backu
 default: pdf
 
 pdf:
-	latexmk -pdf main.tex
+	@pdflatex -halt-on-error main.tex > /dev/null || true
+	@makeglossaries -q main
+	@bibtex -terse main | grep "Warning--" || true
+	@pdflatex -halt-on-error main.tex > /dev/null || true
+	@pdflatex -halt-on-error main.tex | grep -a3 ^! || true
 
 clean:
-	latexmk -c main.tex
+	@latexmk -silent -c main.tex 2> /dev/null
 	@for i in $(EXTENSIONS); \
 	do \
 		for file in `find . -name "*.$$i"`; do rm $$file; done; \

@@ -19,10 +19,60 @@
 % $clean_ext .= ' %R.ist %R.xdy';
 %
 % =============================================================================
+% When compiling manually (e.g. pdflatex), use 'makeglossaries'
+% =============================================================================
+%
+% $> pdflatex main.tex
+% $> makeglossaries main
+% $> bibtex main.aux
+% $> pdflatex main.tex
+% $> pdflatex main.tex
+%
+% =============================================================================
+% Create glossary entries
+% =============================================================================
+%
+% \newglossaryentry{<key>}
+% {
+%     name=<name>,
+%     plural=<plural>,
+%     description={A name is an identifier.},
+%     see=<another-key>
+% }
+%
+% =============================================================================
+% Use glossary entries
+% =============================================================================
+%
+% \gls{}    - lower-case singular
+% \glspl{}  - lower-case plural
+%
+% \Gls{}    - upper-case singular
+% \Glspl{}  - upper-case plural
+%
+% =============================================================================
+
+% TODO Remove whitespace between last word of desc. and implicit period if last word is an acronym (appending \xspace seems to work)
 
 \newglossaryentry{tx}
 {
     name=transaction,
-    % plural=transactions,
-    description={A sequence of operations that appears as a single atomic operation. It either succeeds or fails without any side effects.}
+    description={
+        A sequence of operations that appears as a single atomic operation. It
+        either succeeds or fails without any side effects
+    }
+}
+
+\newglossaryentry{mmdb}
+{
+    name=main-memory database,
+    description={
+        A database that keeps all of its data in main memory. This enables data
+        access with very low latency. Still, with volatile memory such as
+        \ac{DRAM}, data is vulnerable to crashes and power failures which
+        violates ACID. For this reason, most \acp{MMDB} must retain an
+        up-to-date recovery partition in slower non-volatile memory which is
+        copied back into main memory in case of a restart. Ensuring this kind of
+        recovery is a prominent bottleneck of \acp{MMDB}
+    }
 }
