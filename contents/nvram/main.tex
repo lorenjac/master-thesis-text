@@ -1,46 +1,103 @@
 \chapter{Non-Volatile RAM}
 \label{ch:nvram}
 
-Current non-volatile storage technologies such as harddisks or \acp{SSD} are
-block-oriented. Also accessing these devices can be up to three orders of
-magnitude slower than accessing \ac{DRAM}. Recent research however, suggests
-that fast and byte-addressable \ac{NVM} will be available in the near future.
-Based on its projected characteristics, this new class of memory is referred to
-as \ac{NVRAM}.
+Popular non-volatile storage technologies such as HDD or SSD can only be
+operated as block devices and incur high access latencies compared to volatile
+DRAM. This led to the development of non-volatile analogies of DRAM, which
+however failed to see wide adoption. One reason was that these devices were
+either block-oriented or required additional peripherals such as batteries.
+
+Recent research however, suggests that fast and byte-addressable NVM will be
+available in the near future. Based on its projected characteristics, this new
+class of memory is also referred to as NVRAM.
 
 \todo{Short chapter overview}
-\todo{re-consider choice of PCM over STT-RAM}
 
 \paragraph{Terminology}
 
 As of this writing there is no consensus as to how byte-addressable non-volatile
-memory should be referred to. This thesis exclusively uses term \ac{NVRAM}.
-There are two reasons for this decision. For one, alternative terms such as
-\ac{BPRAM} or \ac{PM} suggest that non-volatile memory is also persistent which
-however, may not always be correct\todo{proof?}. Another reason is that some
-terms such as \ac{SCM}, \ac{NVM} and \ac{PM} may not reflect the property of
-bytewise addressing which is central to these technologies. \ac{NVRAM} on the
-other hand, explicitly denotes all of the required properties.
+memory should be referred to. This thesis exclusively uses term NVRAM. There are
+two reasons for this decision. For one, alternative terms such as BPRAM or PM
+suggest that non-volatile memory is also persistent which however, may not
+always be correct\todo{proof?}. Another reason is that some terms such as SCM,
+NVM and PM may not reflect the property of bytewise addressing which is central
+to these technologies. NVRAM on the other hand, explicitly denotes all of the
+desired properties.
 
-% When referring to hardware or processor architecture, this work implicitly
-% refers to the Intel Core architecture and the most recent instruction set
-% Intel 64 (also x86-64, x64 or AMD64).
+\section{Applications}
 
-\section{State of the Art}
+% use cases
+%   operating systems
+%       processes stay in memory and can be toggled
+%   databases
+%       fast disk caches for large databases
+%           for data
+%           for recovery (e.g. logging)
+%       fast recovery for in-memory databases
+%           no more disk IO (for logging etc.)
+%           instant restart
 
-% general properties (non-volatile, byte-addressable)
+\section{Technologies}
 
-The main properties of NVRAM are non-volatility and access on a byte granule.
+% TODO short motivation for non-volatile, byte-addressable memory
+
+In the past there have been multiple attempts to produce non-volatile equivalents of main memory.
+
+\paragraph{Early Approaches}
+
+Initially, the intention was to make systems more tolerant to failures, although
+opportunities for storage systems were also discussed \cite{molina1992main,
+wang2002conquest}. The main issue with DRAM is that, in order to retain its
+data, it needs to refresh its cells which requires a power supply. Therefore,
+early non-volatile main memories were equipped with batteries or UPS which
+allowed to hold information for a limited time in case of a power failure. An
+example is the distributed file system \emph{Harp} which assumes battery-backed
+DRAM on each node to protect its otherwise volatile log from power failures
+\cite{liskov1991replication}. The file cache \emph{Rio} attempts to make
+operating systems more resilient to failures by caching files in fast
+battery-backed DRAM thus providing a smaller window of vulnerability
+\cite{chen1996rio}. Conversely, \emph{Conquest} is a file system that, with the
+exception of large files, stores all data including metadata in battery-backed
+DRAM \cite{wang2002conquest}.
+
+% Notable examples are the file systems \emph{Harp} \cite{liskov1991replication}
+% and \emph{Conquest} \cite{wang2002conquest} as well as the file cache
+% \emph{Rio} \cite{chen1996rio}.
+
+In another approach researchers used battery-backed SRAM as a write buffer which
+is flushed to an interconnected flash memory when full or in case of a power
+failure \cite{wu1994envy}. By limiting access to the SRAM, the non-volatile yet
+slower flash device is effectively shadowed. Still, since flash operates in
+block mode, the byte-addressable nature of SRAM cannot be exploited in this
+setup. This is an early example of hybrid memory solutions for fast mass
+storage. However, backup power supplies have also been subject to criticism.
+Arguments are that batteries are not inherently reliable and introduce
+additional maintenance overhead \cite{molina1992main}. Therefore experiments
+were conducted, where flash memory was directly attached to the memory interface
+\cite{shi2010write}. Similar ideas were later consolidated in the JEDEC NVDIMM
+specification, which defines several configurations for DIMMs consisting of
+flash memory and DRAM \cite{oe2016feasibility, huang2014design}.
+
+% This marks a shift in the development of NVRAM as reliability becomes second
+% to fast high-capacity storage.
+
+\paragraph{Modern Approaches} % TODO modern approaches
+
+
 
 % technologies (PCM, STT-RAM, RRAM)
-% latency
-% density
-% endurance
+% density: DRAM < STT-RAM < PCM (higher is better)
+% endurance: PCM < STT-RAM < DRAM (higher is better)
+% latency: DRAM <= STT-RAM < PCM (lower is better)
+% dypower: STT-RAM < DRAM < PCM (lower is better)
 
-% design factors (latency vs capacity vs power)
+\section{System Integration}
 
-% integration
 % consensus that NVRAM will be attached as NVDIMM to system memory interface
+%   disadvantages
+%       shared bandwith with DRAM
+%       DIMM slots do not scale
+%       vulnerability to stray writes
 % how will it be accessed
 %   direct mapped
 %       mapping would somehow have to be deterministic
@@ -51,42 +108,36 @@ The main properties of NVRAM are non-volatility and access on a byte granule.
 %           with DAX (direct memory access) [Intel, oukid2017]
 %               circumvents page cache for memory-like storage devices
 
-\paragraph{Integration}
-
-Before \ac{NVRAM}, there have been multiple attempts to creating fast
-non-volatile system memory. Notable examples include battery-backed \ac{DRAM}
-\cite{molina1992main, condit2009better, bailey2013exploring} and NAND-based
-\acp{SSD} which were attached to the system memory interface \cite{wu1994envy,
-shi2010write}. There have also been attempts to combine the low latencies of
-\ac{DRAM} and the large capacities of NAND flash \cite{oe2016feasibility}. The
-latter has led to the \acs{NVDIMM} specification by \ac{JEDEC}. It introduces
+The latter has led to the NVDIMM specification by JEDEC. It introduces
 \texttt{NVDIMM-F} and \texttt{NVDIMM-N} which define how to integrate and
-interact with combinations of \ac{DRAM} and NAND. In an effort to support recent
-\ac{NVM} technologies such as \ac{PCM}, \ac{JEDEC} has announced
-\texttt{NVDIMM-P}\cite{jedec2017nvdimm}. Therefore, it is assumed that
-\ac{NVRAM} will be available as traditional DIMM modules which are connected to
-the memory interface.
+interact with combinations of DRAM and NAND\todo{explain}. In an effort to
+support recent NVM technologies such as PCM, JEDEC has announced
+\texttt{NVDIMM-P}\cite{jedec2017nvdimm}. Therefore, it is assumed that NVRAM
+will be available as traditional DIMM modules which are connected to the CPU
+memory interface\cite{condit2009better}.
 
-Operating systems need to find ways to efficiently manage \ac{NVRAM}. Similarly
-to previous variants of \ac{NVDIMM}, it is proposed that \ac{NVRAM} is accessed
+% NVDIMM is attached to CPU but still accessed as block device in separate address space
+
+In order to benefit from NVRAM, operating systems need to find ways to efficiently manage NVRAM. Similarly
+to previous variants of NVDIMM, it is proposed that NVRAM is accessed
 through a dedicated device driver \cite{intel2017nvdimm}. Another approach would
-be to map \ac{NVRAM} directly into virtual memory \todo{elaborate!}.
+be to map NVRAM directly into virtual memory \todo{elaborate!}.
 
 At this stage, there are two ways to access the device: raw device access and
 file systems. While raw device access appears unwieldy, file systems provide a
 great deal of flexibility. Not only do file systems provide a more suitable
 abstraction for user-level applications but they also enable memory-mapped IO
 through virtual memory. Therefore, file systems are the currently preferred
-method of accessing \ac{NVRAM} \cite{oukid2017data}. Still, there are a couple
+method of accessing NVRAM \cite{oukid2017data}. Still, there are a couple
 of issues to address.
 
 While traditional file systems will continue to work, they may not be
-well-suited for \ac{NVRAM} as they were designed for external block-oriented
-storage. Therefore, several \ac{NVRAM}-aware file systems such as \texttt{pmfs},
-\texttt{bpfs}, and \texttt{scmfs} have been proposed \cite{dulloor2014system,
-condit2009better, wu2011scmfs}. \todo{elaborate on differences}
+well-suited for NVRAM as they were designed for external block-oriented
+storage. Therefore, several NVRAM-aware file systems such as \texttt{pmfs},
+\texttt{bpfs}, and \texttt{scmfs} have been proposed \cite{condit2009better,
+wu2011scmfs, dulloor2014system}.
 
-A key feature of main memory is store/load semantics.
+\todo{elaborate on differences}
 
 % file systems use operating system page cache
 % was used to buffer modified pages to reduce disk IO
@@ -95,36 +146,28 @@ A key feature of main memory is store/load semantics.
 % in linux/ext4: using DAX => circumvents page cache,
 % nvram-aware file systems also proposed to expose actual memory regions for direct memory access
 
-% use cases
-%   operating systems
-%       processes stay in memory and can be toggled
-%   databases
-%       fast disk caches for large databases
-%           for data
-%           for recovery (e.g. logging)
-%       fast recovery for in-memory databases
-%           no more disk IO for logging etc.
-%           instant restart
+\section{Challenges}
 
-% challenges
 % some applications (at least in part) rely on information to be volatile (corrupt data from crash, security relevant data, garbage collection)
 % memory mapping is volatile and often random (see ASLR)
 % consistency in case of crash
 
 \section{Preserving Consistency}
 
-As pointed out earlier, \ac{NVRAM} is vulnerable to inconsistent data in case of
-a crash or power failure. Unlike \acp{HDD} or \acp{SSD}, \acl{NVRAM} is part of
+As pointed out earlier, NVRAM is vulnerable to inconsistent data in case of
+a crash or power failure. Unlike HDD or SSD, NVRAM is part of
 the memory address space and accessed through virtual memory rather than IO
-ports. Therefore, all data operations on \ac{NVRAM} must pass through the memory
-hierarchy of the \ac{CPU}. However, there are two essential mechanisms of modern
-processors that can break the consistency of data stored in \ac{NVRAM}:
+ports. Therefore, all data operations on NVRAM must pass through the memory
+hierarchy of the CPU. However, there are two essential mechanisms of modern
+processors that can break the consistency of data stored in NVRAM:
 \emph{instruction reordering} and \emph{deferred write-back}.
 
+\todo{write-back ordering is also a problem (unordered clflush)}
+
 % However, the memory hierarchy is designed for volatile memory which has weaker
-% semantics than non-volatile counterpart. As modern \acp{CPU} have no way to
-% distinguish between both types of memory, \ac{NVRAM} is treated as if it were
-% \ac{DRAM}.
+% semantics than non-volatile counterpart. As modern CPU have no way to
+% distinguish between both types of memory, NVRAM is treated as if it were
+% DRAM.
 
 \paragraph{Instruction Reordering}
 
@@ -137,7 +180,7 @@ In order to optimimize instruction throughput of modern processors, instructions
 \todo[inline]{requirements?}
 \todo[inline]{example for failure?}
 
-This leads to the conclusion that, preserving data consistency on \ac{NVRAM} requires the system or programmer to enforce strict ordering of memory operations.
+This leads to the conclusion that, preserving data consistency on NVRAM requires the system or programmer to enforce strict ordering of memory operations.
 
 \paragraph{Deferred Write-Back}
 
@@ -164,7 +207,7 @@ or power loss.
 Modern processors queue memory operations in small buffers in order to achieve
 efficient bulk transfers. On Intel \code{x86} architectures there are separate
 buffers for load and store operations, respectively. Such buffers are referred
-to as \ac{MOB}. Whenever a store operation is issued, it is added to an
+to as MOB. Whenever a store operation is issued, it is added to an
 available store buffer. Once satisfied, the buffer is flushed and the stores are
 propagated into the first level data cache.
 
@@ -186,7 +229,7 @@ While other levels of the memory hierarchy may be flushed through machine
 instructions, there is no such instruction for memory controllers. Therefore,
 \code{PCOMMIT} a special instruction to flush memory controller buffers was
 proposed. Only recently, this instruction has been deprecated in favor of
-\ac{ADR}. \ac{ADR} is a platform feature that guarantees that, in case of power
+ADR. ADR is a platform feature that guarantees that, in case of power
 loss, all memory controllers flush their buffers using the remaining power of
 the system. It works by exploiting the fact that even in case of a power failure
 there is sufficient time and power to flush the write buffers of all memory
@@ -198,14 +241,3 @@ failure and issue a signal to the memory controllers.
 \todo[inline]{Epoch Barriers, condit, SOSP 2009}
 \todo[inline]{Whole System Persistence, narayanan, 2012}
 \todo[inline]{Strand Persistency, pelley, ISCA 2014}
-
-\section{Phase-Change Memory}
-
-\todo{explain why PCM instead of STT-RAM / RRAM}
-
-density: DRAM < STT-RAM < PCM (higher is better)
-endurance: PCM < STT-RAM < DRAM (higher is better)
-latency: DRAM <= STT-RAM < PCM (lower is better)
-dypower: STT-RAM < DRAM < PCM (lower is better)
-
-implication: PCM
