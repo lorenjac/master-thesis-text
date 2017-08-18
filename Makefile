@@ -18,10 +18,15 @@ EXTENSIONS:=aux bbl blg cut dvi log out pdfsync ps synctex.gz tdo toc tex~ backu
 default: pdf
 
 pdf:
+	@echo "pdflatex..."
 	@pdflatex -halt-on-error main.tex > /dev/null || true
+	@echo "makeglossaries..."
 	@makeglossaries -q main
+	@echo "bibtex..."
 	@bibtex -terse main | grep "Warning--" || true
+	@echo "pdflatex..."
 	@pdflatex -halt-on-error main.tex > /dev/null || true
+	@echo "pdflatex..."
 	@pdflatex -halt-on-error main.tex | grep -a3 ^! || true
 
 clean:
