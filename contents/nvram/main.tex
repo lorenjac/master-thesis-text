@@ -27,21 +27,31 @@ desired properties.
 \section{Applications}
 
 % use cases
-%   operating systems
-%       processes stay in memory and can be toggled
 %   databases
+%       persistent log files
 %       fast disk caches for large databases
 %           for data
 %           for recovery (e.g. logging)
 %       fast recovery for in-memory databases
 %           no more disk IO (for logging etc.)
 %           instant restart
+%   operating systems
+%       processes stay in memory and can be toggled
+%   misc
+%       in-memory computing for AI
+
+While early proposals looked at NVRAM from a point of fault tolerance, later research acknowledged further potentials. Whether the deployment of NVRAM can be advantageous or not strongly depends on how it is integrated into the memory hierarchy. In practice, also both the memory interface and the parameters of the respective NVRAM technology play a crucial role. These issues will be revisited in the subsequent sections.
+
+There are multiple ways to do build a memory hierarchy based on NVRAM \cite{bailey2011implications}. First, NVRAM may form an additional layer between traditional DRAM and conventional storage, thus serving as a durable storage cache \todo{has this been done?}. 
 
 \section{Technologies}
 
-% TODO short motivation for non-volatile, byte-addressable memory
-
-In the past there have been multiple attempts to produce non-volatile equivalents of main memory.
+In the past, there have been multiple attempts to produce non-volatile
+equivalents of main memory. One way is to emulate non-volatility by providing
+backup power supplies or combining volatile DRAM and conventional non-volatile
+storage in a single module. Another promising approach is to develop alternative
+memory techniques that provide the features of NVRAM. This section presents
+notable developments in the field of NVRAM.
 
 \paragraph{Early Approaches}
 
@@ -58,18 +68,18 @@ operating systems more resilient to failures by caching files in fast
 battery-backed DRAM thus providing a smaller window of vulnerability
 \cite{chen1996rio}. Conversely, \emph{Conquest} is a file system that, with the
 exception of large files, stores all data including metadata in battery-backed
-DRAM \cite{wang2002conquest}.
+DRAM \cite{wang2002conquest} to enable less copying and achieve better access latencies.
 
 % Notable examples are the file systems \emph{Harp} \cite{liskov1991replication}
 % and \emph{Conquest} \cite{wang2002conquest} as well as the file cache
 % \emph{Rio} \cite{chen1996rio}.
 
-In another approach researchers used battery-backed SRAM as a write buffer which
-is flushed to an interconnected flash memory when full or in case of a power
-failure \cite{wu1994envy}. By limiting access to the SRAM, the non-volatile yet
-slower flash device is effectively shadowed. Still, since flash operates in
-block mode, the byte-addressable nature of SRAM cannot be exploited in this
-setup. This is an early example of hybrid memory solutions for fast mass
+In another approach, researchers used battery-backed SRAM as a write buffer
+which is flushed to an interconnected flash memory when full or in case of a
+power failure \cite{wu1994envy}. By limiting access to the SRAM, the
+non-volatile yet slower flash device is effectively shadowed. Still, since flash
+operates in block mode, the byte-addressable nature of SRAM cannot be exploited
+in this setup. This is an early example of hybrid memory solutions for fast mass
 storage. However, backup power supplies have also been subject to criticism.
 Arguments are that batteries are not inherently reliable and introduce
 additional maintenance overhead \cite{molina1992main}. Therefore experiments
@@ -83,9 +93,29 @@ flash memory and DRAM \cite{oe2016feasibility, huang2014design}.
 
 \paragraph{Modern Approaches} % TODO modern approaches
 
+Early approaches for practical NVRAM were focused on making volatile DRAM retain its information across power outages. There are however promising alternatives such as PCM, MRAM or RRAM which are both byte-addressable and non-volatile by design. Although their underlying principles have been known for a while, further research was required to reach practical designs for manufacturing. Recent research suggests that these NVM technologies will see broad availability in the near future \todo{cite}.
 
+% technologies
+    % PCM (also PRAM)
+    %     phase-change memory
+    %     based on properties of chalcogenide glasses
+    %     discovered in 1955
+    %     first prototype in 1969
+    % STT-MRAM (also ST[T]-[M]RAM)
+    %     advanced type of MRAM
+    %         magnetoresistive RAM
+    %         similar to magnetic core memory (1955)
+    %         GMR effect discovered in 1984
+    %         developed since 1995 (Motorola)
+    %     spin-transfer torque proposed in 1996
+    % RRAM (also ReRam)
+    %     resistive RAM
+    %     resistive switching discovered in 1967
+    %     disputed to be a memristor
+    % memristors
+    %     ???
+    % FeRAM
 
-% technologies (PCM, STT-RAM, RRAM)
 % density: DRAM < STT-RAM < PCM (higher is better)
 % endurance: PCM < STT-RAM < DRAM (higher is better)
 % latency: DRAM <= STT-RAM < PCM (lower is better)
@@ -136,6 +166,10 @@ well-suited for NVRAM as they were designed for external block-oriented
 storage. Therefore, several NVRAM-aware file systems such as \texttt{pmfs},
 \texttt{bpfs}, and \texttt{scmfs} have been proposed \cite{condit2009better,
 wu2011scmfs, dulloor2014system}.
+
+% scmcfs (tao2016, complex file system for nvram)
+% aerie (volos2014, kvs-like file system for nvram)
+% hermes (millter2001, mram as fast disk cache)
 
 \todo{elaborate on differences}
 
