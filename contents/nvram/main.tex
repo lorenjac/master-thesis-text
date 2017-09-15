@@ -11,7 +11,7 @@ Recent research however, suggests that fast and byte-addressable NVM will be
 available in the near future. Based on its projected characteristics, this new
 class of memory is also referred to as NVRAM.
 
-\todo{Short chapter overview}
+\todo[inline]{Short chapter overview}
 
 \paragraph{Terminology}
 
@@ -19,30 +19,99 @@ As of this writing there is no consensus as to how byte-addressable non-volatile
 memory should be referred to. This thesis exclusively uses term NVRAM. There are
 two reasons for this decision. For one, alternative terms such as BPRAM or PM
 suggest that non-volatile memory is also persistent which however, may not
-always be correct\todo{proof?}. Another reason is that some terms such as SCM,
+always be correct \todo{proof?}. Another reason is that some terms such as SCM,
 NVM and PM may not reflect the property of bytewise addressing which is central
 to these technologies. NVRAM on the other hand, explicitly denotes all of the
 desired properties.
 
 \section{Applications}
 
-% use cases
-%   databases
-%       persistent log files
-%       fast disk caches for large databases
-%           for data
-%           for recovery (e.g. logging)
-%       fast recovery for in-memory databases
-%           no more disk IO (for logging etc.)
-%           instant restart
-%   operating systems
-%       processes stay in memory and can be toggled
-%   misc
-%       in-memory computing for AI
+There are numerous examples for applications of NVRAM. While earlier works often
+considered NVRAM as a means to improve fault tolerance, recent research suggests
+a broader range of applications. This development is especially fuelled by
+recent advances in the manufacture of standalone NVRAM instead of battery-backed
+DRAM. In practice, application scenarios also include assumptions on the
+properties of NVRAM and the surrounding system architecture. Such issues are
+covered in later sections.
 
-While early proposals looked at NVRAM from a point of fault tolerance, later research acknowledged further potentials. Whether the deployment of NVRAM can be advantageous or not strongly depends on how it is integrated into the memory hierarchy. In practice, also both the memory interface and the parameters of the respective NVRAM technology play a crucial role. These issues will be revisited in the subsequent sections.
+As pointed out earlier, a well-known use case of NVRAM is to increase fault
+tolerance towards crashes. The goal is to retain main memory content even in
+case of a crash, for instance by an abrupt power loss \cite{molina1992main}.
+This way, critical data such as logs of file systems (also journals) or
+databases remain durable and can be used to recover and even complete unfinished
+operations such as making a transaction durable \cite{liskov1991replication,
+chen1996rio}. Furthermore, NVRAM can be used to create durable disk caches,
+hence shrinking the window in which disk IO is vulnerable to crashes
+\cite{chen1996rio, wu1994envy}. In the past, such solutions relied on
+battery-backed DRAM or SRAM. This was subject to criticism as batteries only
+have a limited charge to ensure durability. Also batteries degrade over time and
+need to be maintained to prevent unexpected failure \cite{molina1992main}.
+Therefore, modern NVRAM solutions which no longer require peripherals are a
+welcome improvement in this area.
 
-There are multiple ways to do build a memory hierarchy based on NVRAM \cite{bailey2011implications}. First, NVRAM may form an additional layer between traditional DRAM and conventional storage, thus serving as a durable storage cache \todo{has this been done?}. 
+A significant amount of research on NVRAM is dedicated to mitigating the IO
+bottleneck imposed by traditional disk storage. One way to do so is to defer
+disk IO via durable disk caches \cite{chen1996rio, wu1994envy}. When an object
+on disk is requested it is moved to the disk cache. Once an object is cached it
+may be read or modified with accessing the underlying disk. In theory,
+write-back is only required when there is not enough space for an incoming cache
+item. This way, frequently used objects incur no latency penalty through disk
+IO. Many operating systems, such as Linux or BSD implement such mechanisms where
+it is usually referred to as page buffer \todo{quote?}. The difference is that
+conventional page buffers are volatile and need to be flushed at some point
+which requires careful resource management.
+
+Another approach is to treat NVRAM as an equivalent to traditional disk storage.
+Early works which were strongly influenced by the lack of high-capacity NVRAM
+proposed hybrid storage systems where disk storage was used in conjunction with
+NVRAM \cite{wang2002conquest, miller2001hermes}. These works have very similar
+assignment policies in that they only store small files such as  metadata or
+libraries in NVRAM whereas larger files remain on disk. While this does not
+remove disk access as a common bottleneck it certainly alleviates latency for
+some frequently accessed files. In this regard, NVRAM-complemented disk storage
+systems are similar to those with NVRAM disk caches.
+
+A more rigorous implementation of the paradigm of NVRAM-assisted mass storage is
+to remove all traditional storage and rely solely on NVRAM. A prominent use case
+for this architecture are MMDB. Conventional MMDB keep all their data in
+volatile main memory and only use disks for recovery in case of crash. Recovery
+measures such as logging have been a long-standing issue with MMDB as they incur
+expensive disk IO, thus limiting the overall throughput. With NVRAM, disk IO can
+be eliminated allowing for faster logging and recovery using the main memory
+bandwidth. This concept is especially promising as some upcoming variants of
+NVRAM are projected to feature larger capacities than conventional DRAM
+\todo{quote!}. For this reason, recent research has presented NVRAM-aware
+designs for MMDB ranging from complex database systems \cite{oukid2015instant,
+schwalb2016hyrise} to key-value stores \cite{bailey2013exploring, zhou2016nvht,
+wu2016nvmcached}. Another notable example is \emph{Machine}, a novel computer
+architecture which comprises a cluster of special purpose processors and large
+amounts of NVRAM \cite{courtland2016can}.
+
+\paragraph{Further Applications}
+
+It was shown in various works that advantages can be gained by using NVRAM.
+Still, most proposals assume the presence volatile RAM in addition to NVRAM
+\cite{oukid2017data}. The reason behind this assumption is that not all parts of
+memory are intended to be durable. This is true for regions capturing machine
+state or security-relevant data. Nonetheless, recent research suggests that
+systems exclusively based on NVRAM can be built \cite{narayanan2012whole}.
+Clearly, such an architecture would have severe consequences for both operating
+systems and applications \cite{bailey2011operating}. For example, operating
+system processes would remain in memory even if terminated. On the one hand,
+this could significantly accelerate the procedure of invoking a process. On the
+other hand, all data belonging to a process' address space would be durable even
+if they were corrupted by a crash. Other issues are concerned about memory
+management, device drivers, and vital information. An early prototype of such a
+system is currently in development \cite{courtland2016can}. This topic however,
+is beyond the scope of this work and is not subject to further discussion.
+
+In a more recent effort to aid machine learning, it has been proposed to
+implement artificial neural networks by means of NVRAM
+\cite{fumarola2016accelerating}. ANN perform a weighted sum over all inputs
+while an activation function acts as a classifier. For this to work, ANN need to
+be trained by properly adjusting the scalar weights. It has been suggested that
+this process could be performed directly in NVRAM where updated weights would be
+durable without the need for write-back.
 
 \section{Technologies}
 
