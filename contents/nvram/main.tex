@@ -122,47 +122,38 @@ storage in a single module. Another promising approach is to develop alternative
 memory techniques that provide the features of NVRAM. This section presents
 notable developments in the field of NVRAM.
 
-\paragraph{Early Approaches}
-
-Initially, the intention was to make systems more tolerant to failures, although
-opportunities for storage systems were also discussed \cite{molina1992main,
-wang2002conquest}. The main issue with DRAM is that, in order to retain its
-data, it needs to refresh its cells which requires a power supply. Therefore,
-early non-volatile main memories were equipped with batteries or UPS which
-allowed to hold information for a limited time in case of a power failure. An
-example is the distributed file system \emph{Harp} which assumes battery-backed
-DRAM on each node to protect its otherwise volatile log from power failures
-\cite{liskov1991replication}. The file cache \emph{Rio} attempts to make
-operating systems more resilient to failures by caching files in fast
-battery-backed DRAM thus providing a smaller window of vulnerability
-\cite{chen1996rio}. Conversely, \emph{Conquest} is a file system that, with the
-exception of large files, stores all data including metadata in battery-backed
-DRAM \cite{wang2002conquest} to enable less copying and achieve better access latencies.
-
-% Notable examples are the file systems \emph{Harp} \cite{liskov1991replication}
-% and \emph{Conquest} \cite{wang2002conquest} as well as the file cache
-% \emph{Rio} \cite{chen1996rio}.
-
-In another approach, researchers used battery-backed SRAM as a write buffer
-which is flushed to an interconnected flash memory when full or in case of a
-power failure \cite{wu1994envy}. By limiting access to the SRAM, the
-non-volatile yet slower flash device is effectively shadowed. Still, since flash
-operates in block mode, the byte-addressable nature of SRAM cannot be exploited
-in this setup. This is an early example of hybrid memory solutions for fast mass
-storage. However, backup power supplies have also been subject to criticism.
-Arguments are that batteries are not inherently reliable and introduce
-additional maintenance overhead \cite{molina1992main}. Therefore experiments
-were conducted, where flash memory was directly attached to the memory interface
-\cite{shi2010write}. Similar ideas were later consolidated in the JEDEC NVDIMM
-specification, which defines several configurations for DIMMs consisting of
-flash memory and DRAM \cite{oe2016feasibility, huang2014design}.
-
-% This marks a shift in the development of NVRAM as reliability becomes second
-% to fast high-capacity storage.
-
-\paragraph{Modern Approaches} % TODO modern approaches
-
-Early approaches for practical NVRAM were focused on making volatile DRAM retain its information across power outages. There are however promising alternatives such as PCM, MRAM or RRAM which are both byte-addressable and non-volatile by design. Although their underlying principles have been known for a while, further research was required to reach practical designs for manufacturing. Recent research suggests that these NVM technologies will see broad availability in the near future \todo{cite}.
+% \paragraph{Early Approaches}
+%
+% Initially, the intention was to make systems more tolerant to failures, although
+% opportunities for storage systems were also discussed \cite{molina1992main,
+% wang2002conquest}. The main issue with DRAM is that, in order to retain its
+% data, it needs to refresh its cells which requires a power supply. Therefore,
+% early non-volatile main memories were equipped with batteries or UPS which
+% allowed to hold information for a limited time in case of a power failure.
+% Notable examples for systems using battery-backed DRAM are the file systems
+% \emph{Harp} \cite{liskov1991replication} and \emph{Conquest}
+% \cite{wang2002conquest} as well as the file cache \emph{Rio} \cite{chen1996rio}.
+%
+% In another approach, researchers used battery-backed SRAM as a write buffer
+% which is flushed to an interconnected flash memory when full or in case of a
+% power failure \cite{wu1994envy}. By limiting access to the SRAM, the
+% non-volatile yet slower flash device is effectively shadowed. Still, since flash
+% operates in block mode, the byte-addressable nature of SRAM cannot be exploited
+% in this setup. This is an early example of hybrid memory solutions for fast mass
+% storage. However, backup power supplies have also been subject to criticism.
+% Arguments are that batteries are not inherently reliable and introduce
+% additional maintenance overhead \cite{molina1992main}. Therefore experiments
+% were conducted, where flash memory was directly attached to the memory interface
+% \cite{shi2010write}. Similar ideas were later consolidated in the JEDEC NVDIMM
+% specification, which defines several configurations for DIMMs consisting of
+% flash memory and DRAM \cite{oe2016feasibility, huang2014design}.
+%
+% % This marks a shift in the development of NVRAM as reliability becomes second
+% % to fast high-capacity storage.
+%
+% \paragraph{Modern Approaches} % TODO modern approaches
+%
+% Early approaches for practical NVRAM were focused on making volatile DRAM retain its information across power outages. There are however promising alternatives such as PCM, MRAM or RRAM which are both byte-addressable and non-volatile by design. Although their underlying principles have been known for a while, further research was required to reach practical designs for manufacturing. Recent research suggests that these NVM technologies will see broad availability in the near future \todo{cite}.
 
 % technologies
     % PCM (also PRAM)
@@ -190,67 +181,6 @@ Early approaches for practical NVRAM were focused on making volatile DRAM retain
 % latency: DRAM <= STT-RAM < PCM (lower is better)
 % dypower: STT-RAM < DRAM < PCM (lower is better)
 
-\section{System Integration}
-
-% consensus that NVRAM will be attached as NVDIMM to system memory interface
-%   disadvantages
-%       shared bandwith with DRAM
-%       DIMM slots do not scale
-%       vulnerability to stray writes
-% how will it be accessed
-%   direct mapped
-%       mapping would somehow have to be deterministic
-%       or provide designated function for retrieving non-volatile address space
-%   device driver
-%       file system (map to virtual memory using mmap)
-%           ordinary
-%           with DAX (direct memory access) [Intel, oukid2017]
-%               circumvents page cache for memory-like storage devices
-
-The latter has led to the NVDIMM specification by JEDEC. It introduces
-\texttt{NVDIMM-F} and \texttt{NVDIMM-N} which define how to integrate and
-interact with combinations of DRAM and NAND\todo{explain}. In an effort to
-support recent NVM technologies such as PCM, JEDEC has announced
-\texttt{NVDIMM-P}\cite{jedec2017nvdimm}. Therefore, it is assumed that NVRAM
-will be available as traditional DIMM modules which are connected to the CPU
-memory interface\cite{condit2009better}.
-
-% NVDIMM is attached to CPU but still accessed as block device in separate address space
-
-In order to benefit from NVRAM, operating systems need to find ways to efficiently manage NVRAM. Similarly
-to previous variants of NVDIMM, it is proposed that NVRAM is accessed
-through a dedicated device driver \cite{intel2017nvdimm}. Another approach would
-be to map NVRAM directly into virtual memory \todo{elaborate!}.
-
-At this stage, there are two ways to access the device: raw device access and
-file systems. While raw device access appears unwieldy, file systems provide a
-great deal of flexibility. Not only do file systems provide a more suitable
-abstraction for user-level applications but they also enable memory-mapped IO
-through virtual memory. Therefore, file systems are the currently preferred
-method of accessing NVRAM \cite{oukid2017data}. Still, there are a couple
-of issues to address.
-
-While traditional file systems will continue to work, they may not be
-well-suited for NVRAM as they were designed for external block-oriented
-storage. Therefore, several NVRAM-aware file systems such as \texttt{pmfs},
-\texttt{bpfs}, and \texttt{scmfs} have been proposed \cite{condit2009better,
-wu2011scmfs, dulloor2014system}.
-
-% scmcfs (tao2016, complex file system for nvram)
-% aerie (volos2014, kvs-like file system for nvram)
-% hermes (millter2001, mram as fast disk cache)
-
-\todo[inline]{explain key features of an NVRAM-aware file system}
-\todo[inline]{elaborate on role of page caches in operating systems}
-% file systems use operating system page cache
-% was used to buffer modified pages to reduce disk IO
-% no longer required + breaks store/load semantics
-
-\todo[inline]{show how NVRAM memory regions can be exposed (direct, Linux DAX)}
-% nvram-aware file systems provide means to expose memory regions
-% in linux/ext4: using DAX => circumvents page cache,
-% nvram-aware file systems also proposed to expose actual memory regions for direct memory access
-
 \section{Challenges}
 
 Despite the conceivable advantages of NVRAM, there are also challenges to be
@@ -261,52 +191,86 @@ conceptual concerns.
 
 The key feature of NVRAM is to retain its data across restarts. However, not all
 data are necessarily intended to be durable. Notable examples include transient,
-confidential and corrupt data.
-
-The former comprises data which may not be valid after a system restart, as is
-the case with data related to machine or device state.
+confidential and corrupt data. The former comprises data which may not be valid
+after a system restart, as is the case with data related to machine or device
+state.
 
 Other data such as passwords, encryption keys or decrypted data are usually
 confidential and are thus not intended to be durable. Also, it has been shown
 that even volatile RAM holds its charge long enough so that a module can be
-moved to an attacker's machine \cite{halderman2008lest}. By cooling the module
-capacitator discharge can be slowed so that it can be moved to another machine
+moved to an attacker's machine \cite{halderman2008lest}. By cooling the module,
+capacitor discharge can be slowed so that it can be moved to another machine
 where its content may be read and parsed. Despite being countered with hardware
-scramblers, researchers still managed to obtain critical data such as AES
-encryption keys using the same technique \cite{yitbarek2017cold}. Such attacks
-could be trivial on NVRAM, as durability is its primary feature
+scramblers, researchers still managed to apply variations of the technique and obtain vital information \cite{yitbarek2017cold}. Such attacks
+would be trivial on NVRAM, as durability is its primary feature
 \cite{bailey2011operating}. Of course, confidential data could be overwritten
 with zeros after usage, but there is always a possibility that a crash might
 prevent such clean up tasks from completing. That said, sensitive data should at
 all times remain in volatile memory and be nulled after use.
 
 When an operating system or application behaves in erratic fashion or crashes it
-may leave corrupted data in memory. Unless memory is cleared or treated as such,
+may produce corrupt data in memory. Unless memory is cleared or rewritten,
 systems incorporating NVRAM could face durable memory corruptions. The latter
 may lead to an unstable system producing even more corrupted data. Although the
 same is true for conventional non-volatile memory it is still operated through
-the operating system in terms of APIs and volatile page buffers. NVRAM on the
+the operating system in terms of an API and volatile page buffers. NVRAM on the
 other hand is expected to be connected to the memory bus, enabling unbuffered
 access through virtual memory addresses. This makes NVRAM vulnerable to stray
 writes \cite{condit2009better, oukid2017data}. However, it is suggested that,
-when compared to disk storage, stray writes do not occur significantly more
+compared to disk storage, stray writes do not occur significantly more
 often in NVRAM \cite{chen1996rio}.
 
 \paragraph{Memory Management}
 
-Operating systems designed on volatile RAM usually build a new virtual memory
-address space upon each restart. In order to prevent a range of sidechannel
-attacks, address space layout randomization (ASLR) is used, leading to a unique
-address space layout for each session. This is not a problem for volatile RAM
-since it is expected to lose its data either way. NVRAM however, is based around
-allowing objects to be accessable after a restart. Therefore, it is necessary to
-provide a mechanism to recover the address space of non-volatile memory regions
-or objects stored therein \cite{oukid2014sofort, schwalb2016hyrise}.
+NVRAM is a new type of memory that can also be used as durable mass storage. In
+order to benefit from this new technology, both platforms and operating systems
+need to find ways to efficiently manage it. There are several issues to be
+addressed in this area.
 
-Most proposals for this problem assume a dual memory management separating
-volatile and non-volatile RAM. It is proposed that non-volatile objects will be
-accessed through lightweight zero-copy file systems and will be mapped into
-individual process address spaces \cite{dulloor2014system, schwalb2016hyrise}.
+% Memory Interface
+
+An important aspect in managing NVRAM is the memory interface. Recent research
+suggests that NVRAM will be attached to the system memory bus
+\cite{intel2017nvdimm, oukid2017data}. An advantage of this approach is better
+latencies compared to the alternative IO bus. Another reason is that a previous
+attempt to produce NVRAM, also known as NVDIMM, modules have also been
+integrated this way. Drawbacks include shared bandwidth with volatile RAM and
+fixed amounts of module slots \cite{condit2009better}.
+
+It further suggested that, in accordance with NVDIMM, NVRAM modules will be
+accessed through special device drivers \cite{oukid2017data}. Instead of mapping
+the device's address space into virtual memory, there is a consensus that
+specialized file systems will be used to manage NVRAM. Reasons are that a direct
+mapping would make it difficult to distinguish non-volatile from volatile memory
+and address space layout randomization would render pointers to NVRAM useless
+after a restart.
+
+File systems provide a well-known and suitable abstraction for non-volatile
+storage. In order to enable regular memory access in a load-store manner,
+individual files can be mapped into virtual memory. Still, traditional file
+systems are not directly well-suited for use with NVRAM. One reason is that most
+operating systems provide a page cache which is used by file systems to defer
+expensive disk IO. In the case of NVRAM, this leads to unnecessary copies to
+volatile RAM, thus mitigating its benefits. Also traditional file systems are
+usually designed for block-oriented devices which may no longer be the best
+option. Therefore, several NVRAM-aware file systems such as \emph{pmfs},
+\emph{bpfs}, and \emph{scmfs} have been proposed \cite{condit2009better,
+wu2011scmfs, dulloor2014system}. A key feature is a zero-copy mechanism by
+circumventing page caches. This enables true store-load semantics for NVRAM when
+mapping files into virtual memory. Other aspects include the attempt to leverage
+the byte-addressable nature of NVRAM and crash-related consistency issues.
+
+% Other more specialized file systems include aerie and scmcfs
+% \cite{volos2014aerie, tao2016nvmcfs}.
+
+% Programming Model
+
+Still, programmers need a mechanism to distinguish non-volatile memory from
+volatile memory. This implies some form of a dual memory management. Notable
+problems include volatile memory mappings of NVRAM and both efficient and robust
+memory allocators. Therefore, many authors have proposed designated allocators
+and pointer types for use with NVRAM \cite{wu2011scmfs, moraru2013consistent,
+oukid2014sofort, schwalb2015nvm_malloc}.
 
 \paragraph{Consistency}
 
