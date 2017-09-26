@@ -274,9 +274,9 @@ oukid2014sofort, schwalb2015nvm_malloc}.
 
 \paragraph{Consistency}
 
-A notorious problem with NVRAM is consistency in case of crashes. Due to the
-complex nature of this subject further discussion is deferred to the next
-section.
+A notorious problem with NVRAM is consistency in case of crashes
+\cite{condit2009better, dulloor2014system, oukid2017data}. Due to the complex
+nature of this subject further discussion is deferred to the next section.
 
 \section{Preserving Consistency}
 
@@ -332,8 +332,10 @@ necessary to force write-back in all of these cases.
 In conjunction with instruction scheduling and cache coherency protocols a
 memory order buffer may be present. It holds all loads and stores, with the
 exception of non-temporal operations. In order to prevent a deferred write-back
-through MOB, its store buffer must be flushed. On x86 architectures this can be
-achieved with a store fence operation such as \code{sfence}.
+through memory order buffers, their store buffers must be flushed. On x86
+architectures this can be achieved with a store fence operation such as
+\code{sfence}. Since memory barriers are already used for enforcing program
+order, flushing store buffers is a desirable side effect and incurs no overhead.
 
 % caches
 
@@ -354,15 +356,15 @@ $t2$'s result will be durable while $t1$'s initial update is lost.
 % T1: r(A) w(A) c*   -- Cache ---------------------- (crash)
 % T2: -------------- r(A) w(B) c -- Cache -- RAM --- (crash)
 
-An approach to prevent such inconsistencies is to mark relevant memory pages as
-uncacheable but that could introduce considerable overhead for frequently used
-data. A more popular approach is to evict cache lines programmatically whenever
-necessary \cite{condit2009better, dulloor2014system, oukid2017data}. On x86
-architectures this can be done with the \code{clflush} or \code{clwb}
+An approach to prevent such inconsistencies is to disable caching for selected
+memory regions but that could introduce considerable overhead for frequently
+used data. A more popular approach is to evict cache lines programmatically
+whenever necessary \cite{condit2009better, dulloor2014system, oukid2017data}. On
+x86 architectures this can be done with the \code{clflush} or \code{clwb}
 instructions. However, the problem with a simple cache line flush such as
 \code{clflush} is that making a cache line durable may not always mean that is
 should be evicted. In this regared, \code{clwb} compensates for this matter by
-retaining the designated cache line.
+retaining the designated cache line \cite{kolli2016high}.
 
 % memory controller queues
 
