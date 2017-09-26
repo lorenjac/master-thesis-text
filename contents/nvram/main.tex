@@ -57,9 +57,9 @@ may be read or modified with accessing the underlying disk. In theory,
 write-back is only required when there is not enough space for an incoming cache
 item. This way, frequently used objects incur no latency penalty through disk
 IO. Many operating systems, such as Linux or BSD implement such mechanisms where
-it is usually referred to as page buffer \todo{quote?}. The difference is that
-conventional page buffers are volatile and need to be flushed at some point
-which requires careful resource management.
+it is usually referred to as page buffer. The difference is that conventional
+page buffers are volatile and need to be flushed at some point which requires
+careful resource management.
 
 Another approach is to treat NVRAM as an equivalent to traditional disk storage.
 Early works which were strongly influenced by the lack of high-capacity NVRAM
@@ -80,12 +80,13 @@ expensive disk IO, thus limiting the overall throughput. With NVRAM, disk IO can
 be eliminated allowing for faster logging and recovery using the main memory
 bandwidth. This concept is especially promising as some upcoming variants of
 NVRAM are projected to feature larger capacities than conventional DRAM
-\todo{quote!}. For this reason, recent research has presented NVRAM-aware
-designs for MMDB ranging from complex database systems \cite{oukid2015instant,
-schwalb2016hyrise} to key-value stores \cite{bailey2013exploring, zhou2016nvht,
-wu2016nvmcached}. Another notable example is \emph{Machine}, a novel computer
-architecture which comprises a cluster of special purpose processors and large
-amounts of NVRAM \cite{courtland2016can}.
+\cite{lee2009architecting, zilberberg2013phase, dulloor2014system}. For this
+reason, recent research has presented NVRAM-aware designs for MMDB ranging from
+complex database systems \cite{oukid2015instant, schwalb2016hyrise} to key-value
+stores \cite{bailey2013exploring, zhou2016nvht, wu2016nvmcached}. Another
+notable example is \emph{Machine}, a novel computer architecture which comprises
+a cluster of special purpose processors and large amounts of NVRAM
+\cite{courtland2016can}.
 
 \paragraph{Further Applications}
 
