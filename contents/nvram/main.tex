@@ -3,7 +3,9 @@
 
 Conventional non-volatile memory such as HDD or SSD provide large capacities but are only block-oriented and incur substantial access latencies compared to volatile DRAM. Especially IO-bound applications tend to keep as much data in RAM as possible but are eventually forced to access slower media for durable storage. This led to the development of non-volatile variants of RAM. Recent research suggests that both fast and high-capacity NVRAM will become widely available in the near future.
 
-This chapter gives a brief overview on the state-of-the-art in NVRAM research. This includes a discussion of opportunities and challenges, such as the notorious consistency issues in the presence of failures.
+This chapter gives a brief overview on the state-of-the-art in NVRAM research.
+Included is a discussion of opportunities and challenges, such as the notorious
+consistency issues in the presence of failures.
 
 \section{Applications}
 
@@ -105,8 +107,8 @@ memory techniques that provide the features of NVRAM.
 
 % This section presents notable developments in the field of NVRAM.
 
-\todo[inline]{General overview on current technologies or just one?}
-\todo[inline]{What do I want to convey?}
+\todo[inline]{General overview on current technologies or pick one?}
+\todo[inline]{What do I really need/want to show?}
 
 % \paragraph{Early Approaches}
 %
@@ -339,8 +341,12 @@ but is not evicted from cache. Then a transaction $t2$ based on the result of
 $t1$ commits and gets evicted from cache. If the system crashes at this point,
 $t2$'s result will be durable while $t1$'s initial update is lost.
 
-% T1: r(A) w(A) c*   -- Cache ---------------------- (crash)
-% T2: -------------- r(A) w(B) c -- Cache -- RAM --- (crash)
+\todo[inline]{graphic example?}
+
+\begin{lstlisting}
+T1: r(A) w(A) c*   -- Cache ---------------------- (crash)
+T2: -------------- r(A) w(B) c -- Cache -- RAM --- (crash)
+\end{lstlisting}
 
 An approach to prevent such inconsistencies is to disable caching for selected
 memory regions but that could introduce considerable overhead for frequently
@@ -367,12 +373,12 @@ formerly known as \code{pm\_wbarrier} \cite{dulloor2014system, oukid2015instant,
 schwalb2015nvm_malloc, volos2017whisper}. Others have developed more general
 mechanisms for preserving consistency in NVRAM that also address this issue
 \cite{condit2009better, pelley2014memory}. The current state in this regard is
-that platforms must provide Asynchronous DRAM Refresh which ensures a queue
-flush whenever a power failure is detected \cite{volos2017whisper}. It works by
-exploiting the fact that even in case of a power failure there is sufficient
-time and power to flush the write buffers of all memory controllers. For this to
-work, the power supply unit has to detect a power failure and issue a signal to
-the memory controllers.
+that platforms must provide a feature called ADR \cite{volos2017whisper}. It
+works by exploiting the fact that even in case of a power failure there is
+sufficient power to flush the write buffers of all memory controllers. For this
+to work, the power supply unit has to detect a power failure and issue a signal
+to all memory controllers.
 
 \todo[inline]{Epoch Barriers (condit2009better) erklären?}
 \todo[inline]{Strand Consistency (pelley2014memory) erklären?}
+\todo[inline]{Short Summary of this section + chapter!}
