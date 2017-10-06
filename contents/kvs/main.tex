@@ -1,40 +1,132 @@
 \chapter{Key-Value Stores}
 \label{ch:kvs}
 
-% Context
+A prominent use-case for NVRAM is main-memory databases. Even though main memory
+and processor caches have become more affordable, MMDB still suffer from
+recovery on slower disk drives \cite{oukid2015instant, schwalb2016hyrise}. NVRAM
+on the other hand, provides an opportunity to eliminate recovery altogether. An
+important class of databases often implemented as MMDB is KVS. Due to their
+simplicity and low overhead, KVS have been adopted both in big-data computing
+and database research \cite{decandia2007dynamo, lakshman2010cassandra,
+wang2015hydradb}. In recent works, KVS were used to explore database design for
+NVRAM \cite{bailey2013exploring, zhou2016nvht, wu2016nvmcached}.
 
-Recent research suggests the use of novel non-volatile memory as persistent
-main memory. Apart from being byte-addressable, the upcoming modules are
-projected to be almost as fast as DRAM and provide a higher capacity. Among
-others, this could have considerable consequences for databases such as
-key-value stores. Imagine recovery without retrieving checkpoints from disk.
-Nevertheless, this work aims to assess the influence of NVRAM on the design of
-concurrency control.
-
-% Overview (coarse)
-
-This chapter provides a brief overview on key-value stores with regard to
-upcoming NVRAM. But before giving insight into the current state of the art,
-a few fundamental terms must be introduced. For this purpose the chapter has
-been separated into two parts.
-
-% Overview (fine)
-
-The first part introduces the concept of key-value stores with an emphasis on
-managing concurrent transactions. Important aspects in this regard are
-concurrency control and serializability. In the second part, a comprehensive
-analysis on novel non-volatile memory and modern key-value stores is conducted.
-
-% Basics
-
-%\input{contents/main/domain/basic}
-
-% State of the Art
-
-%\input{contents/main/domain/state}
+This chapter provides a domain analysis of KVS. First, a brief overview of KVS
+is given. The aim of this work to exploit NVRAM for a KVS with fast
+conflict-free concurrent transactions. Therefore, a substantial part of the
+remaining chapter is dedicated to transactions and concurrency control. The
+chapter is concluded with an examination of existing KVS for NVRAM.
 
 \section{Overview}
-\section{Concurrency Control}
+
+KVS form an integral part in modern database technology \cite{fiebig2016one}.
+This section gives an overview of their properties, classes, and applications.
+Compared to other types of databases, KVS are very simple databases that are
+sometimes better described by what they are not or do not provide.
+
+\begin{itemize}
+    \item non-relational data model
+    \item no data schemas
+    \item no query languages
+\end{itemize}
+
+A KVS is a single-level store of key-value pairs. Unlike relational databases
+that can model complex relations, KVS simply map keys to values.
+
+\todo[inline]{Advantage/Motive}
+
+A distinct property of KVS is that they do not employ data schemas.
+Consequently, arbitrary chunks of data can to be stored as values. This is
+especially useful in scenarios with no fixed data model or when enforcing one is
+not a priority.
+
+\begin{lstlisting}
+| user | Max                  |
+| auth | dxlf240r0g7jr4u8n2oe |
+| ...  | ...                  |
+\end{lstlisting}
+
+Contrary to traditional DBMS, KVS do not provide query languages such as SQL to
+store and retrieve data. Instead, KVS are accessed programmatically through a
+concise set of operations. Although their API is not standardized, it can be
+essentially broken down to the following operations.
+
+\begin{itemize}
+    \item open/close
+    \item insertion (e.g. put())
+    \item retrieval (e.g. get())
+    \item removal (e.g. del())
+\end{itemize}
+
+\paragraph{Applications}
+
+Applications for KVS range from databases to caches and file systems. A notable
+example is BerkeleyDB which acts as a foundation to many software solutions such
+as NoSQL, Subversion, and the package manager RPM \cite{?}. Other than that, KVS
+such as Redis or memcached serve as highly-available, distributed caches in
+big-data environments. However, it is not uncommon for large companies to have
+custom in-house solutions for this purpose \cite{chang2008bigtable,
+decandia2007dynamo, lakshman2010cassandra, wang2015hydradb}. KVS have also been
+proposed as a means to implement file systems \cite{murphy2001database,
+volos2014aerie}.
+
+% Not unlike their larger ancestor DBMS, KVS come in a variety of different flavors.
+
+\paragraph{Transactions}
+
+An essential feature of most databases is transactions. Transactions enable a
+sequence of database operations to appear as a single atomic operation. If
+single operation involved in a transaction fails, then the transaction fails as
+well. Transactions are a powerful mechanism that enables complex operations
+without worrying about inconsistencies in case of failure. Given the prevalence
+of transactions, most KVS support them. Unless stated otherwise, it is
+henceforth assumed that every operation is executed in the context of a
+transaction. Due to their importance for this work, transactions are covered in
+more detail in the next section.
+
+\paragraph{In-Memory Operation}
+
+The performance of a database is often denoted in terms of transaction
+throughput. One way to increase throughput is to mitigate data access latencies.
+Apart from faster storage, this can be done by placing the entire database in
+main memory which enables speedups by multiple orders of magnitude. This
+approach, which dates back to the mid 1980s has been adopted in many
+high-performance databases such as the more recent HANA database
+\cite{molina1992main, faerber2012hana}. Likewise, most KVS are explicitly
+designed for in-memory operation. Notable exceptions are the popular BerkeleyDB
+or Apache's Cassandra where in-memory operation is only an option
+\cite{bdb2017doc, lakshman2010cassandra}.
+
+\paragraph{Concurrency}
+
+Another approach to increase transaction throughput is to utilize multi-core
+processors by executing transactions concurrently. In order to achieve maximum
+performance, it is common for main-memory databases to also support concurrency
+\cite{grund2010hyrise, faerber2012hana, diaconu2013hekaton}. Further, it has
+been shown that KVS can gain substantial performance benefits through
+concurrency \cite{fan2013memc3, li2015architecting, xu2014building}. In fact,
+most KVS natively support concurrency with the exception of redis \cite{?}.
+Unfortunately, concurrency also introduces new issues such as inconsistencies
+through race conditions on shared data. Mitigating this issue can degrade
+performance which is why many designs trade full consistency against faster
+relaxations. This issue is dealt with in the next section about transactions.
+
+\paragraph{Distributed Databases}
+
+As mentioned earlier, KVS play a crucial role in big-data environments. Since
+availability is often a requirement, KVS in this area are often implemented as
+distributed services \cite{chang2008bigtable, decandia2007dynamo,
+lakshman2010cassandra, wang2015hydradb}. Distributed databases and their
+mechanisms such as distributed transactions are beyond the scope of this work.
+
+\section{Concurrent Transactions}
+
+\section{Concurrency Control Protocols}
+
 \subsection{Locking}
+
 \subsection{Multiversioning}
+
 \subsection{Serializable MVCC}
+
+\section{Key-Value Stores for NVRAM}

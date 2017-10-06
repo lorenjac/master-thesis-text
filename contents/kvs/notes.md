@@ -10,26 +10,26 @@
         * small interface
         * no query language
 * applications
-    * in production (e.g. big-data): redis, memcached, berkeley db, atlas (for baidu)
-    * in research: foedus, nvht, echo, berkeley db
+    * in production (e.g. big-data): redis, memcached, berkeley db, aerospike
+    * in research: berkeley db, echo, nvht, nvmcached
+    * databases, caches, file systems
 * aspects
-    * storage
-        * topologies
-            * read
-        * memory management
-        * data structures
-            * b-tree
-                * classic (berkeley db)
-                * master-tree (foedus)
-                * cdds
-            * LSM-tree (atlas for baidu)
-            * hash table (redis, memcached, berkeley db, echo, nvht)
-            * radix tree (lee2017wort)
-    * transactions
-        * atomicity
-        * consistency
-        * isolation
-        * durability
+    * distributed vs local
+    * in-memory vs disk-based
+    * transactions vs atomic operations
+    * data structures (/memory management)
+        * b-tree
+            * classic (berkeley db)
+            * master-tree (foedus)
+            * cdds
+        * hash table (redis, memcached, berkeley db, echo, nvht)
+        * LSM-tree (atlas for baidu)
+        * radix tree (lee2017wort)
+    * optimization
+        * Kernel Modules: waddington2014scalable (Fiasco), xu2014building (Linux)
+        * GPU: hetherington2012characterizing, zhang2015mega_kv
+        * SIMD: lemire2017upscaledb
+        * RDMA: mitchell2013using, wang2015hydradb, hemmatpour2016kanzi
 
 ### Transactions
 
@@ -61,9 +61,16 @@
 * why
     * can improve throughput
     * can improve resource utilization
+    * multi-core processors become affordable (area, power, architecture)
+    * vectorization not really an option
 * problem
-    * data races in shared memory
-    * => need serializability (emulate serial execution)
+    * data races in shared memory (RW, WR, WW)
+    * => need synchronization (emulate serial execution)
+        * ensure consistency, recover when in doubt
+    * **problem**: concurrency introduces synchronization overhead
+        * a) do not provide concurrency (rely on fast memory + eliminate recovery)
+        * b) relax consistency requirements (serializability may not be needed)
+        * c) design efficient concurrency control (e.g. optimistic CC => MVCC)
 * locking
     * block (wait) upon request to occupied resource until resource available
     * granularities
@@ -96,8 +103,11 @@
             * timestamp creation (locked, atomic fetch-and-add)
             * timestamp update (locked, atomic test-and-set)
         * snapshot isolation (write skew, read-only anomaly)
-        * serializable snapshot isolation (track read-sets to know if version was written after read)
-        * neumann2015fast
+        * serializable snapshot isolation (track read-sets for modification)
+            * neumann2015fast
+            * faleiro2015rethinking
+            * ding2015centiman
+            * wang2017efficiently
     * related: RCU
         * restricted form of MVCC (2VCC, only one item => no dependencies)
         * used in operating systems (linux, dragonflyBSD)
@@ -113,45 +123,3 @@
     * checkpointing (to reduce undos/redos)
 * eliminated in some MMDB (SOFORT)
     * delta/main-partitioning (quasi RCU / shadow copying)
-
-## Non-Volatile Memory
-
-* new class of main memory (storage-class memory)
-* byte-addressable
-* fast
-* dense
-* inexpensive
-
-### Implications
-
-* storage no longer block-oriented => new algorithms/data structures possible/needed
-* several possible topologies
-    * replace disk (faster "disk")
-    * complement DRAM (fast enough to accompany DRAM, may decide what data is persistent)
-    * replace DRAM: main memory becomes storage => less/no disk IO (everything is persistent)
-* consistency issues in case of power loss
-    * memory models ? (+ relaxations ?)
-    * fences + flushes
-    * PCOMMIT (dedicated CPU instruction; deprecated)
-    * ADR (asynchronous DRAM refresh, platform-dependent, PCOMMIT replacement)
-    * whole-system persistence (interrupt + flush on powerloss)
-
-### Technologies
-
-* PCM, 3D XPoint, MRAM, RRAM, ...
-* performance => write -10 %, read -5 %
-* wear => need wear leveling
-
-### Simulation
-
-* not yet commercially available => need to simulate
-* latency
-    * program SPD
-    * encapsulate mem access + insert NOPs (rdtsc, clock_gettime())
-* powerloss
-    * signals: `raise(SIGKILL)`, `raise(SIGSTOP)`
-    * exit: `std::quick_exit()`, `std::_Exit()`
-* durability
-    * RAM disk
-    * tmpfs
-* WHISPER benchmark
