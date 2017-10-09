@@ -33,7 +33,7 @@ sometimes better described by what they are not or do not provide.
 A KVS is a single-level store of key-value pairs. Unlike relational databases
 that can model complex relations, KVS simply map keys to values.
 
-\todo[inline]{Advantage/Motive}
+\todo[inline]{Advantage/Motive for non-relational storage paradigm}
 
 A distinct property of KVS is that they do not employ data schemas.
 Consequently, arbitrary chunks of data can to be stored as values. This is
@@ -60,29 +60,60 @@ essentially broken down to the following operations.
 
 \paragraph{Applications}
 
-Applications for KVS range from databases to caches and file systems. A notable
-example is BerkeleyDB which acts as a foundation to many software solutions such
-as NoSQL, Subversion, and the package manager RPM \cite{?}. Other than that, KVS
-such as Redis or memcached serve as highly-available, distributed caches in
-big-data environments. However, it is not uncommon for large companies to have
-custom in-house solutions for this purpose \cite{chang2008bigtable,
-decandia2007dynamo, lakshman2010cassandra, wang2015hydradb}. KVS have also been
-proposed as a means to implement file systems \cite{murphy2001database,
-volos2014aerie}.
+Traditional DBMS are often based on complex architectures featuring query
+frontends and sophisticated storage mechanisms. While this works well in many
+cases, it severely limits the performance in situations where a simpler storage
+paradigm (e.g. key-value pairs) is sufficient. As a consequence, high access
+latencies and convoluted, error-prone concurrency schemes inhibit the
+scalability of storage systems. KVS on the other hand are designed to compensate
+for these shortcomings. A driving force in this regard, are large internet
+platforms, take e-commerce for instance, and cloud computing services.
+
+A longstanding example of a KVS is BerkeleyDB which acts as a database in a
+variety of software solutions. Apart from open-source software such as OpenLDAP
+or Apache Web server, BerkeleyDB is also used in a number of proprietary
+software such as messaging servers, switches, and routers
+\cite{kaestner2007aspect, olson1999berkeley}.
+
+Another use-case are distributed in-memory caches often found in big-data
+environments. Web caches have received great attention as service providers
+struggle to scale with rising traffic where many requests target only a small
+amount of data \cite{xu2014characterizing}. With caching, a dedicated eviction
+policy ensures that \emph{relevant} items reside in memory. As a result,
+caching can improve response times significantly. For this purpose, KVS provide
+an appropriate abstraction. However, in accordance with the volatile nature of
+caches, the criterion durability is often dropped. Important representatives of
+this class are Redis \cite{redis2017home} and memcached
+\cite{memcached2017home}. Not only have these KVS been deployed at companies
+such as Facebook or Twitter, but they have also formed the basis for substantial
+amounts of research in this area \cite{xu2014characterizing}. Examples include
+FPGA acceleration \cite{lavasani2014fpga}, memory partitioning for better cache
+hit rates \cite{carra2014memory}, and NVRAM integration \cite{wu2016nvmcached}.
+Large companies however, tend to maintain in-house solutions to suit their needs
+\cite{chang2008bigtable, decandia2007dynamo, lakshman2010cassandra,
+wang2015hydradb}.
+
+% file systems
+
+KVS have also been proposed as a means to implement file systems
+\cite{murphy2001database, volos2014aerie}.
+
+\todo[inline]{Expand (Motivation + Pros vs. Cons)}
+\todo[inline]{Filesystems: General Parallel File System (GPFS), OrangeFS}
+% BDB: such as Oracle NoSQL, Subversion, and the package manager RPM
 
 % Not unlike their larger ancestor DBMS, KVS come in a variety of different flavors.
 
 \paragraph{Transactions}
 
 An essential feature of most databases is transactions. Transactions enable a
-sequence of database operations to appear as a single atomic operation. If
-single operation involved in a transaction fails, then the transaction fails as
-well. Transactions are a powerful mechanism that enables complex operations
-without worrying about inconsistencies in case of failure. Given the prevalence
-of transactions, most KVS support them. Unless stated otherwise, it is
-henceforth assumed that every operation is executed in the context of a
-transaction. Due to their importance for this work, transactions are covered in
-more detail in the next section.
+sequence of database operations to appear as a single atomic operation. If a
+single operation involved in a transaction fails, the entire transaction fails and its side effects are rolled back.
+
+Transactions are a powerful mechanism that enables aggregated operations without
+worrying about inconsistencies even in case of failure. Given the prevalence of
+transactions, most KVS support them. Due to their importance for this work,
+transactions are covered in more detail in the next section.
 
 \paragraph{In-Memory Operation}
 
@@ -105,19 +136,20 @@ performance, it is common for main-memory databases to also support concurrency
 \cite{grund2010hyrise, faerber2012hana, diaconu2013hekaton}. Further, it has
 been shown that KVS can gain substantial performance benefits through
 concurrency \cite{fan2013memc3, li2015architecting, xu2014building}. In fact,
-most KVS natively support concurrency with the exception of redis \cite{?}.
-Unfortunately, concurrency also introduces new issues such as inconsistencies
-through race conditions on shared data. Mitigating this issue can degrade
-performance which is why many designs trade full consistency against faster
-relaxations. This issue is dealt with in the next section about transactions.
+most KVS natively support concurrency with the exception of redis
+\cite{redis2017home}. Unfortunately, concurrency also introduces new issues such
+as inconsistencies through race conditions on shared data. Mitigating this issue
+can degrade performance which is why many designs trade full consistency against
+faster relaxations \cite{decandia2007dynamo}. This issue is dealt with in the
+next section about transactions.
 
 \paragraph{Distributed Databases}
 
 As mentioned earlier, KVS play a crucial role in big-data environments. Since
-availability is often a requirement, KVS in this area are often implemented as
-distributed services \cite{chang2008bigtable, decandia2007dynamo,
-lakshman2010cassandra, wang2015hydradb}. Distributed databases and their
-mechanisms such as distributed transactions are beyond the scope of this work.
+availability is often a requirement in this area, KVS are often implemented as
+distributed services \cite{decandia2007dynamo, lakshman2010cassandra,
+wang2015hydradb}. Distributed databases and their mechanisms such as distributed
+transactions are beyond the scope of this work.
 
 \section{Concurrent Transactions}
 
