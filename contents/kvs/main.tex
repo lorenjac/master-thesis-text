@@ -1,8 +1,8 @@
 \chapter{Key-Value Stores}
 \label{ch:kvs}
 
-A prominent use-case for NVRAM is main-memory databases. Even though main memory
-and processor caches have become more affordable, MMDB still suffer from
+A prominent use-case for NVRAM are main-memory databases. Even though main
+memory and processor caches have become more affordable, MMDB still suffer from
 recovery on slower disk drives \cite{oukid2015instant, schwalb2016hyrise}. NVRAM
 on the other hand, provides an opportunity to eliminate recovery altogether. An
 important class of databases often implemented as MMDB is KVS. Due to their
@@ -12,7 +12,7 @@ wang2015hydradb}. In recent works, KVS were used to explore database design for
 NVRAM \cite{bailey2013exploring, zhou2016nvht, wu2016nvmcached}.
 
 This chapter provides a domain analysis of KVS. First, a brief overview of KVS
-is given. The aim of this work to exploit NVRAM for a KVS with fast
+is given. The aim of this work is to exploit NVRAM for a KVS with fast
 conflict-free concurrent transactions. Therefore, a substantial part of the
 remaining chapter is dedicated to transactions and concurrency control. The
 chapter is concluded with an examination of existing KVS for NVRAM.
@@ -48,14 +48,15 @@ not a priority.
 
 Contrary to traditional DBMS, KVS do not provide query languages such as SQL to
 store and retrieve data. Instead, KVS are accessed programmatically through a
-concise set of operations. Although their API is not standardized, it can be
+concise set of operations. Therefore, KVS are also referred to as
+\emph{embedded} databases. Although their API is not standardized, it can be
 essentially broken down to the following operations.
 
 \begin{itemize}
     \item open/close
-    \item insertion (e.g. put())
-    \item retrieval (e.g. get())
-    \item removal (e.g. del())
+    \item insertion
+    \item retrieval
+    \item removal
 \end{itemize}
 
 \paragraph{Applications}
@@ -67,7 +68,7 @@ paradigm (e.g. key-value pairs) is sufficient. As a consequence, high access
 latencies and convoluted, error-prone concurrency schemes inhibit the
 scalability of storage systems. KVS on the other hand are designed to compensate
 for these shortcomings. A driving force in this regard, are large internet
-platforms, take e-commerce for instance, and cloud computing services.
+platforms, e-commerce for instance, and cloud computing services.
 
 A longstanding example of a KVS is BerkeleyDB which acts as a database in a
 variety of software solutions. Apart from open-source software such as OpenLDAP
@@ -75,34 +76,38 @@ or Apache Web server, BerkeleyDB is also used in a number of proprietary
 software such as messaging servers, switches, and routers
 \cite{kaestner2007aspect, olson1999berkeley}.
 
-Another use-case are distributed in-memory caches often found in big-data
+A more recent use-case are distributed in-memory caches often found in big-data
 environments. Web caches have received great attention as service providers
 struggle to scale with rising traffic where many requests target only a small
 amount of data \cite{xu2014characterizing}. With caching, a dedicated eviction
-policy ensures that \emph{relevant} items reside in memory. As a result,
-caching can improve response times significantly. For this purpose, KVS provide
-an appropriate abstraction. However, in accordance with the volatile nature of
-caches, the criterion durability is often dropped. Important representatives of
-this class are Redis \cite{redis2017home} and memcached
-\cite{memcached2017home}. Not only have these KVS been deployed at companies
-such as Facebook or Twitter, but they have also formed the basis for substantial
-amounts of research in this area \cite{xu2014characterizing}. Examples include
-FPGA acceleration \cite{lavasani2014fpga}, memory partitioning for better cache
-hit rates \cite{carra2014memory}, and NVRAM integration \cite{wu2016nvmcached}.
-Large companies however, tend to maintain in-house solutions to suit their needs
-\cite{chang2008bigtable, decandia2007dynamo, lakshman2010cassandra,
-wang2015hydradb}.
+policy ensures that \emph{relevant} items reside in memory. As a result, caching
+can improve response times significantly. For this purpose, KVS provide an
+appropriate abstraction. Important representatives of this class are Redis
+\cite{redis2017home} and memcached \cite{memcached2017home}. Not only have these
+KVS been deployed at companies such as Facebook or Twitter, but they have also
+formed the basis for substantial amounts of research in this area
+\cite{xu2014characterizing}. Examples include FPGA acceleration
+\cite{lavasani2014fpga}, memory partitioning for better cache hit rates
+\cite{carra2014memory}, and NVRAM integration \cite{wu2016nvmcached,
+malinowski2017using}. Still, large companies tend to maintain in-house solutions
+to suit their needs \cite{chang2008bigtable, decandia2007dynamo,
+lakshman2010cassandra, wang2015hydradb}.
 
-% file systems
-
-KVS have also been proposed as a means to implement file systems
-\cite{murphy2001database, volos2014aerie}.
-
-\todo[inline]{Expand (Motivation + Pros vs. Cons)}
-\todo[inline]{Filesystems: General Parallel File System (GPFS), OrangeFS}
-% BDB: such as Oracle NoSQL, Subversion, and the package manager RPM
-
-% Not unlike their larger ancestor DBMS, KVS come in a variety of different flavors.
+Beyond databases and caches, KVS have also been proposed as a basis for file
+systems. In the past, there have been several attempts to integrate database
+concepts into file systems, some of which are logging \cite{rosenblum1992design,
+tweedie1998journaling} and transactions \cite{seltzer1990transaction,
+wright2007extending, spillane2009enabling}. Some studies even suggest that
+traditional hierarchical file systems may often be suboptimal
+\cite{stein2005stupid, seltzer2009hierarchical}. However, databases in general
+are still considered too heavy for driving file systems
+\cite{seltzer2009hierarchical}. KVS on the other hand, provide light-weight
+database that could be used for file systems. Examples include the network file
+system DBFS which is based on BerkeleyDB \cite{murphy2002design} and FlatFS, a
+simple file system for NVRAM \cite{volos2014aerie}. In addition, KVS are also
+used to complement file systems, for example, to store metadata as in PVFS
+\cite{carns2009small}. Still, the predominant use-case of KVS is found in
+light-weight databases and caches on top of existing file systems.
 
 \paragraph{Transactions}
 
@@ -136,7 +141,7 @@ performance, it is common for main-memory databases to also support concurrency
 \cite{grund2010hyrise, faerber2012hana, diaconu2013hekaton}. Further, it has
 been shown that KVS can gain substantial performance benefits through
 concurrency \cite{fan2013memc3, li2015architecting, xu2014building}. In fact,
-most KVS natively support concurrency with the exception of redis
+most KVS natively support concurrency with the exception of Redis
 \cite{redis2017home}. Unfortunately, concurrency also introduces new issues such
 as inconsistencies through race conditions on shared data. Mitigating this issue
 can degrade performance which is why many designs trade full consistency against
@@ -162,3 +167,13 @@ transactions are beyond the scope of this work.
 \subsection{Serializable MVCC}
 
 \section{Key-Value Stores for NVRAM}
+
+\paragraph{Summary}
+
+\begin{itemize}
+    \item KVS are vital database technology; esp. distributed but beyond scope
+    \item performance can be increased through in-memory operation + concurrency
+    \item a widely-adopted concurrency control is MVCC; but most impl. non-ser.
+    \item KVS for NVRAM have shown some potential over traditional KVS
+    \item recent KVS for NVRAM all non-ser. => leverage boost to provide ser.
+\end{itemize}
