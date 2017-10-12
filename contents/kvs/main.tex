@@ -1,7 +1,7 @@
 \chapter{Key-Value Stores}
 \label{ch:kvs}
 
-A prominent use-case for NVRAM are main-memory databases. Even though main
+A prominent use case for NVRAM are main-memory databases. Even though main
 memory and processor caches have become more affordable, MMDB still suffer from
 recovery on slower disk drives \cite{oukid2015instant, schwalb2016hyrise}. NVRAM
 on the other hand, provides an opportunity to eliminate recovery altogether. An
@@ -78,7 +78,7 @@ or Apache Web server, BerkeleyDB is also used in a number of proprietary
 software such as messaging servers, switches, and routers
 \cite{kaestner2007aspect, olson1999berkeley}.
 
-A more recent use-case are distributed in-memory caches often found in big-data
+A more recent use case are distributed in-memory caches often found in big-data
 environments. Web caches have received great attention as service providers
 struggle to scale with rising traffic where many requests target only a small
 amount of data \cite{xu2014characterizing}. With caching, a dedicated eviction
@@ -108,13 +108,8 @@ include the network file system DBFS which is based on BerkeleyDB
 \cite{murphy2002design} and FlatFS, a simple file system for NVRAM
 \cite{volos2014aerie}. In addition, KVS are also used to complement file
 systems, for example, to store metadata as in PVFS \cite{carns2009small}. Still,
-the predominant use-case of KVS is found in light-weight databases and caches on
+the predominant use case of KVS is found in light-weight databases and caches on
 top of existing file systems.
-
-% However, databases in general
-% are still considered too heavy for driving file systems
-% \cite{seltzer2009hierarchical}. KVS on the other hand, are light-weight
-% databases that could be used for file systems.
 
 \paragraph{Transactions}
 

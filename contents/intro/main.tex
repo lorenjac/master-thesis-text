@@ -10,7 +10,7 @@ on databases to store large amounts of data and provide fast access. Further, in
 order to perform essential tasks, such databases must also be reliable.
 
 The predominant method to access data in a database is by using \glspl{tx}. A
-transaction is a sequence of operations on data that appears as single atomic
+transaction is a sequence of operations on data that appears as a single atomic
 operation. Therefore, an important factor in delivering the mentioned
 technologies is \emph{transaction throughput}.
 
@@ -24,7 +24,7 @@ Another approach to improve transaction throughput is to utilize multi-core
 architectures by allowing transactions to execute concurrently. This way, an
 incoming transaction does not have to wait until a running transaction
 terminates. However, race conditions between concurrent transactions may result
-in inconsistent data. Therefore a dedicated \emph{concurrency control} must be
+in inconsistent data. Therefore, a dedicated \emph{concurrency control} must be
 employed. If a concurrency control provides \emph{serializability} then no
 concurrent transactions may yield inconsistent data. Although desirable,
 serializability is often unsupported or discouraged due to its performance
@@ -73,16 +73,16 @@ disks.
 The task is to design and implement an in-memory key-value store that exploits
 the benefits of upcoming non-volatile RAM to enable efficient serializable
 transactions. For this purpose, an NVRAM-aware multiversion concurrency control
-protocol will be implemented. In order to validate the approach and determine
-the overhead of serializability, benchmarks will be used to compare the
-key-value store against non-serializable solutions.
+protocol is implemented. In order to validate the approach and determine the
+overhead of serializability, benchmarks are used to compare the key-value store
+against non-serializable solutions.
 
 % Overview
 
 \paragraph{Overview}
 
-First, a thorough domain analysis in the fields of \ac{NVRAM} and key-value
-stores is conducted. Chapter \ref{ch:nvram} introduces \ac{NVRAM} and discusses
+First, a domain analysis in the fields of \ac{NVRAM} and key-value stores is
+conducted. Chapter \ref{ch:nvram} introduces \ac{NVRAM} and discusses
 applications and challenges such as consistency guarantees in the presence of
 power failures. Next, chapter \ref{ch:kvs} introduces \kvsp and modern
 concurrency control protocols.
@@ -104,6 +104,6 @@ non-volatile memory should be referred to. This thesis exclusively uses term
 NVRAM. There are two reasons for this decision. For one, alternative terms such
 as BPRAM or PM suggest that non-volatile memory is also persistent which has
 ambiguous definitions and is not consistently used. Another reason is that some
-terms such as SCM, NVM and PM may not reflect the property of bytewise
+terms such as SCM, NVM, and PM may not reflect the property of bytewise
 addressing which is central to these technologies. NVRAM on the other hand,
 explicitly denotes all of the desired properties.
