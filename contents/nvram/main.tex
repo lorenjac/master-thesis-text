@@ -74,11 +74,10 @@ NVRAM logging is no longer necessary which paves the way for instantaneous
 restarts \cite{oukid2015instant}. The concept of NVRAM-based MMDB is especially
 promising as some upcoming variants of NVRAM are projected to feature larger
 capacities than conventional DRAM \cite{lee2009architecting,
-zilberberg2013phase, dulloor2014system}. For this reason, recent research has
-presented NVRAM-aware designs for MMDB ranging from key-value stores
+zilberberg2013phase, dulloor2014system}. For that reason, recent research has
+investigated NVRAM-aware designs for MMDB ranging from KVS
 \cite{bailey2013exploring, zhou2016nvht, wu2016nvmcached} to full-fledged
-database systems \cite{oukid2015instant, schwalb2016hyrise, andrei2017sap}.
-Research topics include integration, assignment policies, and consistency. However, little attention has been paid to concurrency control and whether current designs should be revisited.
+database systems \cite{oukid2015instant, schwalb2016hyrise, andrei2017sap}. Research results in these areas are central to this work and are reflected in chapter \ref{ch:nvram} through \ref{ch:concept}. Given their importance for this thesis, existing KVS for NVRAM are looked into in more detail at the end of chapter \ref{ch:kvs}.
 
 While most works aim to improve existing architectures, some explore different
 computation models. A recent example is a proposal to use NVRAM to enable
@@ -89,7 +88,7 @@ before an activation function classifies the result. But before satisfiable
 results can be obtained, ANN need to be trained by properly adjusting the scalar
 weights of their inputs. It has been suggested that with NVRAM weight adjustment
 could be performed on-chip where updated weights would be durable without the
-need for write-back.
+need for write-back. However, neither artificial intelligence nor alternative computation models are subject of this work.
 
 Most proposals concerning NVRAM assume the presence of volatile RAM.
 \cite{oukid2017data}. The reason behind this assumption is that not all parts of
@@ -103,13 +102,9 @@ process. On the other hand, all data belonging to a process' address space would
 be durable even if they were corrupted by a crash. Other issues are concerned
 about memory management, device drivers, and vital information. An early
 prototype of such a system is currently in development \cite{courtland2016can}.
-This topic however, is beyond the scope of this work and is not subject to
-further discussion.
+This topic however, is beyond the scope of this work and it is henceforth assumed that volatile RAM will co-exist with NVRAM.
 
-\todo[inline]{Short summary}
-\todo[inline]{Stress importance of MMDB/KVS for this work}
-
-It was shown in various works that advantages can be gained by using NVRAM.
+As shown above, NVRAM provides an opportunity to improve existing architectures and even create new computation models. Given sufficient parameters such as capacity and endurance, NVRAM could resolve the IO bottleneck of non-volatile storage media. Especially systems such as MMDB have shown considerable benefits in transaction throughput and recovery. Consequently, MMDB and in particular KVS are at the center of this work.
 
 \section{Technologies}
 
@@ -192,11 +187,13 @@ conceptual concerns.
 
 The key feature of NVRAM is to retain its data across restarts. However, not all
 data are necessarily intended to be durable. Notable examples include transient,
-confidential and corrupt data. The former comprises data which may not be valid
+confidential, and corrupt data. The former comprises data which may not be valid
 after a system restart, as is the case with data related to machine or device
 state.
 
-Other data such as passwords, encryption keys or decrypted data are usually
+\todo[inline]{out-of-scope -> abgrenzen}
+
+Other data such as passwords, encryption keys, or decrypted data are usually
 confidential and are thus not intended to be durable. Also, it has been shown
 that even volatile RAM holds its charge long enough so that a module can be
 moved to an attacker's machine \cite{halderman2008lest}. By cooling the module,
@@ -213,13 +210,13 @@ When an operating system or application behaves in erratic fashion or crashes it
 may produce corrupt data in memory. Unless memory is cleared or rewritten,
 systems incorporating NVRAM could face durable memory corruptions. The latter
 may lead to an unstable system producing even more corrupted data. Although the
-same is true for conventional non-volatile memory it is still operated through
-the operating system in terms of an API and volatile page buffers. NVRAM on the
+same is true for conventional non-volatile memory, it is still operated through
+the operating system in terms of an API and volatile page caches. NVRAM on the
 other hand is expected to be connected to the memory bus, enabling unbuffered
 access through virtual memory addresses. This makes NVRAM vulnerable to stray
-writes \cite{condit2009better, oukid2017data}. However, it is suggested that,
-compared to disk storage, stray writes do not occur significantly more
-often in NVRAM \cite{chen1996rio}.
+writes \cite{condit2009better, venkataraman2011consistent}. However, it has been
+shown that, compared to disk storage, stray writes do not occur significantly
+more often in NVRAM \cite{chen1996rio}.
 
 \paragraph{Memory Management}
 
@@ -231,12 +228,15 @@ addressed in this area.
 % Memory Interface
 
 An important aspect in managing NVRAM is the memory interface. Recent research
-suggests that NVRAM will be attached to the system memory bus
-\cite{intel2017nvdimm, oukid2017data}. An advantage of this approach is better
-latencies compared to the alternative IO bus. Another reason is that a previous
-attempt to produce NVRAM, also known as NVDIMM, modules have also been
-integrated this way \cite{dulloor2014system}. Drawbacks include shared bandwidth
-with volatile RAM and fixed amounts of module slots \cite{condit2009better}.
+suggests that NVRAM will be attached to the system memory bus using the DIMM
+format known from DRAM \cite{intel2017nvdimm, oukid2017data}. An advantage of
+this approach is better latencies compared to the alternative IO bus. Another
+reason is that in a previous effort to produce NVRAM, also known as NVDIMM,
+modules have also been integrated this way \cite{dulloor2014system,
+huang2014design}. Drawbacks include shared bandwidth with volatile RAM and fixed
+amounts of module slots \cite{condit2009better}.
+
+\todo[inline]{Elaborate on drawbacks of DIMM integration (incl. stray writes)}
 
 It further suggested that, in accordance with NVDIMM, NVRAM modules will be
 accessed through special device drivers \cite{oukid2017data}. Instead of mapping
@@ -256,13 +256,15 @@ volatile RAM, thus mitigating its benefits. Also traditional file systems are
 usually designed for block-oriented devices which may no longer be the best
 option. Therefore, several NVRAM-aware file systems such as \emph{pmfs},
 \emph{bpfs}, and \emph{scmfs} have been proposed \cite{condit2009better,
-wu2011scmfs, dulloor2014system}. A key feature is a zero-copy mechanism by
-circumventing page caches. This enables true store-load semantics for NVRAM when
-mapping files into virtual memory. Other aspects include the attempt to leverage
-the byte-addressable nature of NVRAM and crash-related consistency issues.
+wu2011scmfs, dulloor2014system}. The key feature of these file systems is a
+zero-copy mechanism by circumventing page caches. This enables true store-load
+semantics for NVRAM when mapping files into virtual memory. Other aspects
+include the attempt to leverage the byte-addressable nature of NVRAM and
+crash-related consistency issues.
 
-% Other more specialized file systems include aerie and scmcfs
-% \cite{volos2014aerie, tao2016nvmcfs}.
+\todo[inline]{Aerie erwähnen (NVRAM interface for file systems)}
+
+% Others: aerie, nvmcfs
 
 % Programming Model
 
@@ -273,11 +275,14 @@ memory allocators. Therefore, many authors have proposed designated allocators
 and pointer types for use with NVRAM \cite{wu2011scmfs, moraru2013consistent,
 oukid2014sofort, schwalb2015nvm_malloc}.
 
+\todo[inline]{Why do we need a programming model?}
+\todo[inline]{There is no consensus regarding the programming model}
+
 \paragraph{Consistency}
 
 A notorious problem with NVRAM is consistency in case of crashes
 \cite{condit2009better, dulloor2014system, oukid2017data}. Due to the complex
-nature of this subject further discussion is deferred to the next section.
+nature of this subject, further discussion is deferred to the next section.
 
 \section{Preserving Consistency}
 
@@ -292,16 +297,20 @@ write-back.
 
 \paragraph{Out-Of-Order Execution}
 
-In an attempt to optimize instruction throughput, processors may reorder
+When executing a program, processors fetch instructions on a consecutive manner.
+Some instructions may inflict minimal latency, while others such as load
+operations may delay further execution for hundreds of cycles. In an attempt to
+optimize instruction throughput, individual instructions may be reordered. While
+compilers may statically define promising orders, processors are able to reorder
 instructions at runtime. This enables processors to optimize resource
 utilization and hide latencies of time-consuming instructions. However, only
 reorderings that do not violate data dependencies between instructions are
 possible. While processors do prevent such conflicts, there are dependencies
 that cannot be observed. For example, in order to mark a chunk of data as
 durable in NVRAM, one might store a designated flag immediately after the
-operation completed. With out-of-order execution it is possible that the flag
-is written before the payload. This can lead to severe inconsistencies
-especially when a crash prevents the chunk from being written.
+operation completed. With out-of-order execution it is possible that the flag is
+written before the payload. This can lead to severe inconsistencies especially
+when a crash prevents the chunk from being written.
 
 A common method to counter this issue is to enforce memory order with memory
 barriers (also fences) \cite{dulloor2014system, schwalb2016hyrise,
@@ -310,12 +319,13 @@ prior memory operations have completed. Although a barrier does not directly
 order its preceding instructions, it can be used to impose an order on separate
 sequences of instructions. An example for a memory barrier is \code{sfence} on
 x86 architectures. While this approach solves the initial problem, it has a
-notable drawback. Barriers defeat the purpose of out-of-order execution. As a
-result, CPU pipelines are likely to stall, hence reducing resource utilization.
-Therefore, barriers can have significant impact on runtime performance, unless
-used judiciously. With \emph{epoch barriers} a similar approach has been
-proposed to address both order and durability issues when writing to NVRAM
-\cite{condit2009better}.
+notable drawback. Memory barriers defeat the purpose of out-of-order execution.
+As a result, CPU pipelines are likely to stall, hence reducing resource
+utilization. Furthermore, store buffers are flushed leading to higher latencies
+when accessing data of deferred store operations. Therefore, barriers can have
+significant impact on runtime performance, unless used judiciously. With
+\emph{epoch barriers} a similar approach has been proposed to address both order
+and durability issues \cite{condit2009better}.
 
 \paragraph{Deferred Write-Back}
 
@@ -335,19 +345,21 @@ memory order buffer may be present. It holds all loads and stores, with the
 exception of non-temporal operations. In order to prevent a deferred write-back
 through memory order buffers, their store buffers must be flushed. On x86
 architectures this can be achieved with a store fence operation such as
-\code{sfence}. Since memory barriers are already used for enforcing program
-order, flushing store buffers is a desirable side effect and incurs no overhead.
+\code{sfence}. As mentioned above, memory barriers carry a considerable
+overhead. However, if memory barriers are already used for enforcing program
+order, then flushing store buffers is a desirable side effect and incurs no
+overhead.
 
 % caches
 
 Processor caches help avoid access latencies and reduce memory bus traffic for
 frequently used data. A possible exception are non-temporal stores and data
-chunks marked as uncacheable. As well as memory order buffers caches are
-volatile, so an abrupt power failure may lead to lost updates. The issue with
-this is not that updates are lost but that it is unclear which updates are lost
+chunks marked as uncacheable. Similar to memory order buffers, caches are
+volatile so an abrupt power failure may lead to lost updates. The issue with
+this is not that updates are lost but that it is unclear which updates are lost,
 if any. The reason for this circumstance is the cache eviction policy trying to
 compensate for typically narrow cache volume. Depending on policy, cache
-content, and system load a modified chunk may or may not be flushed to main
+content, and system load, a modified chunk may or may not be flushed to main
 memory. An example of an application scenario where such behaviour is
 unacceptable is transactions. Imagine an updating transaction $t1$ that commits
 but is not evicted from cache. Then a transaction $t2$ based on the result of
@@ -365,11 +377,13 @@ An approach to prevent such inconsistencies is to disable caching for selected
 memory regions but that could introduce considerable overhead for frequently
 used data. A more popular approach is to evict cache lines programmatically
 whenever necessary \cite{condit2009better, dulloor2014system, oukid2017data}. On
-x86 architectures this can be done with the \code{clflush} or \code{clwb}
+x86 architectures this can be done with the \code{clflush} or \code{clflushopt}
 instructions. However, the problem with a simple cache line flush such as
 \code{clflush} is that making a cache line durable may not always mean that is
-should be evicted. In this regared, \code{clwb} compensates for this matter by
-retaining the designated cache line \cite{kolli2016high}.
+should be evicted. In this regard, \code{clwb} compensates for this matter by
+retaining the designated cache line \cite{kolli2016high}. Unfortunately, at the
+time of this writing there is no evidence of a processor to implement this
+instruction.
 
 % memory controller queues
 
@@ -385,16 +399,31 @@ write-back queues. An example is the meanwhile deprecated \code{pcommit},
 formerly known as \code{pm\_wbarrier} \cite{dulloor2014system, oukid2015instant,
 schwalb2015nvm_malloc, volos2017whisper}. Others have developed more general
 mechanisms for preserving consistency in NVRAM that also address this issue
-\cite{condit2009better, pelley2014memory}. The current state in this regard is
+\cite{condit2009better, pelley2014memory}. The current state of affairs is
 that platforms must provide a feature called ADR \cite{volos2017whisper}. It
 works by exploiting the fact that even in case of a power failure there is
 sufficient power to flush the write buffers of all memory controllers. For this
 to work, the power supply unit has to detect a power failure and issue a signal
-to all memory controllers.
+to all memory controllers. As a result, neither programmers nor processors need to worry about memory controller queues while no overhead is incurred.
 
-\todo[inline]{Maybe mention that ADR incurs no overhead}
-\todo[inline]{Epoch Barriers (condit2009better) erklären?}
-\todo[inline]{Strand Consistency (pelley2014memory) erklären?}
-\todo[inline]{Mention that cache policy may mess up physical memory order?}
-\todo[inline]{Actually, MC queues may also mess up memory order. Elaborate?}
-\todo[inline]{Short Summary of this chapter? (Aim towards MMDB/KVS)}
+% \todo[inline]{Epoch Barriers (condit2009better) erklären?}
+% \todo[inline]{Strand Consistency (pelley2014memory) erklären?}
+% \todo[inline]{Actually, MC queues may also mess up memory order. Elaborate?}
+
+\paragraph{Summary}
+
+\begin{itemize}
+    \item this chapter touched several aspects of NVRAM research: ...
+    \item the most ingriguing use case in conventional systems are MMDB/KVS
+    \item in accordance with recent research, it is assumed that NVRAM complements DRAM instead of replacing it
+    \item through hybrid mem arch benefits of both techs can be leveraged
+    \item in context of MMDB it seems reasonable to refrain from using conventional non-volatile storage
+    \item with PCM a promising technology nears commercial release
+    \item concerning integration, it is very likely that NVRAM will be packaged as NVDIMM, so integration patterns are likely to remain largely the same
+    \item consistency across crashes is still a prominent issue with NVRAM
+    \item however, recent research suggests that a combination of memory barriers, cacheline flushes, and ADR provides a viable solution
+    \item still, an open question is the programming model used with NVRAM
+    \item as a result, a number of partly disjoint programming models have emerged
+    \item in practice, programmers still need to meticulously manage non-volatile data
+    \item but that is beyond the scope of this work
+\end{itemize}
