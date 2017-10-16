@@ -77,7 +77,11 @@ capacities than conventional DRAM \cite{lee2009architecting,
 zilberberg2013phase, dulloor2014system}. For that reason, recent research has
 investigated NVRAM-aware designs for MMDB ranging from KVS
 \cite{bailey2013exploring, zhou2016nvht, wu2016nvmcached} to full-fledged
-database systems \cite{oukid2015instant, schwalb2016hyrise, andrei2017sap}. Research results in these areas are central to this work and are reflected in chapter \ref{ch:nvram} through \ref{ch:concept}. Given their importance for this thesis, existing KVS for NVRAM are looked into in more detail at the end of chapter \ref{ch:kvs}.
+database systems \cite{oukid2015instant, schwalb2016hyrise, andrei2017sap}.
+Research results in these areas are central to this work and are reflected in
+chapter \ref{ch:nvram} through \ref{ch:concept}. Given their importance for this
+thesis, existing KVS for NVRAM are looked into in more detail at the end of
+chapter \ref{ch:kvs}.
 
 While most works aim to improve existing architectures, some explore different
 computation models. A recent example is a proposal to use NVRAM to enable
@@ -88,7 +92,8 @@ before an activation function classifies the result. But before satisfiable
 results can be obtained, ANN need to be trained by properly adjusting the scalar
 weights of their inputs. It has been suggested that with NVRAM weight adjustment
 could be performed on-chip where updated weights would be durable without the
-need for write-back. However, neither artificial intelligence nor alternative computation models are subject of this work.
+need for write-back. However, neither artificial intelligence nor alternative
+computation models are subject of this work.
 
 Most proposals concerning NVRAM assume the presence of volatile RAM.
 \cite{oukid2017data}. The reason behind this assumption is that not all parts of
@@ -102,9 +107,15 @@ process. On the other hand, all data belonging to a process' address space would
 be durable even if they were corrupted by a crash. Other issues are concerned
 about memory management, device drivers, and vital information. An early
 prototype of such a system is currently in development \cite{courtland2016can}.
-This topic however, is beyond the scope of this work and it is henceforth assumed that volatile RAM will co-exist with NVRAM.
+This topic however, is beyond the scope of this work and it is henceforth
+assumed that volatile RAM will co-exist with NVRAM.
 
-As shown above, NVRAM provides an opportunity to improve existing architectures and even create new computation models. Given sufficient parameters such as capacity and endurance, NVRAM could resolve the IO bottleneck of non-volatile storage media. Especially systems such as MMDB have shown considerable benefits in transaction throughput and recovery. Consequently, MMDB and in particular KVS are at the center of this work.
+As shown above, NVRAM provides an opportunity to improve existing architectures
+and even create new computation models. Given sufficient parameters such as
+capacity and endurance, NVRAM could resolve the IO bottleneck of non-volatile
+storage media. Especially systems such as MMDB have shown considerable gains in
+transaction throughput and recovery times. Consequently, MMDB and in particular
+KVS are at the center of this work.
 
 \section{Technologies}
 
@@ -191,20 +202,22 @@ confidential, and corrupt data. The former comprises data which may not be valid
 after a system restart, as is the case with data related to machine or device
 state.
 
-\todo[inline]{out-of-scope -> abgrenzen}
-
-Other data such as passwords, encryption keys, or decrypted data are usually
-confidential and are thus not intended to be durable. Also, it has been shown
-that even volatile RAM holds its charge long enough so that a module can be
-moved to an attacker's machine \cite{halderman2008lest}. By cooling the module,
-capacitor discharge can be slowed so that it can be moved to another machine
-where its content may be read and parsed. Despite being countered with hardware
-scramblers, researchers still managed to apply variations of the technique and obtain vital information \cite{yitbarek2017cold}. Such attacks
-would be trivial on NVRAM, as durability is its primary feature
-\cite{bailey2011operating}. Of course, confidential data could be overwritten
-with zeros after usage, but there is always a possibility that a crash might
-prevent such clean up tasks from completing. That said, sensitive data should at
-all times remain in volatile memory and be nulled after use.
+Other data such as passwords, encryption keys, or decrypted data may be
+confidential and should not be durable. It has been shown that even volatile RAM
+holds its charge long enough so that a module can be moved to an attacker's
+machine for read-out \cite{halderman2008lest}. By cooling the module, capacitor
+discharge can be slowed so that it can be moved to another machine where its
+content may be read and parsed. Despite being countered with hardware
+scramblers, researchers still managed to apply variations of the technique and
+obtain vital information \cite{yitbarek2017cold}. Such attacks would be trivial
+on NVRAM, as durability is its primary feature \cite{bailey2011operating}. Of
+course, confidential data could be overwritten with zeros after usage, but there
+is always a possibility that a crash might prevent such clean up tasks from
+completing. That said, sensitive data should at all times remain in volatile
+memory and be nulled after use. Although information security is an important
+matter, this thesis does not address such issues. Although it is important,
+information security in terms of attack resilience contributes little to the aim
+of this thesis and is therefore not addressed further. Also, since volatile RAM continues to be available, there is no need to use NVRAM for sensitive data.
 
 When an operating system or application behaves in erratic fashion or crashes it
 may produce corrupt data in memory. Unless memory is cleared or rewritten,
@@ -216,7 +229,7 @@ other hand is expected to be connected to the memory bus, enabling unbuffered
 access through virtual memory addresses. This makes NVRAM vulnerable to stray
 writes \cite{condit2009better, venkataraman2011consistent}. However, it has been
 shown that, compared to disk storage, stray writes do not occur significantly
-more often in NVRAM \cite{chen1996rio}.
+more often in NVRAM \cite{chen1996rio}. That said, stray writes are not considered an issue in this work.
 
 \paragraph{Memory Management}
 
@@ -229,22 +242,24 @@ addressed in this area.
 
 An important aspect in managing NVRAM is the memory interface. Recent research
 suggests that NVRAM will be attached to the system memory bus using the DIMM
-format known from DRAM \cite{intel2017nvdimm, oukid2017data}. An advantage of
-this approach is better latencies compared to the alternative IO bus. Another
-reason is that in a previous effort to produce NVRAM, also known as NVDIMM,
-modules have also been integrated this way \cite{dulloor2014system,
-huang2014design}. Drawbacks include shared bandwidth with volatile RAM and fixed
-amounts of module slots \cite{condit2009better}.
+format known from DRAM \cite{volos2017whisper, oukid2017data, andrei2017sap,
+intel2017nvdimm}. A key advantage of this approach is better latencies compared
+to the alternative IO bus. Another reason is that in a previous effort to
+produce NVRAM, known as NVDIMM, modules have also been integrated this way
+\cite{dulloor2014system, huang2014design}. Still, there are drawbacks to be
+considered. Deploying NVRAM as DIMMs strictly limits scalability as the number
+of DIMM slots is fixed. The situation becomes even more problematic, as volatile
+RAM and NVRAM are set to exist alongside each other. Another consequence of
+using both technologies is that both RAM and NVRAM are attached to the same
+memory interface thus sharing its bandwidth.
 
-\todo[inline]{Elaborate on drawbacks of DIMM integration (incl. stray writes)}
-
-It further suggested that, in accordance with NVDIMM, NVRAM modules will be
-accessed through special device drivers \cite{oukid2017data}. Instead of mapping
-the device's address space into virtual memory, there is a consensus that
-specialized file systems will be used to manage NVRAM. Reasons are that a direct
-mapping would make it difficult to distinguish non-volatile from volatile memory
-and address space layout randomization would render pointers to NVRAM useless
-after a restart.
+It is further suggested that, in accordance with NVDIMM, NVRAM modules will be
+accessed through special device drivers \cite{oukid2017data, intel2017nvdimm}.
+Instead of mapping the device's address space into virtual memory, there is a
+consensus that specialized file systems will be used to manage NVRAM. Reasons
+are that a direct mapping would make it difficult to distinguish non-volatile
+from volatile memory and address space layout randomization would render
+pointers to NVRAM useless after a restart.
 
 File systems provide a well-known and suitable abstraction for non-volatile
 storage. In order to enable regular memory access in a load-store manner,
@@ -261,8 +276,6 @@ zero-copy mechanism by circumventing page caches. This enables true store-load
 semantics for NVRAM when mapping files into virtual memory. Other aspects
 include the attempt to leverage the byte-addressable nature of NVRAM and
 crash-related consistency issues.
-
-\todo[inline]{Aerie erwähnen (NVRAM interface for file systems)}
 
 % Others: aerie, nvmcfs
 
