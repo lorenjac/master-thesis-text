@@ -243,53 +243,68 @@ addressed in this area.
 An important aspect in managing NVRAM is the memory interface. Recent research
 suggests that NVRAM will be attached to the system memory bus using the DIMM
 format known from DRAM \cite{volos2017whisper, oukid2017data, andrei2017sap,
-intel2017nvdimm}. A key advantage of this approach is better latencies compared
-to the alternative IO bus. Another reason is that in a previous effort to
-produce NVRAM, known as NVDIMM, modules have also been integrated this way
-\cite{dulloor2014system, huang2014design}. Still, there are drawbacks to be
-considered. Deploying NVRAM as DIMMs strictly limits scalability as the number
-of DIMM slots is fixed. The situation becomes even more problematic, as volatile
-RAM and NVRAM are set to exist alongside each other. Another consequence of
-using both technologies is that both RAM and NVRAM are attached to the same
-memory interface thus sharing its bandwidth.
+intel2017nvdimm}. A decisive advantage of this approach is much lower latencies
+compared to the alternative IO bus. Another reason is that in a previous effort
+to produce NVRAM, known as NVDIMM, modules have also been integrated this way
+\cite{dulloor2014system, huang2014design}. Consequently, system designers can
+build on an existing software stack. Still, there are drawbacks to be
+considered. Clearly, the number of available DIMM slots in a machine is limited,
+so NVRAM may not scale well for mass storage. That situation is especially
+relevant in hybrid systems containing both RAM and NVRAM. Also, in hybrid
+systems both kinds of memory are likely to be attached to the same memory
+interface thus sharing its bandwidth.
 
-It is further suggested that, in accordance with NVDIMM, NVRAM modules will be
-accessed through special device drivers \cite{oukid2017data, intel2017nvdimm}.
-Instead of mapping the device's address space into virtual memory, there is a
-consensus that specialized file systems will be used to manage NVRAM. Reasons
-are that a direct mapping would make it difficult to distinguish non-volatile
-from volatile memory and address space layout randomization would render
-pointers to NVRAM useless after a restart.
+With NVRAM devices integrated into the system, programmers still need a way to
+access it. Several approaches have been proposed to this end
+\cite{volos2017whisper}. While it is always possible to operate on NVRAM by
+mapping individual device regions into virtual memory, there are considerable
+weaknesses to this approach \cite{condit2009better, volos2011mnemosyne,
+dulloor2014system, volos2017whisper}. A major challenge of working with NVRAM is
+to provide consistency guarantees across possible system failures. Yet, systems
+are largely unaware of these circumstances. With raw device access which is
+already error-prone, the complex task of preserving consistency is handed to the
+programmer. Another challenge is that virtual memory mappings are volatile and
+may no longer be valid after a restart.
 
-File systems provide a well-known and suitable abstraction for non-volatile
-storage. In order to enable regular memory access in a load-store manner,
-individual files can be mapped into virtual memory. Still, traditional file
-systems are not directly well-suited for use with NVRAM. One reason is that most
-operating systems provide a page cache which is used by file systems to defer
-expensive disk IO. In the case of NVRAM, this leads to unnecessary copies to
-volatile RAM, thus mitigating its benefits. Also traditional file systems are
-usually designed for block-oriented devices which may no longer be the best
-option. Therefore, several NVRAM-aware file systems such as \emph{pmfs},
-\emph{bpfs}, and \emph{scmfs} have been proposed \cite{condit2009better,
-wu2011scmfs, dulloor2014system}. The key feature of these file systems is a
+Therefore, it has been proposed to rely on dedicated high-level programming
+primitives as in Mnemosyne, NV-Heaps, and NVML \cite{volos2011mnemosyne,
+coburn2011nv_heaps, intel2017nvml}. These systems provide interfaces for memory
+allocation and consistent updates based on transactions. An important
+distinction to the previous low-level approach is that memory is accessed
+through an NVRAM-aware API instead of basic load and store statements. The
+difference is that the latter have no knowledge of non-volatile memory and its
+implications.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[scale=0.75]{figures/nvml-arch.jpg}
+    \caption{System hierarchy indicating the position of NVML in red \cite{intel2014nvml}}
+    \label{fig:nvml}
+\end{figure}
+
+Another discussed approach to manage NVRAM is through designated file systems
+\cite{oukid2017data, andrei2017sap}. File systems provide a well-known and
+suitable abstraction for non-volatile storage. In order to enable regular memory
+access in a load-store manner, individual files can be mapped into virtual
+memory. However, traditional file systems are not directly well-suited for use
+with NVRAM. One reason is that most operating systems provide a page cache which
+is used by file systems to defer expensive disk IO. In the case of NVRAM, page
+caches may be no longer needed, as updates to NVRAM incur far less latency
+compared to other non-volatile memories. In this regard, page caches even add
+overhead instead of mitigating it. Apart from that, they add a level of
+indirection which makes writes to NVRAM more likely to be torn by failures.
+Also, traditional file systems are usually designed for block-oriented devices
+which may no longer be the best option. Therefore, several NVRAM-aware file
+systems have been proposed \cite{condit2009better, wu2011scmfs,
+dulloor2014system, xu2016nova}. The key feature of these file systems is a
 zero-copy mechanism by circumventing page caches. This enables true store-load
-semantics for NVRAM when mapping files into virtual memory. Other aspects
-include the attempt to leverage the byte-addressable nature of NVRAM and
-crash-related consistency issues.
+semantics for memory-mapped files. Other aspects include attempts to leverage
+the byte-addressable nature of NVRAM and crash-related consistency issues.
 
-% Others: aerie, nvmcfs
-
-% Programming Model
-
-Still, programmers need a mechanism to distinguish non-volatile memory from
-volatile memory. This implies some form of a dual memory management. Notable
-problems include volatile memory mappings of NVRAM and both efficient and robust
-memory allocators. Therefore, many authors have proposed designated allocators
-and pointer types for use with NVRAM \cite{wu2011scmfs, moraru2013consistent,
-oukid2014sofort, schwalb2015nvm_malloc}.
-
-\todo[inline]{Why do we need a programming model?}
-\todo[inline]{There is no consensus regarding the programming model}
+Unfortunately, as of this writing there is no evident consensus regarding the
+programming model to use for NVRAM \cite{boehm2016persistence}. Still,
+middlewares such as NVML appear to be gaining the upper hand
+\cite{oukid2017data, volos2017whisper, malinowski2017using, andrei2017sap}.
 
 \paragraph{Consistency}
 
@@ -350,6 +365,13 @@ operations. This is a known vulnerability for consistency in NVRAM as the
 mentioned buffers are volatile and deferred stores may be lost when power fails
 \cite{condit2009better, oukid2017data}. In order to preserve consistency, it is
 necessary to force write-back in all of these cases.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[scale=0.75]{figures/nvram-memory-subsystem.pdf}
+    \caption{Architecture of memory subsystem \cite{bhandari2012implications}}
+    \label{fig:nvml}
+\end{figure}
 
 % memory order buffers
 
