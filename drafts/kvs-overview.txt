@@ -1,0 +1,55 @@
+KVS form an integral part in modern database technology {fiebig2016one}. This section gives an overview of their properties, classes, and applications.
+
+Compared to other types of databases, KVS are very simple databases that are sometimes better described by what they are not or do not provide.
+
+* non-relational data model
+* no data schemas
+* no query languages
+
+A KVS is a single-level store of key-value pairs. Unlike relational databases that can model complex relations, KVS simply map keys to values. [Advantage/Motive]
+
+A distinct property of KVS is that they do not employ data schemas. Consequently, arbitrary chunks of data can to be stored as values. This is especially useful in scenarios with no fixed data model or when enforcing one is not a priority.
+
+| user | Max                  |
+| auth | dxlf240r0g7jr4u8n2oe |
+| ...  | ...                  |
+
+Contrary to traditional DBMS, KVS do not provide query languages such as SQL to store and retrieve data. Instead, KVS are accessed programmatically through a concise set of operations. Although their API is not standardized, it can be essentially broken down to the following operations.
+
+* open/close
+* insertion (e.g. put())
+* retrieval (e.g. get())
+* removal (e.g. del())
+
+### Applications
+
+Traditional DBMS are often based on complex architectures featuring query frontends and sophisticated storage mechanisms. 
+While this works well in many cases, it severely limits the performance in situations where a simpler storage paradigm (e.g. key-value pairs) is sufficient. As a consequence, high access latencies and convoluted, error-prone concurrency schemes inhibit the scalability of storage systems. KVS on the other hand are designed to compensate for these shortcomings. A driving force in this regard, are large internet platforms, take e-commerce for instance, and cloud computing services.
+
+A longstanding example of a KVS is BerkeleyDB which acts as a database in a variety of software solutions. Apart from open-source software such as OpenLDAP or Apache Web server, BerkeleyDB is also used in a number of proprietary software such as messaging servers, switches, and routers {kaestner2007aspect, olson1999berkeleydb}.
+
+Another use-case are distributed in-memory caches often found in big-data environments. Web caches have received great attention as service providers struggle to scale with rising traffic where many requests target only a small amount of data {xu2014characterizing}. With caching, a dedicated eviction policy ensures that \emph{relevant} items reside in memory. As a result, caching can improve response times significantly. For this purpose, KVS provide an appropriate abstraction. However, in accordance with the volatile nature of caches, the criterion durability is often dropped. Important representatives of this class are Redis {redis2017home} and memcached {memcached2017home}. Not only have these KVS been deployed at companies such as Facebook or Twitter, but they have also formed the basis for substantial amounts of research in this area {xu2014characterizing}. Examples include FPGA acceleration {lavasani2014fpga}, memory partitioning for better cache hit rates {carra2014memory}, and NVRAM integration {wu2016nvmcached}. Large companies however, tend to maintain in-house solutions to suit their needs {chang2008bigtable, decandia2007dynamo, lakshman2010cassandra, wang2015hydradb}.
+
+### File systems
+
+KVS have also been proposed as a means to implement file systems
+\cite{murphy2001database, volos2014aerie}.
+
+"Hierarchical file systems are dead" seltzer2009hierarchical
+\todo[inline]{Filesystems: General Parallel File System (GPFS)}
+
+### Transactions
+
+An essential feature of most databases is transactions. Transactions enable a sequence of database operations to appear as a single atomic operation. If single operation involved in a transaction fails, then the transaction fails as well. Transactions are a powerful mechanism that enables complex operations without worrying about inconsistencies in case of failure. Given the prevalence of transactions, most KVS support them. Unless stated otherwise, it is henceforth assumed that every operation is executed in the context of a transaction. Due to their importance for this work, transactions are covered in more detail in the next section.
+
+### In-Memory Operation
+
+The performance of a database is often denoted in terms of transaction throughput. One way to increase throughput is to mitigate data access latencies. Apart from faster storage, this can be done by placing the entire database in main memory which enables speedups by multiple orders of magnitude. This approach, which dates back to the mid 1980s has been adopted in many high-performance databases such as the more recent HANA database {molina1992main, faerber2012hana}. Likewise, most KVS are explicitly designed for in-memory operation. Notable exceptions are the popular BerkeleyDB or Apache's Cassandra where in-memory operation is only an option {bdb2017doc, lakshman2010cassandra}. 
+
+### Concurrency
+
+Another approach to increase transaction throughput is to utilize multi-core processors by executing transactions concurrently. In order to achieve maximum performance, it is common for main-memory databases to also support concurrency {grund2010hyrise, farber2012hana, diaconu2013hekaton}. Further, it has been shown that KVS can gain substantial performance benefits through concurrency {fan2013memc3, li2015architecting, xu2014building}. In fact, most KVS natively support concurrency with the exception of redis {?}. Unfortunately, concurrency also introduces new issues such as inconsistencies through race conditions on shared data. Mitigating this issue can degrade performance which is why many designs trade full consistency against faster relaxations. This issue is dealt with in the next section about transactions.
+
+### Distributed Databases
+
+As mentioned earlier, KVS play a crucial role in big-data environments. Since availability is often a requirement, KVS in this area are often implemented as distributed services {chang2006bigtable, decandia2007dynamo, lakshman2010cassandra, wang2015hydradb}. Distributed databases and their mechanisms such as distributed transactions are beyond the scope of this work.

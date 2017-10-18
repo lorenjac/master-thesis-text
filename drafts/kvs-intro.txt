@@ -1,0 +1,5 @@
+# Key-Value Stores
+
+A prominent use-case for NVRAM is main-memory databases. Even though main memory and processor caches have become more affordable, MMDB still suffer from recovery on slower disk drives {oukid2015instant, schwalb2016hyrise}. NVRAM on the other hand, provides an opportunity to eliminate recovery altogether. An important class of databases often implemented as MMDB is KVS. Due to their simplicity and low overhead, KVS have been adopted both in big-data computing and database research {decandia2007dynamo, lakshman2010cassandra, wang2015hydradb}. In recent works, KVS were used to explore database design for NVRAM {bailey2013exploring, zhou2016nvht, wu2016nvmcached}.
+
+This chapter provides a domain analysis of KVS. First, a brief overview of KVS is given. The aim of this work to exploit NVRAM for a KVS with fast conflict-free concurrent transactions. Therefore, a substantial part of the remaining chapter is dedicated to transactions and concurrency control. The chapter is concluded with an examination of existing KVS for NVRAM.

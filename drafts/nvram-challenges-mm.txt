@@ -1,0 +1,15 @@
+NVRAM is a new type of memory that can also be used as durable mass storage. In order to benefit from this new technology, both platforms and operating systems need to find ways to efficiently manage it. There are several issues to be addressed in this area.
+
+### Memory Interface
+
+An important aspect in managing NVRAM is the memory interface. Recent research suggests that NVRAM will be attached to the system memory bus {intel2017nvdimm, oukid2017data}. An advantage of this approach is better latencies compared to the alternative IO bus. Another reason is that a previous attempt to produce NVRAM, also known as NVDIMM, modules have also been integrated this way. Drawbacks include shared bandwidth with volatile RAM and fixed amounts of module slots {condit2009better}.
+
+It further suggested that, in accordance with NVDIMM, NVRAM modules will be accessed through special device drivers {oukid2017data}. Instead of mapping the device's address space into virtual memory, there is a consensus that specialized file systems will be used to manage NVRAM. Reasons are that a direct mapping would make it difficult to distinguish non-volatile from volatile memory and address space layout randomization would render pointers to NVRAM useless after a restart.
+
+File systems provide a well-known and suitable abstraction for non-volatile storage. In order to enable regular memory access in a load-store manner, individual files can be mapped into virtual memory. Still, traditional file systems are not directly well-suited for use with NVRAM. One reason is that most operating systems provide a page cache which is used by file systems to defer expensive disk IO. In the case of NVRAM, this leads to unnecessary copies to volatile RAM, thus mitigating its benefits. Also traditional file systems are usually designed for block-oriented devices which may no longer be the best option. Therefore, several NVRAM-aware file systems such as pmfs,
+bpfs, and scmfs have been proposed {condit2009better,
+wu2011scmfs, dulloor2014system}. Other more specialized file systems include aerie and scmcfs {volos2014aerie, tao2016nvmcfs}. A key feature is a zero-copy mechanism by circumventing page caches. This enables true store-load semantics for NVRAM when mapping files into virtual memory. Other aspects include the attempt to leverage the byte-addressable nature of NVRAM and crash-related consistency issues. 
+
+### Programming Model
+
+Still, programmers need a mechanism to distinguish non-volatile memory from volatile memory. This implies some form of a dual memory management. Notable problems include volatile memory mappings of NVRAM and both efficient and robust memory allocators. Therefore, many authors have proposed designated allocators and pointer types for use with NVRAM {wu2011scmfs, moraru2013consistent, oukid2014sofort, schwalb2015nvm_malloc}.

@@ -1,0 +1,45 @@
+Transactions are a powerful concept that has been adopted in various branches of computer science. With transactions, multiple operations, such as reading or updating a record, can be grouped into a single unit that succeeds if and only if neither of its operations fails. Especially in high-performance computing environments, the utilization of computing resources through concurrent transactions plays an essential role.
+
+This section introduces the concept of transactions and its properties with regard to concurrency, in particular.
+
+### Definition
+
+A transaction is a sequence of operations that is treated as single atomic operation, i.e. it either succeeds if all its suboperations succeed or it fails. In general, an incomplete or failed transaction must not have any observable side effects. A transaction *commits* when all its subordinate operations have completed. Once this process is complete, the transaction is *committed* and all its side effects, if any, become visible.
+
+In general, the concept of a transaction does not impose any restrictions on the kind of operation enclosed inside a transaction. That is, apart from primitive operations such as read or update, transactions may also consist of transactions as well. This concept is known as *nested* transactions. In contrast, only primitive operations are permitted for *flat* transactions. Since nested transactions are more complex in their nature and have not been widely adopted, they are not subject of this work {?}. Unless stated otherwise, the term transaction always refers to flat transactions.
+
+Transactions are useful when a series of operations must either execute in conjunction or not at all. A simple example is the transfer of money from one bank account to another. The action of withdrawing and depositing a specified value comprises two separate actions that must be successful in conjunction or not at all. Still, as shown later, even single operations can benefit from transactional semantics.
+
+### Transactional Semantics
+
+The previous definition of transactions was of rather intuitive nature. However, in order to be useful the semantics of a transaction need to be described more precisely. The predominant characterization of transactional semantics is ACID {haerder1983}. It comprises a set of necessary properties:
+
+* atomicity
+* consistency
+* isolation
+* durability
+
+Atomicity captures the notion of all-or-nothing, i.e. either all operations of a transactional context succeed or none at all. As a consequence, any already completed operation of a transaction must be undone if the latter fails. Reverting the affected data to their previous state is often referred to as *rollback*.
+
+The property of consistency asserts that if the underlying data are in a consistent state, then any transaction must preserve consistency. For example, an ACID-compliant database cannot be transitioned into an illegal state by means of a transaction. If a transaction is bound to break the consistency of the database, then it has to be aborted and rolled back.
+
+In case multiple transactions are executed concurrently, each transaction may observe intermediate side effects of other concurrent transactions. In order to prevent this scenario and ensure the consistency property, isolation precludes transactions from seeing any concurrent activity. The property of isolation is later dealt with in more detail.
+
+The last of the four ACID properties is durability. It ensures that all side effects incurred by a committed transaction must be durable across any subsequent system failure. Durability can be very hard to enforce, especially in the face of catastropic failures with failing backup media. Therefore its notion is often relaxed to a reasonable extent.
+
+The ACID criteria have become the prevalent measure to characterize transactionial semantics. Although often associated with synchronization of concurrent transactions, ACID is also useful in simpler scenarios. An example is atomicity which captures the essence of a transaction even when the latter comprises no more than two operations. Moreover, even a transaction that consists of a single operation can benefit from ACID-compliance as it guarantees that any modifications become durable if and only if the enclosing transaction commits. Clearly though, the isolation property is central to preserving consistency in the presence of concurrent transactions. In that regard, isolation is the equivalent of consistency for concurrency.
+
+### Concurrent Transactions
+
+The performance of transaction processing systems such as databases is generally denoted by their transaction throughput, i.e. the number of transactions executed in a certain time frame. There are several approaches to increasing transaction throughput, one being concurrency. In theory, the throughput improvement on multi-core systems is linear in the number of available cores. However, there are several factors to consider, some of which are cache consistency and data integrity. Preserving both can have adverse effects on performance thus thwarting the above estimation. The following paragraph deals with data integrity as guaranteed by the isolation property in ACID.
+
+When two or more transactions are run concurrently, race conditions on shared data are bound to occur. Race conditions on the other hand, may cause data conflicts which in turn can lead to inconsistent data. The possible conflicts are:
+
+* write-write
+* write-read
+* read-write
+
+[todo: explain conflicts]
+[todo: explain serializability]
+
+### Transaction Models

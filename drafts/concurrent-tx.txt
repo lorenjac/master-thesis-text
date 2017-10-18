@@ -1,0 +1,21 @@
+* definition
+* types
+	* flat
+	* nested
+	* distributed
+* models/implementations
+	* software-based
+	* transactional memory (software-/hardware-TM)
+* semantics/guarantees: ACID
+	* already useful for single-threaded tx
+	* especially useful with multi-threaded tx
+	* ACI
+		* race conditions -> conflicts
+			* read-write
+			* write-read
+			* write-write
+		* solutions = let tx behave as if serially executed
+			* serializability
+			* linearizability (?)
+	* D
+		* durability using write-ahead logging

@@ -1,0 +1,3 @@
+Conventional non-volatile memory such as HDD or SSD provide large capacities but are only block-oriented and incur substantial access latencies compared to volatile DRAM. Especially IO-bound applications tend to keep as much data in RAM as possible but are eventually forced to access slower media for durable storage. This led to the development of non-volatile variants of RAM. Recent research suggests that both fast and high-capacity NVRAM will become widely available in the near future.
+
+This chapter gives a brief overview on the state-of-the-art in NVRAM research. This includes a discussion of opportunities and challenges, such as the notorious consistency issues in the presence of failures.

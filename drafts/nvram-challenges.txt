@@ -1,0 +1,21 @@
+Despite the conceivable advantages of NVRAM, there are also challenges to be addressed. Although most issues are of practical nature there also are conceptual concerns.
+
+### Unintended Durability
+
+The key feature of NVRAM is to retain its data across restarts. However, not all data are necessarily intended to be durable. Notable examples include transient, confidential and corrupt data.
+
+The former comprises data which may not be valid after a system restart, as is the case with data related to machine or device state. 
+
+Other data such as passwords, encryption keys or decrypted data are usually confidential and are thus not intended to be durable. Also, it has been shown that even volatile RAM holds its charge long enough so that a module can be moved to an attacker's machine {halderman2008lest}. By cooling the module capacitator discharge can be slowed so that it can be moved to another machine where its content may be read and parsed. Despite being countered with hardware scramblers, researchers still managed to obtain critical data such as AES encryption keys using the same technique {yitbarek2017cold}. Such attacks could be trivial on NVRAM, as durability is its primary feature {bailey2011operating}. Of course, confidential data could be overwritten with zeros after usage, but there is always a possibility that a crash might prevent such clean up tasks from completing. That said, sensitive data should at all times remain in volatile memory and be nulled after use.
+
+When an operating system or application behaves in erratic fashion or crashes it may leave corrupted data in memory. Unless memory is cleared or treated as such, systems incorporating NVRAM could face durable memory corruptions. The latter may lead to an unstable system producing even more corrupted data. Although the same is true for conventional non-volatile memory it is still operated through the operating system in terms of APIs and volatile page buffers. NVRAM on the other hand is expected to be connected to the memory bus, enabling unbuffered access through virtual memory addresses. This makes NVRAM vulnerable to stray writes {condit2009better, oukid2017data}. However, it is suggested that, when compared to disk storage, stray writes do not occur significantly more often in NVRAM {chen1996rio}.
+
+### Volatile Memory Mapping
+
+Operating systems designed on volatile RAM usually build a new virtual memory address space upon each restart. In order to prevent a range of sidechannel attacks, address space layout randomization (ASLR) is used, leading to a unique address space layout for each session. This is not a problem for volatile RAM since it is expected to lose its data either way. NVRAM however, is based around allowing objects to be accessable after a restart. Therefore, it is necessary to provide a mechanism to recover the address space of non-volatile memory regions or objects stored therein {oukid2014, schwalb2016hyrise}.
+
+Most proposals for this problem assume a dual memory management separating volatile and non-volatile RAM. It is proposed that non-volatile objects will be accessed through lightweight zero-copy file systems and will be mapped into individual process address spaces {dulloor2014system, schwalb2016hyrise}.
+
+### Consistency
+
+A notorious problem with NVRAM is consistency in case of crashes. Volatile RAM does not have this issue as all data is lost when power supply stops. Conventional non-volatile storage is not immune to data corruption but is shielded by several operating system mechanisms such as page caches. NVRAM however, is likely to be attached to the memory bus of a system. Due to the resulting load/store semantics, operating systems have little to no control over memory access to NVRAM. Instead the CPU, which is unaware of any consistency guarantees, is responsible for performing the memory operations on NVRAM. This makes way for inconsistencies through torn writes in case of a crash. Due to the complex nature of this subject further discussion is deferred to the next section.
