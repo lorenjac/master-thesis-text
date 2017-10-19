@@ -289,8 +289,49 @@ are:
     \item read-write
 \end{itemize}
 
-\todo[inline]{explain conflicts}
-\todo[inline]{explain serializability}
+
+When a transaction $t_1$ attempts to update a record $A$ that was previously
+written but not committed by another transaction $t_2$ then $t_1$'s update could
+overwrite $t_2$'s update to $A$ before it has become visible. This situation is
+called a \emph{write-write} conflict.
+
+\begin{lstlisting}
+t1: -------w(A)-commit---------
+t2: --w(A)---- ... ----commit-- (update is lost)
+\end{lstlisting}
+
+In a \emph{write-read} conflict occurs when a transaction reads data from an
+update that has not been committed yet. Imagine a transaction $t_1$ that reads a
+record $A$ that was previously updated but not committed by another transaction
+$t_2$. If $t_2$ fails for some reason, then $t_1$ could produce inconsistent
+data, e.g. by updating another record B based on $A$'s value. This situation is
+also called \emph{dirty read}.
+
+\begin{lstlisting}
+t1: -------r(A)-w(B)-commit-- (B is inconsistent to committed A)
+t2: --w(A)--- !!! ----------- (update to A was rolled back)
+\end{lstlisting}
+
+The last conflict is called \emph{read-write} conflict and denotes a situation
+when a transaction updates a record that was previously read by another
+transaction that is still running. Consider two transactions $t_1$, $t_2$ where
+$t_1$ reads a record $A$ which is later updated by $t_2$ before either
+transaction commits. If $t_1$ reads $A$ again, then the result may be
+inconsistent with the earlier read, hence the term \emph{inconsistent read}.
+
+\begin{lstlisting}
+t1: --r(A)--- ... ---r(A)--------- (has read inc. values of A)
+t2: ----------w(A)--------commit--
+\end{lstlisting}
+
+It is important to note that the conflicts explained above are not precluded by
+protecting the individual read or update operations. With regard to data
+integrity it is imperative to ensure isolation by preventing these conflicts.
+
+\paragraph{Serializability}
+
+A core concept to preserve consistency in the presence of concurrent
+transactions is \emph{serializability}.
 
 \paragraph{Transaction Models}
 

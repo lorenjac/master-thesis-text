@@ -39,7 +39,49 @@ When two or more transactions are run concurrently, race conditions on shared da
 * write-read
 * read-write
 
-[todo: explain conflicts]
-[todo: explain serializability]
+When a transaction t1 attempts to update a record A that was previously written but not committed by another transaction t2 then t1's update could overwrite t2's update to A before it has become visible. This situation is called a *write-write* conflict.
+
+t1: -------w(A)-commit---------
+t2: --w(A)---- ... ----commit-- (t2's update is lost)
+
+In a *write-read* conflict occurs when a transaction reads data from an update that has not been committed yet. Imagine a transaction t1 that reads a record A that was previously updated but not committed by another transaction t2. If t2 fails for some reason, then t1 could produce inconsistent data, e.g. by updating another record B based on A's value. This situation is also called *dirty read*.
+
+t1: -------r(A)-w(B)-commit-- (B is inconsistent to committed A)
+t2: --w(A)--- !!! ----------- (update to A was rolled back)
+
+The last conflict is called *read-write* conflict and denotes a situation when a transaction updates a record that was previously read by another transaction that is still running. Consider two transactions t1, t2 where t1 reads a record A which is later updated before either transaction commits. If t1 reads A again, then the result may be inconsistent with the earlier read, hence the term *inconsistent read*.
+
+t1: --r(A)--- ... ---r(A)--------- (has read inc. values of A)
+t2: ----------w(A)--------commit-- 
+
+It is important to note that the conflicts explained above are not precluded by protecting the individual read or update operations. With regard to data integrity it is imperative to ensure isolation by preventing these conflicts.
+
+### Serializability
+
+A core concept to preserve consistency in the presence of concurrent transactions is *serializability*.
+
+* observation: given ACD, serial tx cannot cause inconsistencies
+* idea: a concurrent schedule is valid if it behaves like serial
+* implication: allow only concurrent schedules that produce the same output as a serial schedule would have
+* need decidable classification of serial tx schedules
+	* formal: a schedule is serializable if there is an equivalent serial schedule that produces the same output
+	* problem: cannot check against all possible schedules each time
+	* solution: 
+		* identify and detect anomalies of non-serializable schedules
+		* if an anomaly is detected than the involved tx must fail
+		* all remaining schedules would be serializable
+* SQL serializable {sql1992}
+	* = absence of anomalies/phantoms
+	* anomalies
+		* lost update
+		* phantom
+	* isolation levels (degrees)
+		* dirty read
+		* non-repeatable read
+		* serializable
+* extension to SQL {berenson1998critique}
+	* phantoms: 
+		* read skew
+		* write skew
 
 ### Transaction Models
