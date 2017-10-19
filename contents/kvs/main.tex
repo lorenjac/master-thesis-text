@@ -84,10 +84,10 @@ struggle to scale with rising traffic where many requests target only a small
 amount of data \cite{xu2014characterizing}. With caching, a dedicated eviction
 policy ensures that \emph{relevant} items reside in memory. As a result, caching
 can improve response times significantly. For this purpose, KVS provide an
-appropriate abstraction. Important representatives of this class are Redis
-\cite{redis2017home} and memcached \cite{memcached2017home}. Not only have these
-KVS been deployed at companies such as Facebook or Twitter, but they have also
-formed the basis for substantial amounts of research in this area
+appropriate abstraction. Important representatives of this class are Redis and
+memcached \cite{redis2017home, memcached2017home}. Not only have these KVS been
+deployed at companies such as Facebook or Twitter, but they have also formed the
+basis for considerable amounts of research in this area
 \cite{xu2014characterizing}. Examples include FPGA acceleration
 \cite{lavasani2014fpga}, memory partitioning for better cache hit rates
 \cite{carra2014memory}, and NVRAM integration \cite{wu2016nvmcached,
@@ -175,24 +175,35 @@ regard to concurrency, in particular.
 A transaction is a sequence of operations that is treated as single atomic
 operation, i.e. it either succeeds if all its suboperations succeed or it fails.
 In general, an incomplete or failed transaction must not have any observable
-side effects. A transaction *commits* when all its subordinate operations have
-completed. Once this process is complete, the transaction is *committed* and all
-its side effects, if any, become visible.
+side effects. A transaction \emph{commits} when all its subordinate operations
+have completed. Once this process is complete, the transaction is
+\emph{committed} and all its side effects, if any, become visible.
 
 In general, the concept of a transaction does not impose any restrictions on the
 kind of operation enclosed inside a transaction. That is, apart from primitive
-operations such as read or update, transactions may also consist of transactions
-as well. This concept is known as *nested* transactions. In contrast, only
-primitive operations are permitted for *flat* transactions. Since nested
-transactions are more complex in their nature and have not been widely adopted,
-they are not subject of this work \cite{?}. Unless stated otherwise, the term
-transaction always refers to flat transactions.
+operations such as read or update, transactions may also consist of inner
+transactions as well. This concept is known as \emph{nested} transactions
+\cite{gray1981transaction}. In contrast, \emph{flat} transactions only permit
+primitive operations.
+
+Despite their preferably general nature, nested transactions are not a subject
+of discussion in this thesis, for a couple of reasons. First, nesting has been
+found useful primarily for distributed transaction systems and transactional
+programming models neither of which are within the scope of this work
+\cite{moss2006open}. In addition to implementation issues, there are several
+semantic models for nesting which further complicates its discussion
+\cite{harder1993concurrency, weikum1992concepts}. In the end, nesting has not
+found wide adoption with the prominent exception of transactional memory
+\cite{moss2006nested, moravan2006supporting, saha2006mcrt,
+jacobi2012transactional} and a few databases \cite{olson1999berkeley}. Hence,
+unless stated otherwise, the term transaction always refers to flat
+transactions.
 
 Transactions are useful when a series of operations must either execute in
-conjunction or not at all. A simple example is the transfer of money from one
-bank account to another. The action of withdrawing and depositing a specified
-value comprises two separate actions that must be successful in conjunction or
-not at all. Still, as shown later, even single operations can benefit from
+conjunction or not at all. A simple example is the transfer between bank
+accounts. The action of withdrawing a value from one account and depositing it
+on another comprises two separate actions that must both be successful in order
+to take effect. Still, as shown later, even single operations can benefit from
 transactional semantics.
 
 \paragraph{Transactional Semantics}
@@ -200,7 +211,7 @@ transactional semantics.
 The previous definition of transactions was of rather intuitive nature. However,
 in order to be useful the semantics of a transaction need to be described more
 precisely. The predominant characterization of transactional semantics is ACID
-\cite{haerder1983}. It comprises a set of necessary properties:
+\cite{gray1981transaction, haerder1983principles}. It comprises a set of necessary properties:
 
 \begin{itemize}
     \item atomicity
@@ -209,11 +220,11 @@ precisely. The predominant characterization of transactional semantics is ACID
     \item durability
 \end{itemize}
 
-Atomicity captures the notion of all-or-nothing, i.e. either all operations of a
-transactional context succeed or none at all. As a consequence, any already
-completed operation of a transaction must be undone if the latter fails.
+Atomicity captures the all-or-nothing notion of a transaction, i.e. either all
+operations in its context succeed or none. As a consequence, any already
+completed operation of a transaction must be undone should the latter fail.
 Reverting the affected data to their previous state is often referred to as
-*rollback*.
+\emph{rollback}.
 
 The property of consistency asserts that if the underlying data are in a
 consistent state, then any transaction must preserve consistency. For example,
