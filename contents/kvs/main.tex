@@ -161,7 +161,8 @@ transactions are beyond the scope of this work.
 \section{Transactions}
 
 Transactions are a powerful concept that has been adopted in various branches of
-computer science. With transactions, multiple operations, such as reading or
+computer science. Examples include databases, transactional memory, and
+operating systems. With transactions, multiple operations, such as reading or
 updating a record, can be grouped into a single unit that succeeds if and only
 if neither of its operations fails. Especially in high-performance computing
 environments, the utilization of computing resources through concurrent
@@ -186,8 +187,8 @@ transactions as well. This concept is known as \emph{nested} transactions
 \cite{gray1981transaction}. In contrast, \emph{flat} transactions only permit
 primitive operations.
 
-Despite their preferably general nature, nested transactions are not a subject
-of discussion in this thesis, for a couple of reasons. First, nesting has been
+Despite their general nature, nested transactions are not a subject of
+discussion in this thesis, for a couple of reasons. First, nesting has been
 found useful primarily for distributed transaction systems and transactional
 programming models neither of which are within the scope of this work
 \cite{moss2006open}. In addition to implementation issues, there are several
@@ -203,8 +204,10 @@ Transactions are useful when a series of operations must either execute in
 conjunction or not at all. A simple example is the transfer between bank
 accounts. The action of withdrawing a value from one account and depositing it
 on another comprises two separate actions that must both be successful in order
-to take effect. Still, as shown later, even single operations can benefit from
-transactional semantics.
+to take effect.
+
+% Still, as shown later, even single operations can benefit from
+% transactional semantics.
 
 \paragraph{Transactional Semantics}
 
@@ -244,16 +247,24 @@ subsequent system failure. Durability can be very hard to enforce, especially in
 the face of catastropic failures with failing backup media. Therefore its notion
 is often relaxed to a reasonable extent.
 
-The ACID criteria have become the prevalent measure to characterize
-transactionial semantics. Although often associated with synchronization of
-concurrent transactions, ACID is also useful in simpler scenarios. An example is
-atomicity which captures the essence of a transaction even when the latter
-comprises no more than two operations. Moreover, even a transaction that
-consists of a single operation can benefit from ACID-compliance as it guarantees
-that any modifications become durable if and only if the enclosing transaction
-commits. Clearly though, the isolation property is central to preserving
-consistency in the presence of concurrent transactions. In that regard,
-isolation is the equivalent of consistency for concurrency.
+% The ACID criteria have become the prevalent measure to characterize
+% transactionial semantics. Although often associated with ensuring consistency
+% for concurrent transactions, ACID is already useful without concurrency. An
+% example is atomicity which captures the essence of a transaction even when the
+% latter comprises no more than two operations. Moreover, even a transaction that
+% consists of a single operation can benefit from ACID-compliance as it guarantees
+% that any modifications become durable if and only if the enclosing transaction
+% commits. Clearly though, the isolation property is central to preserving
+% consistency in the presence of concurrent transactions. In that regard,
+% isolation is the equivalent of consistency for concurrency.
+
+The ACID properties have become the prevalent reference for characterizing
+transactional systems. However, not all systems enforce the complete set of
+properties. Notable examples are transactional memory for conventional RAM and
+some cache-like databases which do not support durability as they are volatile
+by design. In other cases, guarantees are not dropped but relaxed. As shown
+below, a prominent example for relaxation that is also fundamental to this
+thesis is the isolation of concurrent transactions.
 
 \paragraph{Concurrent Transactions}
 
@@ -264,8 +275,8 @@ transaction throughput, one being concurrency. In theory, the throughput
 improvement on multi-core systems is linear in the number of available cores.
 However, there are several factors to consider, some of which are cache
 consistency and data integrity. Preserving both can have adverse effects on
-performance thus thwarting the above estimation. The following paragraph deals
-with data integrity as guaranteed by the isolation property in ACID.
+performance thus invalidating the above estimation. The following paragraph
+deals with data integrity as guaranteed by the isolation property in ACID.
 
 When two or more transactions are run concurrently, race conditions on shared
 data are bound to occur. Race conditions on the other hand, may cause data
