@@ -23,65 +23,65 @@ Atomicity captures the notion of all-or-nothing, i.e. either all operations of a
 
 The property of consistency asserts that if the underlying data are in a consistent state, then any transaction must preserve consistency. For example, an ACID-compliant database cannot be transitioned into an illegal state by means of a transaction. If a transaction is bound to break the consistency of the database, then it has to be aborted and rolled back.
 
-In case multiple transactions are executed concurrently, each transaction may observe intermediate side effects of other concurrent transactions. In order to prevent this scenario and ensure the consistency property, isolation precludes transactions from seeing any concurrent activity. The property of isolation is later dealt with in more detail.
+In case multiple transactions are executed concurrently, each transaction could observe intermediate side effects of other concurrent transactions. In order to prevent this scenario and ensure the consistency property, isolation precludes transactions from seeing any concurrent activity. The property of isolation is later dealt with in more detail.
 
 The last of the four ACID properties is durability. It ensures that all side effects incurred by a committed transaction must be durable across any subsequent system failure. Durability can be very hard to enforce, especially in the face of catastropic failures with failing backup media. Therefore, its notion is usually relaxed to a practically reasonable extent.
 
-The ACID properties have become the prevalent reference for characterizing transactional systems. However, not all systems enforce the complete set of properties. Notable examples are transactional memory for conventional RAM and some cache-like databases which do not support durability as they are volatile by design. In other cases, guarantees are not dropped but relaxed. As shown below, a prominent example for relaxation that is also fundamental to this thesis is the isolation of concurrent transactions.
+The ACID properties have become the prevalent reference for characterizing transactional systems. However, not all systems enforce the complete set of properties. Notable examples are transactional memory for conventional RAM and some cache-like databases which do not support durability as they are volatile by design. In other cases, guarantees are not dropped but relaxed. A prominent example for relaxation that is also fundamental to this thesis is the isolation of concurrent transactions.
+
+### Serial Transactions
+
+In a serial transaction-processing system all transactions are executed in a sequential order. That is, only one transaction, if any, is being executed at a time and overlapping is not possible. If a transaction t1 attempts to start while another transaction t0 is still active then t1 has to wait until t0 terminates.
+
+This reveals two important drawbacks. First, transaction throughput does not scale as the number of overlapping transaction requests increases. Second, with only one computing resource active at a time, resource utilization is low on multi-core architectures. The same is true on single-core systems as execution latencies cannot be hidden by switching to other transactions. To mitigate these issues, transactions can be allowed to run concurrently.
 
 ### Concurrent Transactions
 
-The performance of transaction processing systems such as databases is generally denoted by their transaction throughput, i.e. the number of transactions executed in a certain time frame. There are several approaches to increasing transaction throughput, one being concurrency. In theory, the throughput improvement on multi-core systems is linear in the number of available cores. However, there are several factors to consider, some of which are cache consistency and data integrity. Preserving both can have adverse effects on performance thus invalidating the above estimation. The following paragraph deals with data integrity as guaranteed by the isolation property in ACID.
-
-When two or more transactions are run concurrently, race conditions on shared data are bound to occur. Race conditions on the other hand, may cause data conflicts which in turn can lead to inconsistent data. The possible conflicts are:
+Concurrent transaction execution can largely remove the shortcomings outlined above. Now, an incoming transaction does not need to wait for an in-flight transaction to complete. In addition to increasing transaction throughput it also enables better resource utilization. This works as long as data are read but not written. Allowing concurrent updates however, bears potential conflicts that threaten the consistency of data and must therefore be addressed. Possible conflicts are:
 
 * write-write
 * write-read
 * read-write
 
-When a transaction t1 attempts to update a record A that was previously written but not committed by another transaction t2 then t1's update could overwrite t2's update to A before it has become visible. This situation is called a *write-write* conflict.
+When a transaction t1 attempts to update a record A that was previously written but not committed by another transaction t2 then t1's update could overwrite t2's update to A before it has become visible. Unaware of the condition t2 will successfully commit even though its update is lost. This situation is called a *write-write* conflict.
 
 t1: -------w(A)-commit---------
-t2: --w(A)---- ... ----commit-- (t2's update is lost)
+t2: --w(A)---- ... ----commit-- (update is lost)
 
-In a *write-read* conflict occurs when a transaction reads data from an update that has not been committed yet. Imagine a transaction t1 that reads a record A that was previously updated but not committed by another transaction t2. If t2 fails for some reason, then t1 could produce inconsistent data, e.g. by updating another record B based on A's value. This situation is also called *dirty read*.
+In a *write-read* conflict occurs when a transaction reads data that has not been committed yet. Imagine a transaction t1 that reads a record A that was previously updated but not committed by another transaction t2. If t2 updates the same item again or fails, then t1 has read a value that was never committed. This situation is also called *dirty read*.
 
 t1: -------r(A)-w(B)-commit-- (B is inconsistent to committed A)
 t2: --w(A)--- !!! ----------- (update to A was rolled back)
 
-The last conflict is called *read-write* conflict and denotes a situation when a transaction updates a record that was previously read by another transaction that is still running. Consider two transactions t1, t2 where t1 reads a record A which is later updated before either transaction commits. If t1 reads A again, then the result may be inconsistent with the earlier read, hence the term *inconsistent read*.
+The last conflict is called *read-write* conflict and denotes a situation when a transaction updates a record that was previously read by another transaction that is still running. Consider two transactions t1, t2 where t1 reads a record A which is later updated before either transaction commits. If t1 reads A again, then the result may be inconsistent with the earlier read. The situation is also referred to as *inconsistent read* or *non-repeatable read*.
 
 t1: --r(A)--- ... ---r(A)--------- (has read inc. values of A)
-t2: ----------w(A)--------commit-- 
+t2: ----------w(A)--------commit--
 
-It is important to note that the conflicts explained above are not precluded by protecting the individual read or update operations. With regard to data integrity it is imperative to ensure isolation by preventing these conflicts.
+It is important to note that the conflicts explained above are not precluded by protecting individual read or update operations.
+
+[Explain consistency in transactional sense vs. race conditions]
+
+With regard to data integrity it is imperative to ensure isolation by preventing these conflicts.
 
 ### Serializability
 
-A core concept to preserve consistency in the presence of concurrent transactions is *serializability*.
+A core concept to preserve consistency in the presence of concurrent transactions is *serializability*. It is based on the observation that in an ACID-compliant serial transaction processing system, every sequence of transactions always yields consistent data. Likewise, a schedule of concurrent transactions should yield consistent data if and only if it behaves in a way that is equivalent to a serial sequence of the same transactions. More precisely, if and only if a concurrent schedule produces the same output as a serial schedule would have then there are no inconsistencies. This leads to the formal definition of serializability.
 
-* observation: given ACD, serial tx cannot cause inconsistencies
-* idea: a concurrent schedule is valid if it behaves like serial
-* implication: allow only concurrent schedules that produce the same output as a serial schedule would have
-* need decidable classification of serial tx schedules
-	* formal: a schedule is serializable if there is an equivalent serial schedule that produces the same output
-	* problem: cannot check against all possible schedules each time
-	* solution: 
-		* identify and detect anomalies of non-serializable schedules
-		* if an anomaly is detected than the involved tx must fail
-		* all remaining schedules would be serializable
-* SQL serializable {sql1992}
-	* = absence of anomalies/phantoms
-	* anomalies
-		* lost update
-		* phantom
-	* isolation levels (degrees)
-		* dirty read
-		* non-repeatable read
-		* serializable
-* extension to SQL {berenson1998critique}
-	* phantoms: 
-		* read skew
-		* write skew
+A concurrent schedule is called *serializable* if and only if there exists a serial schedule of the same transactions that produces the same output. A transaction processing system provides serializability if and only if it guarantees that all concurrent schedules are serializable.
 
-### Transaction Models
+[Examples]
+
+In order to enforce serializability, a decidable classification for serial transaction schedules is required. A naive approach would be to search for equivalent serial schedules whenever needed. However, the complexity of searching for such a schedule grows exponentially, thus making this approach infeasible. Therefore, more pragmatic approaches were designed.
+
+An early definition of serializability was given in ANSI SQL {sql1992}. The idea is to identify and detect *anomalies* of non-serializable schedules at runtime. If an anomaly is detected then any affected transaction must fail. Based on whether these anomalies were permitted, several *isolation levels* were defined. In terms of ANSI SQL, a transaction was serializable if none of the following anomalies was present:
+
+* dirty read
+* non-repeatable read
+* phantom
+
+A phantom is similar to a non-repeatable read but differs in that the item in question is not modified but added or removed. Imagine a transaction t1 making a conditional selection of items. If another transaction t2 adds an item and t1 repeats its selection then the result may contain the item which is inconsistent with the first result.
+
+Note that this formalization is built around the observable artifacts of non-serializable schedules, rather than their cause such as read-write conflicts. While it is pragmatic to address only observable anomalies it also unreliable as more complicated consistencies may remain undetected. In fact, it was later found that the above characterization is insufficient as further anomalies were discovered {berenson1995critique, fekete2004read}. In the wake of these findings, additional restrictions were imposed on the notion of serializability.
+
+Nevertheless, all of the discovered anomalies can be attributed to the access conflicts shown above. For example, the most recently discovered anomalies, *write skew* and *non-serializable read-only* are essentially results of read-write conflicts. In this sense, a transaction is serializable if and only if all possible conflicts are precluded. This characterization has several advantages. Most importantly, it is more plausible to discuss non-serializable schedules in terms of causes instead of effects. In addition, as opposed to anomalies the number of conflicts is smaller and also fixed. Therefore, this thesis primariliy defines serializability in terms of conflicts.

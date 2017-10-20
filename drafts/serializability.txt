@@ -1,0 +1,23 @@
+* observation: given ACD, serial tx cannot cause inconsistencies
+* idea: a concurrent schedule is valid if it behaves like serial
+* implication: allow only concurrent schedules that produce the same output as a serial schedule would have
+* need decidable classification of serial tx schedules
+	* formal: a schedule is serializable if there is an equivalent serial schedule that produces the same output
+	* problem: cannot check against all possible schedules each time
+	* solution: 
+		* identify and detect anomalies of non-serializable schedules
+		* if an anomaly is detected than the involved tx must fail
+		* all remaining schedules would be serializable
+* SQL serializable {sql1992}
+	* = absence of anomalies/phantoms
+	* anomalies
+		* lost update
+		* phantom
+	* isolation levels (degrees)
+		* dirty read
+		* non-repeatable read
+		* serializable
+* extension to SQL {berenson1998critique}
+	* phantoms: 
+		* read skew
+		* write skew
