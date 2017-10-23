@@ -1,0 +1,11 @@
+Concurrency is a major building block for scalable transaction processing. It enables higher transaction throughput and resource utilization compared to serial processing. On the downside, concurrent schedules are subject to potential conflicts that may result in data corruption.
+
+This section motivates the use of a dedicated concurrency control protocol and outlines the state of the art with a focus on optimistic approaches, in particular multiversion concurrency control.
+
+As mentioned earlier, it is not sufficient to protect individual operations within a transaction. The main reason is that according to ACID, transactions need to be isolated from any concurrent activity. Otherwise no transaction could be sure its modifications have taken effect as concurrent transactions may have meanwhile overwritten them. Imagine a transaction that writes a value and finds a different value when reading it later. As a result, the scope in which isolation is required spans across critical sections.
+
+Therefore, a dedicated concurrency control is required to ensure isolation. An instance of a concurrency control is also referred to as protocol or scheme. It can be seen as an implementation of the isolation property in ACID.
+
+[Serializability vs. Performance]
+
+There are two fundamental approaches to implementing concurrency controls: pessimistic and optimistic protocols.

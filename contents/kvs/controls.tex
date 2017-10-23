@@ -1,0 +1,347 @@
+Concurrency is a major building block for scalable transaction processing. It
+enables higher transaction throughput and resource utilization compared to
+serial processing. On the downside, concurrent schedules are subject to
+potential conflicts that may result in data corruption.
+
+This section motivates the use of a dedicated concurrency control protocol and
+outlines the state of the art with a focus on optimistic approaches, in
+particular multiversion concurrency control.
+
+As mentioned earlier, it is not sufficient to protect individual operations
+within a transaction. The main reason is that according to ACID, transactions
+need to be isolated from any concurrent activity. Otherwise no transaction could
+be sure its modifications have taken effect as concurrent transactions may have
+meanwhile overwritten them. Imagine a transaction that writes a value and finds
+a different value when reading it later. As a result, the scope in which
+isolation is required spans across critical sections.
+
+Therefore, a dedicated \emph{concurrency control} is required to ensure
+isolation. An instance of a concurrency control is also referred to as
+\emph{protocol} or \emph{scheme}. It can be seen as an implementation of the
+isolation property in ACID.
+
+\todo[inline]{Serializability vs. Performance}
+
+There are two fundamental approaches to implementing concurrency controls:
+\emph{pessimistic} and \emph{optimistic} protocols.
+
+\paragraph{Pessimistic Concurrency Control} % assume frequent conflicts
+A pessimistic concurrency control strives to prevent conflicts before they can
+occur. In terms of data access, pessimistic control mechanisms employ some form
+of \emph{exclusive ownership}. With such a mechanism, a transaction tries to
+acquire the ownership of all data items it wishes to access. If the resource
+acquisition succeeds the transaction can freely operate on the temporarily owned
+data. Only when that transaction terminates will this ownership be released. If
+a transaction fails to claim the exclusive ownership on its data then it has
+have to wait until the required ownership is granted or abort.
+
+This is the most commonly known and understood variant of concurrency controls.
+It is usually implemented using \emph{locking}. The most widely adapted protocol
+in this regard is \emph{two-phase locking} (also 2PL). Locking provides a solid
+mechanism to ensure serializability and has thus been implemented in a multitude
+of transaction systems (IBM DB2, Oracle, MySQL).
+
+However, there are also drawbacks. Unless carefully engineered, locking-based
+concurrency controls are prone to \emph{deadlocks} due to cyclical resource
+dependencies. These deadlocks must be detected and resolved which introduces
+some runtime overhead. Another problem is \emph{lock contention}. Lock
+contention occurs when most concurrent threads in a system contend for
+overlapping sets of shared resources which only one transaction at a time
+succeeds to acquire. All remaining transactions then wait for the preceding
+transaction to complete only to start contending again. In such a scenario, a
+concurrent transaction execution has effectively been degraded to serial
+execution as only one transaction is executed at a time.
+
+\paragraph{Optimistic Concurrency Control} % assume infrequent updates
+Optimistic concurrency controls form the opposite of pessimistic control
+schemes. Instead of preventing conflicts altogether, optimistic control schemes
+do not impose any restrictions until a transaction commits. Only when a
+transaction commits, the concurrency control starts to check for violations.
+This step is called \emph{validation}. If a no conflict is detected, then the
+transaction may commit, otherwise it is aborted.
+
+This approach is usually lock-free and is thus not subject to deadlocks or lock
+contention. However, the validation at the end of a transaction bears
+significant overhead. This is especially true as not only writes but also reads
+need to be tracked in order to detect all possible conflicts. Another drawback
+is that conflicts are inherently expensive as aborting a conflicting transaction
+discards its entire progress even if the conflict could have been detected early
+on. This is especially a problem in the presence of long-running transactions.
+Such transactions are very likely to be the last to commit an update on data
+items. As a consequence long-running transactions may be repeatedly aborted by
+updates from shorter intermediate transactions.
+
+Despite these drawbacks, this approach has seen much interest especially in
+domains where reads are dominant and conflicts are known to be infrequent or
+negligible \cite{kung1981optimistic, carey1986performance, larson2011high}.
+
+\subsection{Multiversioning}
+
+% Multiversioning is a popular concurrency control mechanism. While originating in
+% distributed systems research \cite{reed1978naming}, it was soon considered a
+% promising alternative to traditional locking-based approaches as optimistic
+% lock-free variants were developed \cite{bayer1980parallelism,
+% stearns1981distributed, kung1981optimistic, bernstein1983multiversion,
+% carey1983multiple, hadzilacos1986algorithmic, carey1986performance}. Today,
+% multiversion concurrency control (MVCC) forms the foundation of many commercial
+% products such as Oracle, Microsoft SQL Server, Postgre SQL
+% \cite{larson2011high}. It is also featured in main-memory databases such as SAP
+% HANA and recent research in non-volatile main memory databases
+% \cite{lee2013high, schwalb2015efficient, schwalb2016hyrise, oukid2014sofort}.
+% However, most implementations of MVCC, such as snapshot isolation, do not
+% guarantee full serializability and are thus prone to inconsistencies
+% \cite{neumann2015fast, berenson1995critique}. Although recent research has shown
+% ways to achieve serializability with MVCC, implementations are hesitant to
+% follow \cite{larson2011high}.
+%
+% MVCC has not only been applied in traditional DBMS but also in main-memory
+% databases. With emerging non-volatile memory that is both affordable and little
+% slower than conventional DRAM, new problems for MVCC such as durability,
+% recovery or access time arise \cite{bailey2011operating, larson2011high,
+% oukid2014sofort, schwalb2016hyrise}. In order to fully leverage the emerging
+% memory technology, it is important to assess opportunities and issues of MVCC
+% especially when serializability is required.
+
+Multiversioning, which is also referred to as multiversioning concurrency
+control (MVCC) is a popular concurrency control method. It has been implemented
+in both commercial and non-commercial transaction-processing systems, ranging
+from general-purpose database systems to high-performance in-memory databases.
+Initially designed as a solution to concurrency control for distributed and
+nested transactions \cite{reed1978naming}, MVCC has been widely adopted as an
+alternative to conventional locking-based concurrency schemes. This move was
+motivated in overcoming typical problems associated with locking, such as
+deadlocks and lock contention.
+
+\paragraph{Concept}
+
+A \emph{version} is a snapshot of a particular data item within a database. In
+traditional concurrency schemes, there is exactly one version of each item.
+These are also referred to as \emph{single-version} concurrency schemes. If a
+transaction issues an update to this version, then it is performed in-place. In
+order to ensure isolation though, a transaction has to be protected against
+concurrent reading or writing. This is usually achieved by having each
+transaction acquire locks on its data which are only released once the
+transaction terminates. This approach is very effective in that it can provide
+the highest isolation level of serializability as in DB2 or MySQL
+\cite{berenson1995critique}. However, it also has some notable drawbacks such as
+deadlocks and lock contention.
+
+In a \emph{multiversion} concurrency scheme, multiple versions of an item can be
+maintained. This fundamentally changes the nature of both read and write
+operations. Instead of updating an item in-place which would have to be
+isolated, write operations create new versions by modifying copies of existing
+versions. Also, since multiple versions are kept, read operations do not need to
+access the latest version and may instead select an earlier version. This means
+that not only may a transaction read an item which is currently being updated
+but it is also able to continue accessing the same item even if there exists a
+newer version.
+
+This scheme can effectively isolate read operations from concurrent operations
+without the need for locking. An important implication of this property is that
+read operations never wait for write operations and vice versa. This is a
+significant advantage over single-version schemes especially in applications
+where reading is much more frequent than writing (e.g. OLAP). In fact, it has
+been shown that even in OLTP systems \emph{typical} workloads are dominated by
+queries \cite{krueger2011fast}. This is also reflected in the TATP benchmark for
+OLTP systems which assumes 80 \% of all transactions to be read-only
+\cite{larson2011high, neumann2015fast, oukid2015instant}.
+
+This is different with write operations. Updating a version incorporates
+additional overhead for allocating a new version and copying the original
+version before modifying it. Also concurrent writes to an item may need to be
+addressed to prevent write/write conflicts.
+
+On the other hand, the presence of multiple versions also implies that whenever
+a transaction issues a operation on a data item, it first has to determine which
+version the operation applies to. This is done by traversing the version
+\emph{history} of the item and testing for each version its \emph{visibility}. A
+version is said to be \emph{visible} if and only if it satisfies a well-defined
+predicate. This predicate can be formulated over operations or transactions.
+Only if a version is visible it can be selected for reading or writing,
+respectively. The implementation of the selection method depends both on the
+type of concurrency control, that is optimistic or pessimistic, and the desired
+isolation level.
+
+The most promising feature of multiversioning is the non-blocking nature of read
+operations due to the absence of in-place updates. However, there also important
+problems that need to be addressed in order to leverage the merits of
+multiversion concurrency control.
+
+First, the maintenance of multiple versions per item implies a significant
+overhead in storage. Note that a version may not only contain payload but
+additional data such as handles pointing to adjacent versions. A version may
+also be required to hold certain metadata such as timestamps, further increasing
+the overall memory footprint. This may be relevant especially in areas where
+memory is comparatively scarce as is in main-memory databases. However, not all
+versions need to be retained. Instead, only the versions that are visible to at
+least one transaction are needed. All other versions can be considered
+\emph{stale} and be disposed. This task is usually achieved by a designated
+garbage collection mechanism. Although garbage collection may improve the
+overall memory footprint it is also known to have adverse effects on
+performance. Another drawback is that in the presence of many long-running
+transactions, versions are less likely to go stale and cannot be released.
+
+Second, whenever an item is accessed, the system first has to find a visible
+version of the item. Accessing an item may therefore incur a significant runtime
+overhead. The overhead mainly depends on the size of the history and is thus
+bounded by the longest available history. Employing a garbage collection
+mechanism can reduce the size of version histories thus improving the upper
+bound of the visibility test. Another optimization would be to have a
+transaction keep track of all the versions it references. This way, visibility
+would only have to be computed once for each item.
+
+\paragraph{Implementation}
+
+There are various ways to implement multiversion concurrency controls. There are
+both optimistic and pessimistic implementations \cite{kung1981optimistic}.
+
+The first description of MVCC was based on \textit{timestamp ordering}
+\cite{reed1978naming}. (Explain...) Locking-based variants have also been
+proposed \cite{bayer1980parallelism, bayer1980distributed,
+stearns1981distributed}. Finally, there are schemes that integrate both
+timestamp ordering and locking. Such a scheme is also referred to as
+\textit{mixed} \cite{bernstein1983multiversion}.
+
+An important observation is that MVCC does not replace locking as a
+synchronization mechanism. In fact, there are many implementations of MVCC that
+rely on locking. However, most implementations do provide some form of lock-free
+read operations.
+
+\subsection{Snapshot Isolation}
+
+Snapshot Isolation \cite{berenson1995critique} is a popular MVCC algorithm that
+has been deployed in numerous databases such as the ORACLE RDBMS, Microsoft SQL
+Server, PostgreSQL and BerkeleyDB \cite{cahill2009serializable}. It is based on
+timestamping and does not require locking. This section introduces the concept
+of Snapshot Isolation and its properties.
+
+The core princple of snapshot isolation is that a transaction $T$ only sees a
+private snapshot of the database as of when $T$ started. In this sense, the
+notion of a snapshot comprises the set of the latest versions of each data item
+that have been committed before $T$ was invoked.
+
+Concurrent updates by a transaction $T_2$ that happen after a transaction $T_1$
+started, are not included in the snapshot of $T_1$ and are thus invisible to
+$T_1$. If however, $T_1$ decides to also update the same data item, then a
+write/write conflict emerges. In this case, the \textit{first-committer-wins}
+principle is applied and $T_1$ must abort as $T_2$ also modified the same item
+and committed earlier. A popular variant of this property is the equivalent
+\textit{first-updater-wins} principle \cite{fekete2004read, larson2011high}.
+According to this property, a writer fails immediately if it is not the first to
+update a given version, thereby making the updating transaction the first
+committer.
+
+Each version keeps a \textit{begin timestamp} and an \textit{end timestamp},
+that store the point in time when it was created and when it was invalidated by
+deletion or an update. Also, when starting, every transaction is given a
+timestamp denoting its start time. In order to determine which version is
+visible to the operation of a transaction, the concurrency control tests for
+each version whether the transaction begin falls between the begin and the end
+timestamp of the version. The latest valid version satisfying this property is
+selected to be visible by the requesting transaction.
+
+Under snapshot isolation reads can always be satisfied, provided the requested
+item exists. Note that even in the face of concurrent updates, a transaction
+always reads the same data items. This precludes inconsistent reads, read skew
+and phantoms. In addition, snapshot isolation does not allow dirty reads, since
+snapshots only contain committed data. However, snapshot isolation does not
+prevent all possible anomalies and is therefore not serializable
+\cite{berenson1995critique}. These anomalies, namely write skew and another
+similar anomaly will be discussed below.
+
+\paragraph{Write Skew}
+
+A classic example in this regard is write skew. The reason for its occurrence is
+that under snapshot isolation a transaction does not see modifications to
+versions that have been read during the transaction.
+
+Imagine two transactions $T_1, T_2$ reading two data items $x, y$ constrained by
+a predicate $C$. Next, $T_1$ updates $x$ and finds that $C(x^{*}, y)$ still
+holds true. At this point $T_2$ is unaware that $x$ has been modified and
+updates $y$. Since $T_2$ does not see the modifications of $T_1$, it also
+evaluates $C(x, y^{*})$ to be true. Finally, both transactions may commit even
+if $C$ is now violated because none observed the others changes (see figure
+\ref{fig:write_skew}). Note that no write/write conflict occurs as both updated
+items are distinct. In fact, write skew is said to occur if read sets overlap
+while write sets are distinct.
+
+\begin{figure}
+    \centering
+    \[
+        r_1[x,y]\; r_2[x,y]\; w_1[x]\; w_2[y]\; c_1\; c_2\;
+    \]
+    \caption{Write skew due to transactions $T_1, T_2$ not seeing each others changes.}
+    \label{fig:write_skew}
+\end{figure}
+
+In the field, write skew has been countered by inducing artificial write
+conflicts between transactions that are expected to exhibit write skew
+\cite{fekete2005making}.
+
+\paragraph{Non-Serializable Read-Only}
+
+Another anomaly was discovered almost 10 years after the introduction of
+snapshot isolation. It proved, contrary to common understanding, that even
+read-only transactions may not always be serializable \cite{fekete2004read}. The
+proof consists of a schedule of three transactions with one being read-only. The
+schedule is constructed in a way that at most two but never all three
+transactions can execute serializably.
+
+Suppose a pair of data items $x = 0$ and $y = 0$ and transactions $T_1, T_2,
+T_{RO}$. Further, let $T_1$ compute $y = y - 10$ and also subtract one if $x + y <
+0$, while $T_2$ sets $x = x + 20$. The schedule given in figure
+\ref{fig:bad_read_only} shows that while $T_1$ is the first transaction to start
+execution, both $T_2$ and $T_{RO}$ start and commit sequentially before $T_1$
+issues its update on $y$. This means that $T_{RO}$ will see the update of $x$ by
+$T_2$ while $T_1$ does not. According to the output of $T_{RO}$ ($x = 20$, $y =
+0$), a serializable schedule would require $T_1$ to have been executed after
+both $T_2$ and $T_{RO}$. This however, is not possible since $T_1$ would have
+seen the update of $T_2$ and no penalty would have been applied as $20 - 10 \geq
+0$. Likewise, in order for $T_1$ to yield $y = -11$, it would have had to be
+executed before $T_2$ (and $T_{RO}$) which however is not consistent with the
+output of $T_{RO}$. In fact, the output of $T_{RO}$ corresponds the the exact
+opposite serial ordering as do those of $T_1$ and $T_2$.
+
+\begin{figure}[h!]
+    \centering
+    \[
+        r_1[x,y]\; r_2[x]\; w_2[x]\; c_2\; r_3[x,y]\; c_3\; w_2[y]\; c_2\;
+    \]
+    \caption{Transaction $T_3$ is read-only but not serializable.}
+    \label{fig:bad_read_only}
+\end{figure}
+
+Both symptoms can be related to the fact, that snapshot isolation fails to
+observe read/write conflicts. When a transaction requests an item, it reads the
+latest version that has been committed before the transaction started. This way,
+a transaction always reads the same version even if a newer version has been
+committed concurrently. The downside is that every transaction is effectively
+isolated from any concurrent modifications. As a consequence, transactions may
+successfully commit even if one or more versions they have read has been updated
+in the meantime. All anomalies known to be emitted by snapshot isolation can be
+reduced to read/write conflicts.
+
+\subsection{Serializable MVCC}
+
+The previous chapter introduced the renowned MVCC algorithm of snapshot
+isolation. Even though snapshot isolation permits non-serializable schedules
+that can lead to inconsistent data, it is still and to this date the most widely
+adopted MVCC algorithm \cite{cahill2009serializable, larson2011high,
+sikka2012efficient, neumann2015fast}. Notable anomalies resulting from
+non-serializable schedules are write skew and non-serializable read-only
+transactions. In fact, most systems do not provide serializable isolation
+degrees by default, even if supported. This is often motivated by significantly
+improved performance. Others argue that anomalies may be negligible as even the
+renowned ACID-compliant TPC-C benchmark does not exhibit them
+\cite{fekete2005making}.
+
+In order to still achieve serializable multiversion concurrency controls some
+advanced methods have been proposed \cite{fekete2005making,
+cahill2009serializable, neumann2015fast}. The examined approaches can be broken
+down as follows:
+
+\begin{itemize}
+    \item Keep Snapshot Isolation but modify transactional database programs
+    \item Extend Snapshot Isolation with read/write conflict detection
+    \item Replace Snapshot Isolation with a custom implementation
+\end{itemize}

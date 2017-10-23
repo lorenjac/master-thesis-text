@@ -61,8 +61,8 @@
 * why
     * can improve throughput
     * can improve resource utilization
-    * multi-core processors become affordable (area, power, architecture)
-    * vectorization not really an option
+        * multi-core processors become affordable (area, power, architecture)
+        * vectorization not really an option
 * problem
     * data races in shared memory (RW, WR, WW)
     * => need synchronization (emulate serial execution)

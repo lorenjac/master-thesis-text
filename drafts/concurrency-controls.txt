@@ -1,0 +1,34 @@
+# Intro
+
+* concurrency
+	* can lead to data corruption
+	* ... when transactions see or don't see concurrent transactions
+	* protecting individual operations does not solve the issue
+	* ... instead we need to protect tx from each other
+* in other words, we need to ensure that tx are sufficiently isolated from each other
+	* => dedicated mechanism: concurrency control (CC)
+	* with CC serializability can be enforced
+	* CC can incur significant overhead
+	* => isolation often relaxed to improve performance
+* for databases there are essentially two different approaches to CC
+	* pessimistic (e.g. locking)
+	* optimistic (e.g. multiversioning)
+
+## Pessimistic CC
+
+* assume frequent presence of conflicts
+* prevent conflicts before they can occur by blocking threads
+* typical representative: two-phase locking (2PL)
+	* well-known and versatile mechanism with OS support
+
+## Optimistic CC	
+
+* assume infrequent presence of conflicts
+* prevent conflicts from manifesting
+	* tolerate conflicts;
+	* check before commit
+* typical representative: MVCC
+	* a hybrid of timestamp ordering and versioning
+	* modern approach to synchronizing read-dominated transaction systems
+
+[OCC > PCC => concentrate on MVCC]
