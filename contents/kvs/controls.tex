@@ -9,11 +9,11 @@ particular multiversion concurrency control.
 
 As mentioned earlier, it is not sufficient to protect individual operations
 within a transaction. The main reason is that according to ACID, transactions
-need to be isolated from any concurrent activity. Otherwise no transaction could
-be sure its modifications have taken effect as concurrent transactions may have
-meanwhile overwritten them. Imagine a transaction that writes a value and finds
-a different value when reading it later. As a result, the scope in which
-isolation is required spans across critical sections.
+need to be isolated from any concurrent activity. Otherwise, no transaction
+could be sure its modifications have taken effect as concurrent transactions may
+have meanwhile overwritten them. Imagine a transaction that writes a value and
+finds a different value when later reading it again. As a result, the scope in
+which isolation is required spans beyond critical sections.
 
 Therefore, a dedicated \emph{concurrency control} is required to ensure
 isolation. An instance of a concurrency control is also referred to as
@@ -30,10 +30,10 @@ A pessimistic concurrency control strives to prevent conflicts before they can
 occur. In terms of data access, pessimistic control mechanisms employ some form
 of \emph{exclusive ownership}. With such a mechanism, a transaction tries to
 acquire the ownership of all data items it wishes to access. If the resource
-acquisition succeeds the transaction can freely operate on the temporarily owned
-data. Only when that transaction terminates will this ownership be released. If
-a transaction fails to claim the exclusive ownership on its data then it has
-have to wait until the required ownership is granted or abort.
+acquisition succeeds, then the transaction can freely operate on the temporarily
+owned data. Only when that transaction terminates will this ownership be
+released. If a transaction fails to claim the exclusive ownership on its data
+then it has to wait until the required ownership is granted or abort.
 
 This is the most commonly known and understood variant of concurrency controls.
 It is usually implemented using \emph{locking}. The most widely adapted protocol
@@ -68,7 +68,7 @@ is that conflicts are inherently expensive as aborting a conflicting transaction
 discards its entire progress even if the conflict could have been detected early
 on. This is especially a problem in the presence of long-running transactions.
 Such transactions are very likely to be the last to commit an update on data
-items. As a consequence long-running transactions may be repeatedly aborted by
+items. As a consequence, long-running transactions may be repeatedly aborted by
 updates from shorter intermediate transactions.
 
 Despite these drawbacks, this approach has seen much interest especially in
@@ -102,17 +102,17 @@ negligible \cite{kung1981optimistic, carey1986performance, larson2011high}.
 % memory technology, it is important to assess opportunities and issues of MVCC
 % especially when serializability is required.
 
-Multiversioning, which is also referred to as multiversioning concurrency
-control (MVCC) is a popular concurrency control method. It has been implemented
-in both commercial and non-commercial transaction-processing systems, ranging
-from general-purpose database systems to high-performance in-memory databases.
+Multiversioning, which is also referred to as multiversion concurrency control
+(MVCC), is a popular concurrency control method. It has been implemented in both
+commercial and non-commercial transaction-processing systems, ranging from
+general-purpose database systems to high-performance in-memory databases.
 Initially designed as a solution to concurrency control for distributed and
 nested transactions \cite{reed1978naming}, MVCC has been widely adopted as an
 alternative to conventional locking-based concurrency schemes. This move was
 motivated in overcoming typical problems associated with locking, such as
 deadlocks and lock contention.
 
-\paragraph{Concept}
+\subsubsection{Concept}
 
 A \emph{version} is a snapshot of a particular data item within a database. In
 traditional concurrency schemes, there is exactly one version of each item.
@@ -190,7 +190,7 @@ bound of the visibility test. Another optimization would be to have a
 transaction keep track of all the versions it references. This way, visibility
 would only have to be computed once for each item.
 
-\paragraph{Implementation}
+\subsubsection{Implementation}
 
 There are various ways to implement multiversion concurrency controls. There are
 both optimistic and pessimistic implementations \cite{kung1981optimistic}.
