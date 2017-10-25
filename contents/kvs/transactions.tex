@@ -37,7 +37,60 @@ found wide adoption with the prominent exception of transactional memory
 databases \cite{olson1999berkeley}. Hence, unless stated otherwise, the term
 transaction always refers to flat transactions.
 
-\todo[inline]{Define \textbf{schedule} somewhere}
+Especially when discussing concurrent transactions, a meaningful notation is
+required to describe their interactions. For this purpose, the concept of a
+\emph{schedule} is used. A schedule is a list of operations enclosed in one or
+more transactions. Within a schedule, all operations appear in the same order
+they are executed. Although there seems to be no standard notation, the
+operations of a schedule typically comprise abstract operations for reading and
+writing a record, as well as the basic transactional primitives of commit and
+abort. A transaction is implicitly started by its first operation, so there is
+no need for an explicit primitive. In order to make schedules more readable,
+operations are denoted by shorthands as shown in Table
+\ref{tab:schedule_notation}.
+
+\begin{figure}[h!]
+    \centering
+    \begin{tabular}{|c|l|}
+        \hline
+        \textbf{Notation} & \textbf{Operation}\\
+        % \hline
+        \hline
+        r(A) & Reads a record A  \\ \hline
+        w(A) & Writes a record A \\ \hline
+        c    & Commit            \\ \hline
+        a    & Abort             \\
+        \hline
+    \end{tabular}
+    \caption{}
+    \label{tab:schedule_notation}
+\end{figure}
+
+There are several ways to print a schedule. A common method is to render a
+linear list containing shorthands of indexed operations where the indices denote
+the associated transaction, respectively (see Figure
+\ref{fig:schedule_interleaved}).
+
+\begin{figure}[h!]
+    \centering
+    \[
+        r_1(A)\; r_2(A)\; w_2(A)\; c_2\; w_1(A)\; c_1
+    \]
+    \caption{Interleaved notation of a write-write conflict.}
+    \label{fig:schedule_interleaved}
+\end{figure}
+
+For the better readability, this work chooses to list operations for each transaction invidually, while retaining their global chronological order as shown in Figure \ref{fig:schedule_projected}.
+
+\begin{figure}[h!]
+    \centering
+    \begin{tabular}{r c c c}
+        $t_1:$ & $r(A)$ &                     & $w(A)\; c$ \\
+        $t_2:$ &        & $r(A)$\; $w(A)\; c$ &            \\
+    \end{tabular}
+    \caption{Projected version of Figure \ref{fig:schedule_interleaved}.}
+    \label{fig:schedule_projected}
+\end{figure}
 
 \paragraph{Applications}
 
@@ -134,37 +187,54 @@ Concurrent transaction execution can largely remove the shortcomings outlined ab
 When a transaction $t_1$ attempts to update a record $A$ that was previously
 written but not committed by another transaction $t_2$ then $t_1$'s update could
 overwrite $t_2$'s update to $A$ before it has become visible. Unaware of the
-condition $t_2$ will successfully commit even though its update is lost. This
-situation is called a \emph{write-write} conflict.
+condition $t_2$ will successfully commit even though its update is lost (see
+Figure \ref{fig:ww-conflict}). This situation is called a \emph{write-write}
+conflict.
 
-\begin{lstlisting}
-t1: -------w(A)-commit---------
-t2: --w(A)---- ... ----commit-- (update is lost)
-\end{lstlisting}
+\begin{figure}[h!]
+    \centering
+    \begin{tabular}{r c c c}
+        $t_1:$ &        & $w(A)\; c$ & \\
+        $t_2:$ & $w(A)$ &            & $c$ \\
+    \end{tabular}
+    \caption{A write-write conflict resulting in a lost update for $t_2$.}
+    \label{fig:ww-conflict}
+\end{figure}
 
-A \emph{write-read} conflict occurs when a transaction reads data that has
-not been committed yet. Imagine a transaction $t_1$ that reads a record $A$ that
-was previously updated but not committed by another transaction $t_2$. If $t_2$
-updates the same item again or fails, then $t_1$ has read a value that was never
-committed. This situation is also called \emph{dirty read}.
+A \emph{write-read} conflict occurs when a transaction reads data that has not
+been committed yet. Imagine a transaction $t_1$ that reads a record $A$ that was
+previously updated but not committed by another transaction $t_2$. If $t_2$
+updates the same item again or fails, then $t_1$ has processed a value that was
+never committed. This situation is also called \emph{dirty read}. For an example see Figure \ref{fig:wr-conflict}.
 
-\begin{lstlisting}
-t1: -------r(A)-w(B)-commit-- (B is inconsistent to committed A)
-t2: --w(A)--- !!! ----------- (update to A was rolled back)
-\end{lstlisting}
+\begin{figure}[h!]
+    \centering
+    \begin{tabular}{r c c c}
+        $t_1:$ &        & $r(A)\; w(B)$ & $c$ \\
+        $t_2:$ & $w(A)$ & $a$           & \\
+    \end{tabular}
+    \caption{A write-read conflict resulting in an erroneous update for $t_1$.}
+    \label{fig:wr-conflict}
+\end{figure}
 
 The last conflict is called \emph{read-write} conflict and denotes a situation
 when a transaction updates a record that was previously read by another
 transaction that is still running. Consider two transactions $t_1$, $t_2$ where
 $t_1$ reads a record $A$ which is later updated by $t_2$ before either
 transaction commits. If $t_1$ reads $A$ again, then the result may be
-inconsistent with the earlier read. The situation is also referred to as
-\emph{inconsistent read} or \emph{non-repeatable read}.
+inconsistent with the earlier read as shown in Figure \ref{fig:rw-conflict}. The
+situation is also referred to as \emph{inconsistent read} or
+\emph{non-repeatable read}.
 
-\begin{lstlisting}
-t1: --r(A)--- ... ---r(A)--------- (has read inc. values of A)
-t2: ----------w(A)--------commit--
-\end{lstlisting}
+\begin{figure}[h!]
+    \centering
+    \begin{tabular}{r c c c c}
+        $t_1:$ & $r(A)$ &        &     & $r(A)$ \\
+        $t_2:$ &        & $w(A)$ & $c$ & \\
+    \end{tabular}
+    \caption{A read-write conflict resulting in an inconsistent read for $t_1$.}
+    \label{fig:rw-conflict}
+\end{figure}
 
 Note that, since isolation must be guaranteed for the entire lifetime of a
 transaction, conflicts are not precluded by protecting individual read or update

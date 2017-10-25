@@ -1,0 +1,19 @@
+Especially when discussing concurrent transactions, a meaningful notation is required to describe their interactions. For this purpose, the concept of a *schedule* is used. A schedule is a list of operations enclosed in one or more transactions. Within a schedule, all operations appear in the same order they are executed. Although there seems to be no standard notation, the operations of a schedule typically comprise abstract operations for reading and writing a record, as well as the basic transactional primitives of commit and abort. A transaction is implicitly started by its first operation, so there is no need for an explicit primitive. In order to make schedules more readable, operations are denoted by shorthands as shown in Table {ref}.
+
+Operation         | Notation
+------------------|-------
+Reads a record A  | r(A)
+Writes a record A | w(A)
+Commit            | c
+Abort             | a
+
+There are several ways to print a schedule. A common method is to render a linear list containing shorthands of indexed operations where the indices denote the associated transaction, respectively (see Figure {ref}).
+
+r_1(A), r_2(A), w_2(A), c_2, w_1(A), c_1
+Interleaved notation of a write-write conflict.
+
+For the better readability, this work chooses to list operations for each transaction invidually, while retaining their global chronological order as shown in Figure {ref}.
+
+T_1: r(A)             w(A) c
+T_2:      r(A) w(A) c
+Projected version of Figure {ref}.
