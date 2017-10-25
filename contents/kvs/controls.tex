@@ -14,37 +14,41 @@ concurrency control.
 \subsection{Strategies}
 
 There are two fundamental approaches to the design of concurrency controls:
-\emph{pessimistic} and \emph{optimistic} protocols.
+\emph{pessimistic} and \emph{optimistic} protocols. The distinction is based on
+whether conflicts are assumed to be frequent or infrequent. Still, both
+strategies share their intent to prevent conflicts from manifesting into
+inconsistencies.
 
-\paragraph{Pessimistic Concurrency Control} % assume frequent conflicts
+\paragraph{Pessimistic Concurrency Control}
 
-A pessimistic concurrency control strives to prevent conflicts before they can
-occur. In terms of data access, pessimistic control mechanisms employ some form
-of \emph{exclusive ownership}. With such a mechanism, a transaction tries to
-acquire the ownership of all data items it wishes to access. If the resource
-acquisition succeeds, then the transaction can freely operate on the temporarily
-owned data. Only when that transaction terminates will this ownership be
-released. If a transaction fails to claim the exclusive ownership on its data
-then it has to wait until the required ownership is granted or abort.
+A pessimistic concurrency control assumes that conflicts are frequent and
+strives to prevent conflicts before they can even emerge. To this end,
+pessimistic control mechanisms employ some form of exclusive ownership. That
+means, a transaction must acquire the ownership of all data items it wishes to
+access. If the resource acquisition succeeds, then the transaction can freely
+operate on the temporarily owned data. Only when that transaction terminates
+will this ownership be released. If a transaction fails to claim the exclusive
+ownership on its data then it has to wait until the required ownership is
+granted or abort.
 
-This is the most commonly known and understood variant of concurrency controls.
-It is usually implemented using \emph{locking}. The most widely adapted protocol
-in this regard is \emph{two-phase locking} (also 2PL). Locking provides a solid
-mechanism to ensure serializability and has thus been implemented in a multitude
-of transaction systems (IBM DB2, Oracle, MySQL).
+Pessimistic concurrency control is usually implemented with locks. Locking
+provides a solid mechanism to ensure serializability and most database systems
+implement it. The most widely adopted protocol in this regard is two-phase
+locking (also 2PL).
 
-However, there are also drawbacks. Unless carefully engineered, locking-based
-concurrency controls are prone to \emph{deadlocks} due to cyclical resource
-dependencies. These deadlocks must be detected and resolved which introduces
-some runtime overhead. Another problem is \emph{lock contention}. Lock
-contention occurs when most concurrent threads in a system contend for
-overlapping sets of shared resources which only one transaction at a time
-succeeds to acquire. All remaining transactions then wait for the preceding
-transaction to complete only to start contending again. In such a scenario, a
-concurrent transaction execution has effectively been degraded to serial
-execution as only one transaction is executed at a time.
+\todo[inline]{A sentence or two on 2PL}
 
-\paragraph{Optimistic Concurrency Control} % assume infrequent updates
+Despite its prevalence, pessimistic concurrency controls have notable drawbacks.
+Unless carefully engineered, locking-based concurrency controls are prone to
+\emph{deadlocks} due to cyclical resource dependencies. These deadlocks must be
+detected and resolved which introduces some runtime overhead. Another problem is
+\emph{lock contention}. Lock contention occurs when a large portion of
+concurrent threads in a system compete for a single shared resource. However,
+only one transaction can manage to acquire ownership, leaving all others waiting
+for it to complete and contend again. As a result, the purpose of concurrency is
+largely defeated as only one transaction is executed at a time.
+
+\paragraph{Optimistic Concurrency Control}
 
 Optimistic concurrency controls form the opposite of pessimistic control
 schemes. Instead of preventing conflicts altogether, optimistic control schemes
@@ -53,16 +57,17 @@ transaction commits, the concurrency control starts to check for violations.
 This step is called \emph{validation}. If a no conflict is detected, then the
 transaction may commit, otherwise it is aborted.
 
-This approach is usually lock-free and is thus not subject to deadlocks or lock
-contention. However, the validation at the end of a transaction bears
-significant overhead. This is especially true as not only writes but also reads
-need to be tracked in order to detect all possible conflicts. Another drawback
-is that conflicts are inherently expensive as aborting a conflicting transaction
-discards its entire progress even if the conflict could have been detected early
-on. This is especially a problem in the presence of long-running transactions.
-Such transactions are very likely to be the last to commit an update on data
-items. As a consequence, long-running transactions may be repeatedly aborted by
-updates from shorter intermediate transactions.
+Optimistic concurrency control protocols usually rely on copy-on-write (CoW)
+mechanisms to synchronize competing transactions. Apart from short-duration
+locks for critical sections, this approach is essentially lock-free and is thus
+not subject to deadlocks or lock contention. However, the validation at the end
+of a transaction can introduce significant overhead. Another drawback is that
+aborting a conflicting transaction means that its entire progress is discarded.
+In this case, valuable computing resources are wasted. This is especially a
+problem in the presence of long-running transactions. Such transactions are very
+likely to be the last to commit an update on data items. As a consequence,
+long-running transactions may be repeatedly aborted by updates from shorter
+intermediate transactions.
 
 Despite these drawbacks, this approach has seen much interest especially in
 domains where reads are dominant and conflicts are known to be infrequent or
