@@ -54,12 +54,11 @@ operations are denoted by shorthands as shown in Table
     \begin{tabular}{|c|l|}
         \hline
         \textbf{Notation} & \textbf{Operation}\\
-        % \hline
         \hline
-        r(A) & Reads a record A  \\ \hline
-        w(A) & Writes a record A \\ \hline
-        c    & Commit            \\ \hline
-        a    & Abort             \\
+        r(A) & Read a record A  \\ \hline
+        w(A) & Write a record A \\ \hline
+        c    & Commit           \\ \hline
+        a    & Abort            \\
         \hline
     \end{tabular}
     \caption{}
@@ -194,7 +193,7 @@ conflict.
 \begin{figure}[h!]
     \centering
     \begin{tabular}{r c c c}
-        $t_1:$ &        & $w(A)\; c$ & \\
+        $t_1:$ &        & $w(A)\; c$ &     \\
         $t_2:$ & $w(A)$ &            & $c$ \\
     \end{tabular}
     \caption{A write-write conflict resulting in a lost update for $t_2$.}
@@ -211,7 +210,7 @@ never committed. This situation is also called \emph{dirty read}. For an example
     \centering
     \begin{tabular}{r c c c}
         $t_1:$ &        & $r(A)\; w(B)$ & $c$ \\
-        $t_2:$ & $w(A)$ & $a$           & \\
+        $t_2:$ & $w(A)$ & $a$           &     \\
     \end{tabular}
     \caption{A write-read conflict resulting in an erroneous update for $t_1$.}
     \label{fig:wr-conflict}
@@ -230,7 +229,7 @@ situation is also referred to as \emph{inconsistent read} or
     \centering
     \begin{tabular}{r c c c c}
         $t_1:$ & $r(A)$ &        &     & $r(A)$ \\
-        $t_2:$ &        & $w(A)$ & $c$ & \\
+        $t_2:$ &        & $w(A)$ & $c$ &        \\
     \end{tabular}
     \caption{A read-write conflict resulting in an inconsistent read for $t_1$.}
     \label{fig:rw-conflict}
