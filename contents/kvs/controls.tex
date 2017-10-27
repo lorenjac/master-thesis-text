@@ -14,10 +14,10 @@ concurrency control.
 \subsection{Strategies}
 
 There are two fundamental approaches to the design of concurrency controls:
-\emph{pessimistic} and \emph{optimistic} protocols. The distinction is based on
-whether conflicts are assumed to be frequent or infrequent. Still, both
-strategies share their intent to prevent conflicts from manifesting into
-inconsistencies.
+\emph{pessimistic} and \emph{optimistic} protocols \cite{kung1981optimistic,
+larson2011high, sadoghi2014reducing}. The distinction is based on whether
+conflicts are assumed to be frequent or infrequent. Still, both strategies share
+their intent to prevent conflicts from manifesting into inconsistencies.
 
 \paragraph{Pessimistic Concurrency Control}
 
@@ -26,79 +26,92 @@ strives to prevent conflicts before they can even emerge. To this end,
 pessimistic control mechanisms employ some form of exclusive ownership. That
 means, a transaction must acquire the ownership of all data items it wishes to
 access. If the resource acquisition succeeds, then the transaction can freely
-operate on the temporarily owned data. Only when that transaction terminates
+operate on the temporarily owned data. Only when that transaction terminates,
 will this ownership be released. If a transaction fails to claim the exclusive
 ownership on its data then it has to wait until the required ownership is
 granted or abort.
 
 Pessimistic concurrency control is usually implemented with locks. Locking
 provides a solid mechanism to ensure serializability and most database systems
-implement it. The most widely adopted protocol in this regard is two-phase
-locking (also 2PL).
+implement it \cite{kung1981optimistic, berenson1995critique, larson2011high}.
 
-\todo[inline]{A sentence or two on 2PL}
-
-Despite its prevalence, pessimistic concurrency controls have notable drawbacks.
-Unless carefully engineered, locking-based concurrency controls are prone to
-\emph{deadlocks} due to cyclical resource dependencies. These deadlocks must be
-detected and resolved which introduces some runtime overhead. Another problem is
-\emph{lock contention}. Lock contention occurs when a large portion of
-concurrent threads in a system compete for a single shared resource. However,
-only one transaction can manage to acquire ownership, leaving all others waiting
-for it to complete and contend again. As a result, the purpose of concurrency is
-largely defeated as only one transaction is executed at a time.
+Despite their prevalence, pessimistic concurrency controls have notable
+drawbacks. Locking-based concurrency controls are prone to \emph{deadlocks}
+\cite{bernstein1981concurrency, kung1981optimistic}. In order to prevent
+deadlocks, they must be detected and resolved which introduces runtime overhead.
+Unfortunately, there is no general-purpose locking protocol that precludes
+deadlocks \cite{kung1981optimistic}. Another problem is \emph{lock contention}
+which occurs when a large portion of concurrent threads in a system compete for
+a single shared resource \cite{berenson1995critique, sadoghi2014reducing}. Since
+only one transaction can manage to acquire ownership, all remaining transactions
+are left waiting for it to complete and contend again. As a result, only one
+transaction is executed at a time, thus defeating the purpose of concurrency.
 
 \paragraph{Optimistic Concurrency Control}
 
 Optimistic concurrency controls form the opposite of pessimistic control
 schemes. Instead of preventing conflicts altogether, optimistic control schemes
-do not impose any restrictions until a transaction commits. Only when a
-transaction commits, the concurrency control starts to check for violations.
-This step is called \emph{validation}. If a no conflict is detected, then the
-transaction may commit, otherwise it is aborted.
+do not enforce consistency until a transaction commits. Only when a transaction
+commits, the concurrency control starts to check for violations, a step called
+\emph{validation}. If no conflict is detected, then the transaction may
+commit, otherwise, it must abort.
 
-Optimistic concurrency control protocols usually rely on copy-on-write (CoW)
-mechanisms to synchronize competing transactions. Apart from short-duration
-locks for critical sections, this approach is essentially lock-free and is thus
-not subject to deadlocks or lock contention. However, the validation at the end
-of a transaction can introduce significant overhead. Another drawback is that
-aborting a conflicting transaction means that its entire progress is discarded.
-In this case, valuable computing resources are wasted. This is especially a
-problem in the presence of long-running transactions. Such transactions are very
-likely to be the last to commit an update on data items. As a consequence,
-long-running transactions may be repeatedly aborted by updates from shorter
-intermediate transactions.
+Optimistic concurrency control protocols rely on copy-on-write (CoW) and
+timestamp ordering to synchronize data races of competing transactions
+\cite{bernstein1981concurrency, kung1981optimistic}. While readers can access
+data without further means of synchronization, writers apply their modifications
+only on copies of the original data. Apart from short-duration locks for
+critical sections, this approach does not require locking and is therefore not
+subject to deadlocks or lock contention. A signature property is that readers
+never block which means that both readers and writers never wait for other
+readers. Due to its nature, optimistic concurrency control is also called
+multiversion concurrency control or multiversioning
+\cite{bernstein1983multiversion}.
 
-Despite these drawbacks, this approach has seen much interest especially in
-domains where reads are dominant and conflicts are known to be infrequent or
-negligible \cite{kung1981optimistic, carey1986performance, larson2011high}.
+There are, however, disadvantages to this type of concurrency control. While
+validation is necessary to ensure that a transaction is not involved in data
+conflicts, it can also introduce a significant overhead. First, even when there
+are no conflicts, validation is conducted nevertheless. Second, validation
+usually requires certain meta data about the operations within a transaction. As
+a result, validation complexity scales in size of meta data required to
+determine conflict freedom. Another drawback is that aborting a conflicting
+transaction means that its entire progress is discarded. In this case, valuable
+computing resources have been wasted. This is especially true for update
+operations as they involve potentially expensive copy operations.
+
+Despite some drawbacks, optimistic concurrency control has found wide adoption
+especially in domains where reads are dominant and conflicts are known to be
+infrequent or negligible \cite{carey1986performance, larson2011high,
+wu2017empirical}. The scenario of read-dominated workloads has been shown to
+apply more often than not \cite{krueger2011fast, andrei2017sap}. Given its
+promising properties, optimistic concurrency control is discussed in more depth
+in the subsequent sections.
 
 \subsection{Multiversion Concurrency Control}
 
-% Multiversioning is a popular concurrency control mechanism. While originating in
-% distributed systems research \cite{reed1978naming}, it was soon considered a
-% promising alternative to traditional locking-based approaches as optimistic
-% lock-free variants were developed \cite{bayer1980parallelism,
-% stearns1981distributed, kung1981optimistic, bernstein1983multiversion,
-% carey1983multiple, hadzilacos1986algorithmic, carey1986performance}. Today,
-% multiversion concurrency control (MVCC) forms the foundation of many commercial
-% products such as Oracle, Microsoft SQL Server, Postgre SQL
-% \cite{larson2011high}. It is also featured in main-memory databases such as SAP
-% HANA and recent research in non-volatile main memory databases
-% \cite{lee2013high, schwalb2015efficient, schwalb2016hyrise, oukid2014sofort}.
-% However, most implementations of MVCC, such as snapshot isolation, do not
-% guarantee full serializability and are thus prone to inconsistencies
-% \cite{neumann2015fast, berenson1995critique}. Although recent research has shown
-% ways to achieve serializability with MVCC, implementations are hesitant to
-% follow \cite{larson2011high}.
-%
-% MVCC has not only been applied in traditional DBMS but also in main-memory
-% databases. With emerging non-volatile memory that is both affordable and little
-% slower than conventional DRAM, new problems for MVCC such as durability,
-% recovery or access time arise \cite{bailey2011operating, larson2011high,
-% oukid2014sofort, schwalb2016hyrise}. In order to fully leverage the emerging
-% memory technology, it is important to assess opportunities and issues of MVCC
-% especially when serializability is required.
+Multiversioning is a popular concurrency control mechanism. While originating in
+distributed systems research \cite{reed1978naming}, it was soon considered a
+promising alternative to traditional locking-based approaches
+\cite{kung1981optimistic, bernstein1983multiversion, carey1983multiple,
+hadzilacos1986algorithmic, carey1986performance}.
+
+Today, MVCC forms the
+foundation of many commercial products \cite{larson2011high}. It is also featured in main-memory databases
+such as SAP HANA and recent research in non-volatile main memory databases
+\cite{lee2013high, schwalb2015efficient, schwalb2016hyrise, oukid2014sofort}.
+However, most implementations of MVCC, such as snapshot isolation, do not
+guarantee full serializability and are thus prone to inconsistencies
+\cite{neumann2015fast, berenson1995critique}. Although recent research has shown
+ways to achieve serializability with MVCC, implementations are hesitant to
+follow \cite{larson2011high}.
+
+MVCC has not only been applied in traditional DBMS but also in main-memory
+databases. With emerging non-volatile memory that is both affordable and little
+slower than conventional DRAM, new problems for MVCC such as durability,
+recovery or access time arise \cite{bailey2011operating, larson2011high,
+oukid2014sofort, schwalb2016hyrise}. In order to fully leverage the emerging
+memory technology, it is important to assess opportunities and issues of MVCC
+especially when serializability is required.
 
 Multiversioning, which is also referred to as multiversion concurrency control
 (MVCC), is a popular concurrency control method. It has been implemented in both
@@ -109,8 +122,6 @@ nested transactions \cite{reed1978naming}, MVCC has been widely adopted as an
 alternative to conventional locking-based concurrency schemes. This move was
 motivated in overcoming typical problems associated with locking, such as
 deadlocks and lock contention.
-
-\subsubsection{Concept}
 
 A \emph{version} is a snapshot of a particular data item within a database. In
 traditional concurrency schemes, there is exactly one version of each item.
@@ -187,23 +198,6 @@ mechanism can reduce the size of version histories thus improving the upper
 bound of the visibility test. Another optimization would be to have a
 transaction keep track of all the versions it references. This way, visibility
 would only have to be computed once for each item.
-
-\subsubsection{Implementation}
-
-There are various ways to implement multiversion concurrency controls. There are
-both optimistic and pessimistic implementations \cite{kung1981optimistic}.
-
-The first description of MVCC was based on \textit{timestamp ordering}
-\cite{reed1978naming}. (Explain...) Locking-based variants have also been
-proposed \cite{bayer1980parallelism, bayer1980distributed,
-stearns1981distributed}. Finally, there are schemes that integrate both
-timestamp ordering and locking. Such a scheme is also referred to as
-\textit{mixed} \cite{bernstein1983multiversion}.
-
-An important observation is that MVCC does not replace locking as a
-synchronization mechanism. In fact, there are many implementations of MVCC that
-rely on locking. However, most implementations do provide some form of lock-free
-read operations.
 
 \subsection{Snapshot Isolation}
 
