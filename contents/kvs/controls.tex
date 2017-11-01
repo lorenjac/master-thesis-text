@@ -320,25 +320,45 @@ reduced to read-write conflicts.
 
 \subsection{Serializable MVCC}
 
-The previous chapter introduced the renowned MVCC algorithm of snapshot
-isolation. Even though snapshot isolation permits non-serializable schedules
-that can lead to inconsistent data, it is still and to this date the most widely
-adopted MVCC algorithm \cite{cahill2009serializable, larson2011high,
-sikka2012efficient, neumann2015fast}. Notable anomalies resulting from
-non-serializable schedules are write skew and non-serializable read-only
-transactions. In fact, most systems do not provide serializable isolation
-degrees by default, even if supported. This is often motivated by significantly
-improved performance. Others argue that anomalies may be negligible as even the
-renowned ACID-compliant TPC-C benchmark does not exhibit them
+Even though snapshot isolation permits non-serializable schedules that can lead
+to inconsistent data, it is still and to this date the most widely adopted MVCC
+implementation \cite{cahill2009serializable, larson2011high, sikka2012efficient,
+neumann2015fast}. Notable anomalies resulting from non-serializable schedules
+are write skew and non-serializable read-only transactions. In fact, most
+systems do not provide serializable isolation degrees by default, even if
+supported. This is often motivated by significantly improved performance
+\cite{cahill2009serializable}. Others argue that anomalies may be negligible as
+even the renowned ACID-compliant TPC-C benchmark does not exhibit them
 \cite{fekete2005making}.
 
-In order to still achieve serializable multiversion concurrency controls some
-advanced methods have been proposed \cite{fekete2005making,
-cahill2009serializable, neumann2015fast}. The examined approaches can be broken
-down as follows:
+\todo[inline]{Present and compare approaches to serializability}
 
 \begin{itemize}
-    \item Keep Snapshot Isolation but modify transactional database programs
-    \item Extend Snapshot Isolation with read-write conflict detection
-    \item Replace Snapshot Isolation with a custom implementation
+    \item keep SI
+        \begin{itemize}
+            \item analyze query and inject conflict detectable by SI \cite{fekete2005making}
+            \item extend SI by tracking read sets and validating on commit \cite{fekete2005making, cahill2009serializable}
+        \end{itemize}
+    \item refrain from SI
+        \begin{itemize}
+            \item optimize read-tracking or validation
+                \begin{itemize}
+                    \item fast read set inclusion detection (based on query lanuguage) \cite{neumann2015fast}
+                    \item parallel validation \cite{bailey2013exploring, ding2015centiman, faleiro2015rethinking}
+                    \item gather dependencies prior to execution (based on query language) \cite{faleiro2015rethinking}
+                    \item eliminate points of contention (tid assignment, timestamps, shmem) \cite{tu2013speedy, zhou2017posterior}
+                \end{itemize}
+            \item insert fast monitor layer on top of any MVCC protocol \cite{wang2017efficiently}
+        \end{itemize}
 \end{itemize}
+
+% In order to still achieve serializable multiversion concurrency controls some
+% advanced methods have been proposed \cite{fekete2005making,
+% cahill2009serializable, neumann2015fast}. The examined approaches can be broken
+% down as follows:
+%
+% \begin{itemize}
+%     \item Keep Snapshot Isolation but modify transactional database programs
+%     \item Extend Snapshot Isolation with read-write conflict detection
+%     \item Replace Snapshot Isolation with a custom implementation
+% \end{itemize}
