@@ -220,7 +220,7 @@ precisely, the version seen by a transaction $t$ is
 \operatorname*{max}_{i \in \mathbb{N}}\, \{\, v_i\, |\, begin_{v_i} < begin_t < end_{v_i}\}.
 \]
 
-\subsubsection{Conflicts}
+\subsubsection{Conflict Handling}
 
 Concurrent updates by a transaction $t_2$ that happen after a transaction $t_1$
 started, are not included in the snapshot of $t_1$ and are therefore invisible
@@ -232,6 +232,11 @@ property is the equivalent \emph{first-updater-wins} principle
 \cite{fekete2004read, larson2011high}. According to this property, a writer
 fails immediately if it is not the first to attempt an update on a given
 version, thus making the earlier transaction the first committer.
+
+\todo[inline]{SI does not need validation with first-updater-wins}
+\todo[inline]{first-updater wins is similar to pessimism but writes are rare + no waiting}
+
+\subsubsection{Issues}
 
 Under snapshot isolation reads can always be satisfied, provided the requested
 item exists. Note that even in the face of concurrent updates, a transaction
@@ -253,7 +258,7 @@ a predicate $C$. Next, $t_1$ updates $x$ and finds that $C(x^{*}, y)$ still
 holds true. At this point $t_2$ is unaware that $x$ has been modified and
 updates $y$. Since $t_2$ does not see the modifications of $t_1$, it also
 evaluates $C(x, y^{*})$ to be true. Finally, both transactions may commit even
-if $C$ is now violated because none observed the others changes (see figure
+if $C$ is now violated because none observed the others changes (see Figure
 \ref{fig:write_skew}). Note that no write-write conflict occurs as both updated
 items are distinct. In fact, write skew is said to occur if read sets overlap
 while write sets are distinct.
@@ -283,7 +288,7 @@ transactions can execute serializably.
 
 Suppose a pair of data items $x = 0$ and $y = 0$ and transactions $t_1, t_2,
 t_{RO}$. Further, let $t_1$ compute $y = y - 10$ and also subtract one if $x + y <
-0$, while $t_2$ sets $x = x + 20$. The schedule given in figure
+0$, while $t_2$ sets $x = x + 20$. The schedule given in Figure
 \ref{fig:bad_read_only} shows that while $t_1$ is the first transaction to start
 execution, both $t_2$ and $t_{RO}$ start and commit sequentially before $t_1$
 issues its update on $y$. This means that $t_{RO}$ will see the update of $x$ by
@@ -344,21 +349,10 @@ even the renowned ACID-compliant TPC-C benchmark does not exhibit them
             \item optimize read-tracking or validation
                 \begin{itemize}
                     \item fast read set inclusion detection (based on query lanuguage) \cite{neumann2015fast}
-                    \item parallel validation \cite{bailey2013exploring, ding2015centiman, faleiro2015rethinking}
-                    \item gather dependencies prior to execution (based on query language) \cite{faleiro2015rethinking}
-                    \item eliminate points of contention (tid assignment, timestamps, shmem) \cite{tu2013speedy, zhou2017posterior}
+                    \item parallel validation \cite{bailey2013exploring, ding2015centiman, faleiro2015rethinking} as pioneered by \cite{kung1981optimistic}
+                    \item detect malicous dependencies prior to execution (based on query language) \cite{faleiro2015rethinking}
+                    \item eliminate points of contention (tid assignment, tstamps, shmem) \cite{tu2013speedy, zhou2017posterior}
                 \end{itemize}
             \item insert fast monitor layer on top of any MVCC protocol \cite{wang2017efficiently}
         \end{itemize}
 \end{itemize}
-
-% In order to still achieve serializable multiversion concurrency controls some
-% advanced methods have been proposed \cite{fekete2005making,
-% cahill2009serializable, neumann2015fast}. The examined approaches can be broken
-% down as follows:
-%
-% \begin{itemize}
-%     \item Keep Snapshot Isolation but modify transactional database programs
-%     \item Extend Snapshot Isolation with read-write conflict detection
-%     \item Replace Snapshot Isolation with a custom implementation
-% \end{itemize}
