@@ -1,0 +1,41 @@
+### NVMcached {wu2016nvmcached}
+
+* does not support concurrency
+
+### ECHO {bailey2013exploring}
+
+* SI
+	* no serializability
+* first-committer-wins
+	* late abort
+
+### NVHT {zhou2016nvht}
+
+* locking
+* lock partitions of hash table (instead of table or single entries)
+	* accessing a single entries locks entire partition (multiple buckets)
+* no consistent durability enforcement
+
+### MetraDB {marmol2016nonvolatile}
+
+* single-threaded for containers
+* global lock for metadata
+
+### Tembo {venkatamaran2011consistent}
+
+* modified version of Redis (single-threaded)
+* versioning for fast updates / recovery
+* no dedicated concurrency control
+* based on CDDS b-tree
+
+### LevelDB on NVRAM {lersch2017analysis}
+
+* LevelDB
+	* disk-based
+	* write-optimized (LSM)
+	* no traditional transactions
+	* multi-threaded (mutex on main partion, lock-free read-only)
+	* limited isolation
+* evaluation
+	* single-threaded
+	* focused on eviction policy of formerly DRAM-residing cache

@@ -1,8 +1,25 @@
+
 \begin{itemize}
-    \item Tembo based on CDDS \cite{venkataraman2011consistent}
-    \item NVMcached based on memcached \cite{wu2016nvmcached}
-    \item ECHO \cite{bailey2013exploring}
-    \item LevelDB for NVRAM \cite{lersch2017analysis}
-    \item NVHT \cite{zhou2016nvht}
-    \item MetraDB \cite{marmol2016nonvolatile}
+    \item disk-based KVS on top of NVRAM
+        \begin{itemize}
+            \item LevelDB \cite{lersch2017analysis}
+            \item Shore-MT \cite{pelley2013storage}
+        \end{itemize}
+    \item in-memory KVS on top of NVRAM
+        \begin{itemize}
+            \item Redis \cite{malinowski2017using}
+            \item Redis based on CDDS (Tembo) \cite{venkataraman2011consistent}
+        \end{itemize}
+    \item KVS as an application for low-level NVRAM mechanics
+        \begin{itemize}
+            \item Redis based on CDDS (Tembo) \cite{venkataraman2011consistent}
+            \item FlatFS based on Aerie \cite{volos2014aerie}
+        \end{itemize}
+    \item custom KVS designs for NVRAM
+        \begin{itemize}
+            \item ECHO \cite{bailey2013exploring}
+            \item NVHT \cite{zhou2016nvht}
+            \item MetraDB \cite{marmol2016nonvolatile}
+            \item NVMcached \cite{wu2016nvmcached}
+        \end{itemize}
 \end{itemize}
