@@ -325,34 +325,6 @@ reduced to read-write conflicts.
 
 \subsection{Serializable MVCC}
 
-% \begin{itemize}
-%     \item keep SI
-%         \begin{itemize}
-%             \item analyze query and inject conflict detectable by SI \cite{fekete2005making}
-%             \item extend SI by tracking read sets and validating on commit \cite{fekete2005making, cahill2009serializable}
-%         \end{itemize}
-%     \item refrain from SI
-%         \begin{itemize}
-%             \item optimize read-tracking or validation
-%                 \begin{itemize}
-%                     \item fast read set inclusion detection (based on query lanuguage) \cite{neumann2015fast}
-%                     \item parallel validation \cite{bailey2013exploring, ding2015centiman, faleiro2015rethinking} as pioneered by \cite{kung1981optimistic}
-%                     \item detect malicous dependencies prior to execution (based on query language) \cite{faleiro2015rethinking}
-%                     \item eliminate points of contention (tid assignment, tstamps, shmem) \cite{tu2013speedy, zhou2017posterior}
-%                 \end{itemize}
-%             \item insert fast monitor layer on top of any MVCC protocol \cite{wang2017efficiently}
-%         \end{itemize}
-% \end{itemize}
-
-% * query-based (=> not suitable for ad-hoc queries)
-% 	* fast range inclusion test during validation {neumann2015fast}
-% 	* predict conflicts from query prior to execution
-% 		* insert w/w conflicts {fekete2005making}
-% 		* abort conflicting transaction {faleiro2015rethinking}
-% * eliminate contention
-% 	* parallel validation {bailey2013exploring, ding2015centiman, faleiro2015rethinking, wang2017efficiently}
-% 	* decentralized ID/TS assignment and memory access {tu2013speedy, zhou2017posterior}
-
 The previous section introduced the MVCC protocol Snapshot Isolation. SI
 provides affordable isolation but fails to preclude all non-serializable
 schedules such as write skew. Nevertheless, SI is the most widely adopted MVCC
@@ -428,3 +400,5 @@ response, some authors have proposed protocols featuring decentralized timestamp
 assignment \cite{tu2013speedy, zhou2017posterior}. Further sources of contention
 addressed in these works are transaction id assignment and shared memory access,
 in general.
+
+\todo[inline]{Überleitung zu MVCC in KVS für NVRAM}
