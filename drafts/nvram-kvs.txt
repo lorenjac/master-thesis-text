@@ -1,0 +1,21 @@
+The previous sections have introduced the fundamentals on transactions, serializability, and modern concurrency control protocols. The aim is to design and implement a robust concurrency control for an in-memory KVS based on NVRAM. Hence, the chapter concludes with an overview on concurrency in KVS for NVRAM.
+
+NVRAM is not yet commercially available, but there is a number of studies involving KVS and NVRAM. In essence, there are three research branches:
+
+* Evaluation of programming facilities for NVRAM
+* Evaluation of implications of NVRAM for existing KVS
+* Design of NVRAM-aware KVS
+
+While, ultimately, all branches aim to understand the implications of NVRAM, individual scenarios and approaches differ substantially. As for the aim of this work, focus is given to KVS specifically designed for NVRAM. The remaining areas are omitted as none of the respective studies in {venkataraman2011consistent, pelley2013storage, volos2014aerie, lersch2017analysis, malinowski2017using} give insight on the implications of NVRAM for transactions and concurrency control.
+
+At the moment there are several designs for NVRAM-aware KVS: Echo {bailey2013exploring}, NVHT {zhou2016nvht}, NVMcached {wu2016nvmcached}, and MetraDB {marmol2016nonvolatile}. Below, the architecture of these KVS is outlined with an emphasis on concurrency control.
+
+### Echo
+
+
+
+### NVHT
+
+### NVMcached
+
+### MetraDB

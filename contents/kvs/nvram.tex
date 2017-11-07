@@ -1,25 +1,54 @@
+The previous sections have introduced the fundamentals on transactions,
+serializability, and modern concurrency control protocols. The aim is to design
+and implement a robust concurrency control for an in-memory KVS based on NVRAM.
+Hence, the chapter concludes with an overview on concurrency in KVS for NVRAM.
+
+NVRAM is not yet commercially available, but there is a number of studies
+involving KVS and NVRAM. In essence, there are three research branches:
 
 \begin{itemize}
-    \item disk-based KVS on top of NVRAM
-        \begin{itemize}
-            \item LevelDB \cite{lersch2017analysis}
-            \item Shore-MT \cite{pelley2013storage}
-        \end{itemize}
-    \item in-memory KVS on top of NVRAM
-        \begin{itemize}
-            \item Redis \cite{malinowski2017using}
-            \item Redis based on CDDS (Tembo) \cite{venkataraman2011consistent}
-        \end{itemize}
-    \item KVS as an application for low-level NVRAM mechanics
-        \begin{itemize}
-            \item Redis based on CDDS (Tembo) \cite{venkataraman2011consistent}
-            \item FlatFS based on Aerie \cite{volos2014aerie}
-        \end{itemize}
-    \item custom KVS designs for NVRAM
-        \begin{itemize}
-            \item ECHO \cite{bailey2013exploring}
-            \item NVHT \cite{zhou2016nvht}
-            \item MetraDB \cite{marmol2016nonvolatile}
-            \item NVMcached \cite{wu2016nvmcached}
-        \end{itemize}
+    \item Evaluation of programming facilities for NVRAM
+    \item Evaluation of implications of NVRAM for existing KVS
+    \item Design of NVRAM-aware KVS
 \end{itemize}
+
+While, ultimately, all branches aim to understand the implications of NVRAM,
+individual scenarios and approaches differ substantially. As for the aim of this
+work, focus is given to KVS specifically designed for NVRAM. The remaining areas
+are omitted as none of the respective studies in
+\cite{venkataraman2011consistent, pelley2013storage, volos2014aerie,
+lersch2017analysis, malinowski2017using} give insight on the implications of
+NVRAM for transactions and concurrency control.
+
+At the moment there are several designs for NVRAM-aware KVS: Echo
+\cite{bailey2013exploring}, NVHT \cite{zhou2016nvht}, NVMcached
+\cite{wu2016nvmcached}, and MetraDB \cite{marmol2016nonvolatile}. Below, the
+architecture of these KVS is outlined with an emphasis on concurrency control.
+
+\subsubsection{Echo}
+\subsubsection{NVHT}
+\subsubsection{NVMcached}
+\subsubsection{MetraDB}
+
+% \begin{itemize}
+%     \item KVS as an application for low-level NVRAM mechanics
+%         \begin{itemize}
+%             \item Redis based on CDDS (Tembo) \cite{venkataraman2011consistent}
+%             \item FlatFS based on Aerie \cite{volos2014aerie}
+%         \end{itemize}
+%     \item existing KVS migrated to NVRAM
+%         \begin{itemize}
+%             \item LevelDB \cite{lersch2017analysis}
+%             \item Shore-MT \cite{pelley2013storage}
+%             \item Redis \cite{malinowski2017using}
+%         \end{itemize}
+%     \item custom KVS designs for NVRAM
+%         \begin{itemize}
+%             \item Echo \cite{bailey2013exploring}
+%             \item NVHT \cite{zhou2016nvht}
+%             \item MetraDB \cite{marmol2016nonvolatile}
+%             \item NVMcached \cite{wu2016nvmcached}
+%         \end{itemize}
+% \end{itemize}
+
+% As pointed out in Chapter {ch:nvram}, working with NVRAM requires additional programming mechanisms not needed for DRAM or conventional durable storage. Issues comprise recoverable memory mappings, consistency ensurance, and memory management accounting for the byte-addressable nature of NVRAM. In this regard, a number of facilities to address these issues have been proposed. Due to their recent prevalence in high-performance environments, some these techniques have been evaluated against KVS. In {venkatamaran2011consistent} NVRAM-ware b-trees based on versioning were designed and integrated into the Redis KVS for evaluation. However, the described implementation of versioning is was only meant to replace logging and all simulations were conducted on a single thread.

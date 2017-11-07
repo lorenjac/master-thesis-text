@@ -2,6 +2,10 @@
 
 * does not support concurrency
 
+### pmemkv {pmem.io}
+
+* does not support transactions
+
 ### ECHO {bailey2013exploring}
 
 * SI
@@ -18,8 +22,12 @@
 
 ### MetraDB {marmol2016nonvolatile}
 
-* single-threaded for containers
-* global lock for metadata
+* hashtable of containers (buckets)
+* each bucket has separate namespace (avoids clashes)
+* transactions only for atomicity / recovery
+* no isolation
+* single-threaded access to containers
+* global lock for editing metadata (e.g. create container)
 
 ### Tembo {venkatamaran2011consistent}
 
