@@ -64,6 +64,34 @@ non-serializing SI and the first-committer-wins strategy. Also the authors'
 evaluation is not entirely conclusive as some aspects were considerably altered.
 
 \subsubsection{NVHT}
+
+The goal of NVHT is to leverage NVRAM to achieve fast updates without
+sacrificing durability \cite{zhou2016nvht}. The architecture of NVHT differs
+significantly from that of Echo. Most importantly, NVHT only supports
+transactional updates instead of full-grown transactions. That means, that each
+operation is implicitly committed, which is sometimes called auto-commit.
+Nevertheless its architecture may give valuable insights into the design of a
+KVS for NVRAM. Similar to Echo, NVHT relies on a hybrid memory architecture
+consisting of both volatile RAM and NVRAM. However, Echo is a two-level store
+where each update is buffered in volatile RAM until it is committed to NVRAM. In
+NVHT, on the other hand, all updates are directly written to NVRAM. Similar to
+Echo, the key data structure of NVHT is a NVRAM-aware hash table. However, NVHT
+does not use multiversioning to control concurrent operations. Instead, it
+applies half-coarse synchronization by locking individual partitions of the hash
+table upon access.
+
+Despite NVHT having shown good performance against prominent KVS, there are some
+problems with its design. First, accessing an item in the hash map locks an
+entire partition. The authors correctly point out that this design decision can
+increase lock contention, thus reducing concurrency. More importantly, NVHT does
+not address the issues of ordering and deferred write-back on NVRAM. Instead,
+the authors merely devise a kind of commit record whose presence or absence
+denotes whether the preceding item should be taken into account. However,
+without enforcing an ordering on store operations, the commit record could be
+durable before the actual item. Also, in order to ensure durability, cache lines
+need to be flushed. Omitting these precautions could lead to inconsistent data.
+These issues are not present in Echo.
+
 \subsubsection{NVMcached}
 \subsubsection{MetraDB}
 
