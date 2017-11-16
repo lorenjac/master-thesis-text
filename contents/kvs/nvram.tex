@@ -20,42 +20,40 @@ are omitted as none of the respective studies in
 lersch2017analysis, malinowski2017using} give insight on the implications of
 NVRAM for transactions and concurrency control.
 
-At the moment there are several designs for NVRAM-aware KVS: Echo
-\cite{bailey2013exploring}, NVHT \cite{zhou2016nvht}, NVMcached
-\cite{wu2016nvmcached}, and MetraDB \cite{marmol2016nonvolatile}. Below, the
-architecture of these KVS is outlined with an emphasis on concurrency control.
+At the moment, there are few designs for NVRAM-aware KVS: Echo
+\cite{bailey2013exploring}, NVHT \cite{zhou2016nvht}, and MetraDB
+\cite{marmol2016nonvolatile}. Below, the architecture of these KVS is outlined
+with an emphasis on transactions and concurrency control.
 
 \subsubsection{Echo}
 
 Echo is one of the earliest KVS designed to leverage the benefits of NVRAM
 \cite{bailey2013exploring}. It aims to achieve scalable high-performance
 transactions through optimistic concurrency control and light-weight persistence
-management.
-
-For this purpose, Echo uses a two-level store architecture featuring both
-volatile and non-volatile RAM. Only committed data are written to NVRAM, while
-uncommitted data are kept in volatile RAM. Moreover, there are two groups of
-threads: workers and masters. The former execute the operations of transactions
-and buffer their updates, whereas masters are in charge of committing them. By
-keeping updates from NVRAM until commit, persistence guarantees need to be
-enforced less often and degradation effects such as wearing are reduced. Also,
-updates are buffered locally in each thread which avoids contention on shared
-data. In order to ensure isolation between concurrent transactions, Echo employs
-classic snapshot isolation. As a result, some non-serializable schedules of
-transactions are permitted. Contrary to many other works, Echo resolves
-write-write conflicts using the original first-committer-wins strategy. This
-eliminates the need to acquire exclusive ownership when updating an item but
-leads to late conflict detection with larger rollbacks. The core data structure
-beneath Echo is a hash table which maps keys to version histories. Concerning
-NVRAM consistency, Echo settles for existing instruction sets with cache line
-flushes and store fences. The authors further anticipated a hardware capability,
-such as the now obligatory ADR, which ensures that cache flushes always become
-durable. During the evaluation of Echo, its design was shown to provide strong
-durability and consistency while providing performance characteristics of
-volatile main-memory KVS. However, the evaluation was carried out on volatile
-RAM and did not account for latencies of NVRAM and cache flushes. Also the
-separation of worker and master threads was simplified, as workers would
-temporarily become a master to commit its transaction.
+management. For this purpose, Echo uses a two-level store architecture featuring
+both volatile and non-volatile RAM. Only committed data are written to NVRAM,
+while uncommitted data are kept in volatile RAM. Moreover, there are two groups
+of threads: workers and masters. The former execute the operations of
+transactions and buffer their updates, whereas masters are in charge of
+committing them. By keeping updates from NVRAM until commit, persistence
+guarantees need to be enforced less often and degradation effects such as
+wearing are reduced. Also, updates are buffered locally in each thread which
+avoids contention on shared data. In order to ensure isolation between
+concurrent transactions, Echo employs classic snapshot isolation. As a result,
+some non-serializable schedules of transactions are permitted. Contrary to many
+other works, Echo resolves write-write conflicts using the original
+first-committer-wins strategy. This eliminates the need to acquire exclusive
+ownership when updating an item but leads to late conflict detection with larger
+rollbacks. The core data structure beneath Echo is a hash table which maps keys
+to version histories. Concerning NVRAM consistency, Echo settles for existing
+instruction sets with cache line flushes and store fences. The authors further
+anticipated a hardware capability, such as the now obligatory ADR, which ensures
+that cache flushes always become durable. During the evaluation of Echo, its
+design was shown to provide strong durability and consistency while providing
+performance characteristics of volatile main-memory KVS. However, the evaluation
+was carried out on volatile RAM and did not account for latencies of NVRAM and
+cache flushes. Also the separation of worker and master threads was simplified,
+as workers would temporarily become a master to commit its transaction.
 
 Being one of the most meticulously designed and documented KVS for NVRAM, Echo
 is a guiding example for this thesis. It achieves high performance through its
@@ -120,12 +118,14 @@ Upon finding scalability to falter when increasing the number of CPU cores, the
 authors link the issue with kernel locking on memory-mapped files.
 
 When compared to Echo or NVHT, MetraDB is a very application-specific KVS.
-Especially, its use of containers, which can only be accessed by a one thread at
-a time, delivers little guidance for the design of a KVS with concurrent
-transactions. And while global locks or even single-threading are not uncommon
-in MMDB, the majority of systems aims for high concurrency
-\cite{molina1992main}.
+Especially, its use of containers, which can only be accessed by one thread at a
+time, conveys little guidance for the design of a KVS with concurrent
+transactions. Apart from a few isolated cases, single-threading and very coarse
+locking may not be the most promising approaches to achieving high transaction
+throughput \cite{molina1992main}.
 
-\subsubsection{NVMcached}
+\subsubsection{Summary}
+
+\todo[inline]{TODO}
 
 % As pointed out in Chapter {ch:nvram}, working with NVRAM requires additional programming mechanisms not needed for DRAM or conventional durable storage. Issues comprise recoverable memory mappings, consistency ensurance, and memory management accounting for the byte-addressable nature of NVRAM. In this regard, a number of facilities to address these issues have been proposed. Due to their recent prevalence in high-performance environments, some these techniques have been evaluated against KVS. In {venkatamaran2011consistent} NVRAM-ware b-trees based on versioning were designed and integrated into the Redis KVS for evaluation. However, the described implementation of versioning is was only meant to replace logging and all simulations were conducted on a single thread.
