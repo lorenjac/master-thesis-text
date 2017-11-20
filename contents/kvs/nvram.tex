@@ -20,6 +20,8 @@ are omitted as none of the respective studies in
 lersch2017analysis, malinowski2017using} give insight on the implications of
 NVRAM for transactions and concurrency control.
 
+% As pointed out in Chapter {ch:nvram}, working with NVRAM requires additional programming mechanisms not needed for DRAM or conventional durable storage. Issues comprise recoverable memory mappings, consistency ensurance, and memory management accounting for the byte-addressable nature of NVRAM. In this regard, a number of facilities to address these issues have been proposed. Due to their recent prevalence in high-performance environments, some these techniques have been evaluated against KVS. In {venkatamaran2011consistent} NVRAM-ware b-trees based on versioning were designed and integrated into the Redis KVS for evaluation. However, the described implementation of versioning is was only meant to replace logging and all simulations were conducted on a single thread.
+
 At the moment, there are few designs for NVRAM-aware KVS: Echo
 \cite{bailey2013exploring}, NVHT \cite{zhou2016nvht}, and MetraDB
 \cite{marmol2016nonvolatile}. Below, the architecture of these KVS is outlined
@@ -124,8 +126,4 @@ transactions. Apart from a few isolated cases, single-threading and very coarse
 locking may not be the most promising approaches to achieving high transaction
 throughput \cite{molina1992main}.
 
-\subsubsection{Summary}
-
-\todo[inline]{TODO}
-
-% As pointed out in Chapter {ch:nvram}, working with NVRAM requires additional programming mechanisms not needed for DRAM or conventional durable storage. Issues comprise recoverable memory mappings, consistency ensurance, and memory management accounting for the byte-addressable nature of NVRAM. In this regard, a number of facilities to address these issues have been proposed. Due to their recent prevalence in high-performance environments, some these techniques have been evaluated against KVS. In {venkatamaran2011consistent} NVRAM-ware b-trees based on versioning were designed and integrated into the Redis KVS for evaluation. However, the described implementation of versioning is was only meant to replace logging and all simulations were conducted on a single thread.
+% \subsubsection{Summary}

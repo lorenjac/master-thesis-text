@@ -31,10 +31,24 @@ chapter is concluded with an examination of existing KVS for NVRAM.
 
 \section{Summary}
 
-\begin{itemize}
-    \item KVS are vital database technology; esp. distributed but beyond scope
-    \item performance can be increased through in-memory operation + concurrency
-    \item a widely-adopted concurrency control is MVCC; but most impl. non-ser.
-    \item KVS for NVRAM have shown some potential over traditional KVS
-    \item recent KVS for NVRAM all non-ser. => leverage boost to provide ser.
-\end{itemize}
+KVS are a vital database technology in modern information processing. While KVS
+are especially relevant in distributed systems, this work concentrates on
+single-node KVS for convenience. As in MMDB, KVS can achieve maximum performance
+when combining in-memory operation and concurrency. In order to preserve
+consistency the presence of concurrent transactions, a dedicated concurrency
+control is required. A modern control scheme which is also used in KVS is MVCC.
+However, many MVCC protocols, such as the popular SI, are not serializing and
+are therefore prone to inconsistencies. On the other hand, alternatives which
+guarantee serializability tend to be error-prone and expensive. Despite having
+shown promising results, all existing KVS for NVRAM still only implement SI or
+locking. This circumstance gives rise to the question whether NVRAM can provide
+enough leverage to make serializable transactions affordable without resorting
+to locking.
+
+% \begin{itemize}
+%     \item KVS are vital database technology; esp. distributed but beyond scope
+%     \item performance can be increased through in-memory operation + concurrency
+%     \item a widely-adopted concurrency control is MVCC; but most impl. non-ser.
+%     \item KVS for NVRAM have shown some potential over traditional KVS
+%     \item recent KVS for NVRAM all non-ser. or locking-based or no tx
+% \end{itemize}
