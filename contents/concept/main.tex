@@ -1,7 +1,35 @@
 \chapter{A Key-Value Store with Serializable Transactions for NVRAM}
 \label{ch:concept}
 
-\section{Design Considerations}
-\section{Concept}
-\subsection{Architecture}
-\subsection{Concurrency Control}
+The aim of this thesis is to design a KVS with affordable serializable
+transactions by exploiting the benefits of NVRAM. In order to provide the
+necessary groundwork, the previous chapters give an overview on recent research
+in NVRAM, KVS, and concurrency control in databases. It is further pointed out
+that, as of this writing, there appears to be no previous work on leveraging
+NVRAM specifically for concurrency control in KVS or MMDB. While recent works
+primarily see NVRAM as a means to reduce recovery overhead and increase
+transaction throughput, this thesis explores a different approach.
+
+As mentioned in Chapter \ref{ch:kvs}, many transaction processing systems do not
+support or encourage serializable transactions due to severe performance
+degradations. Therefore, the idea is to use the benefits of NVRAM to make
+serializable transactions affordable. While this may not provide the highest
+possible transaction throughput, the aim is to achieve performance on a par with
+non-serializing solutions for traditional storage. In other words, instead of
+increasing maximum performance, this work attempts to increase performance with
+maximum consistency.
+
+NVRAM is especially significant for memory-resident databases as data no longer
+need to copied to a much slower storage device for recoverability. Also,
+restarts can be near-instantaneous as all data are already in memory and need
+not be fetched. Therefore, the proposed concept is exclusively targeted at MMDB.
+Given the vast complexity of a fully-featured in-memory DBMS, it seems
+appropriate, for an initial study, to resort to the much simpler class of KVS.
+Based on whether the approach turns out to work well for KVS, it may still be
+applied on MMDB in future work. This chapter gives an overview on the proposed
+concept.
+
+\section{Overview}
+\section{Architecture}
+\section{Consistency}
+\section{Concurrency Control}

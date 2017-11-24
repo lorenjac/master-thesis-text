@@ -1,7 +1,7 @@
 \chapter{Non-Volatile RAM}
 \label{ch:nvram}
 
-Conventional non-volatile memories such as HDD or SSD provide large capacities but are only block-oriented and incur substantial access latencies compared to volatile DRAM. Especially IO-bound applications tend to keep as much data in RAM as possible but are eventually forced to access slower media for durable storage. This led to the development of non-volatile variants of RAM. Recent research suggests that both fast and high-capacity NVRAM will become widely available in the near future.
+Conventional non-volatile memories such as HDD or SSD provide large capacities but are only block-oriented and incur substantial access latencies compared to RAM. Therefore, IO-bound applications tend to keep as much data in RAM as possible but are eventually forced to access slower media for durable storage. This led to the development of non-volatile variants of RAM. Recent research suggests that both fast and high-capacity NVRAM will become widely available in the near future.
 
 This chapter gives an overview on the state-of-the-art in NVRAM research.
 Included is a discussion of opportunities and challenges, such as the notorious
@@ -29,10 +29,10 @@ consistency issues in the presence of failures.
     \item in context of MMDB it seems reasonable to refrain from using conventional non-volatile storage
     \item with PCM a promising technology nears commercial release
     \item concerning integration, it is very likely that NVRAM will be packaged as NVDIMM, so integration patterns are likely to remain largely the same
-    \item consistency across crashes is still a prominent issue with NVRAM
-    \item however, recent research suggests that a combination of memory barriers, cacheline flushes, and ADR provides a viable solution
     \item still, an open question is the programming model used with NVRAM
     \item as a result, a number of programming models have emerged
     \item in practice, programmers still need to meticulously manage non-volatile data (assignment policy, datastructure recovery, consistency)
-    \item but programming models are beyond the scope of this work
+    \item consistency across crashes is still a prominent issue with NVRAM
+    \item however, recent research suggests that a combination of memory barriers, cacheline flushes, and ADR provides a viable solution
+    \item other than that programming models are beyond the scope of this work
 \end{itemize}
