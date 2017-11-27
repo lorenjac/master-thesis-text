@@ -8,12 +8,18 @@ This chapter presents the concept for a NVRAM-aware KVS with serializable transa
 
 ### Overview
 
-* in-memory key-value store
+* goal vs requirements
+* key-value store
 	* in-memory for low latency
-	* NVRAM for durability
-* concurrent full-fledged transactions (as opposed to single-operation transactions)
+	* NVRAM for implicit durability/recovery
+* full-fledged transactions
+	* as opposed to single-operation transactions
 	* concurrency for scalability
-	* ACID + serializability for consistency/recovery
+	* ACID
+		* C = serializability for consistency/recovery
+		* D = durability (unlike volatile KV caches)
+	* no assumption on length of transactions
+	* assume read-dominated workloads
 * API
 
 ### Architecture

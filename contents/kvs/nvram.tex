@@ -49,19 +49,20 @@ ownership when updating an item but leads to late conflict detection with larger
 rollbacks. The core data structure beneath Echo is a hash table which maps keys
 to version histories. Concerning NVRAM consistency, Echo settles for existing
 instruction sets with cache line flushes and store fences. The authors further
-anticipated a hardware capability, such as the now obligatory ADR, which ensures
+anticipate a hardware capability, such as the now obligatory ADR, which ensures
 that cache flushes always become durable. During the evaluation of Echo, its
-design was shown to provide strong durability and consistency while providing
+design is shown to provide strong durability and consistency while providing
 performance characteristics of volatile main-memory KVS. However, the evaluation
-was carried out on volatile RAM and did not account for latencies of NVRAM and
-cache flushes. Also the separation of worker and master threads was simplified,
-as workers would temporarily become a master to commit its transaction.
+is carried out on volatile RAM and does account for latencies of NVRAM and cache
+flushes. Also, the separation of worker and master threads is effectively
+removed, as workers \emph{become} masters and commit their own transactions.
 
 Being one of the most meticulously designed and documented KVS for NVRAM, Echo
 is a guiding example for this thesis. It achieves high performance through its
 two-level architecture and optimistic concurrency control. Drawbacks include
-non-serializing SI and the first-committer-wins strategy. Also the authors'
-evaluation is not entirely conclusive as some aspects were considerably altered.
+non-serializing SI and the first-committer-wins strategy. In th end, the
+authors' evaluation is not entirely conclusive as some design aspects were
+considerably altered.
 
 \subsubsection{NVHT}
 
@@ -75,22 +76,21 @@ KVS for NVRAM. Similar to Echo, NVHT relies on a hybrid memory architecture
 consisting of both volatile RAM and NVRAM. However, Echo is a two-level store
 where each update is buffered in volatile RAM until it is committed to NVRAM. In
 NVHT, on the other hand, all updates are directly written to NVRAM. Similar to
-Echo, the key data structure of NVHT is a NVRAM-aware hash table. However, NVHT
+Echo, the key data structure of NVHT is an NVRAM-aware hash table. However, NVHT
 does not use multiversioning to control concurrent operations. Instead, it
 applies half-coarse synchronization by locking individual partitions of the hash
 table upon access.
 
 Despite NVHT having shown good performance against prominent KVS, there are some
 problems with its design. First, accessing an item in the hash map locks an
-entire partition. The authors correctly point out that this design decision can
-increase lock contention, thus reducing concurrency. More importantly, NVHT does
-not address the issues of ordering and deferred write-back on NVRAM. Instead,
-the authors merely devise a kind of commit record whose presence or absence
-denotes whether the preceding item should be taken into account. However,
-without enforcing an ordering on store operations, the commit record could be
-durable before the actual item. Also, in order to ensure durability, cache lines
-need to be flushed. Omitting these precautions could lead to inconsistent data.
-These issues are not present in Echo.
+entire partition. The authors point out that this design decision can increase
+lock contention, thus reducing concurrency. More importantly, NVHT does not
+address the issues of ordering and deferred write-back on NVRAM. Instead, the
+authors merely devise a kind of commit record whose presence or absence denotes
+whether the preceding item should be taken into account. However, without
+enforcing an ordering on store operations, the commit record could be durable
+before the actual item. Also, in order to ensure durability, cache lines need to
+be flushed. Omitting these precautions could lead to inconsistent data.
 
 \subsubsection{MetraDB}
 
@@ -124,6 +124,4 @@ Especially, its use of containers, which can only be accessed by one thread at a
 time, conveys little guidance for the design of a KVS with concurrent
 transactions. Apart from a few isolated cases, single-threading and very coarse
 locking may not be the most promising approaches to achieving high transaction
-throughput \cite{molina1992main}.
-
-% \subsubsection{Summary}
+throughput.

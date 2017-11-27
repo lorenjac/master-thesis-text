@@ -128,13 +128,13 @@ precisely. The predominant characterization of transactional semantics is ACID
     \item Durability
 \end{itemize}
 
-Atomicity captures the all-or-nothing notion of a transaction, i.e. either all
-operations in its context succeed or none. As a consequence, any already
-completed operation of a transaction must be undone should the latter fail.
-Reverting the affected data to their previous state is often referred to as
-\emph{rollback}.
+\emph{Atomicity} captures the all-or-nothing notion of a transaction, i.e.
+either all operations in its context succeed or none. As a consequence, any
+already completed operation of a transaction must be undone should the latter
+fail. Reverting the affected data to their previous state is often referred to
+as \emph{rollback}.
 
-The property of consistency asserts that if the underlying data are in a
+The property of \emph{consistency} asserts that if the underlying data are in a
 consistent state, then any transaction must preserve consistency. For example,
 an ACID-compliant database cannot be transitioned into an illegal state by means
 of a transaction. If  a transaction is bound to break the consistency of the
@@ -142,12 +142,12 @@ database, then it has to be aborted and rolled back.
 
 In case multiple transactions are executed concurrently, each transaction could
 observe intermediate side effects of other concurrent transactions. In order to
-prevent this scenario and ensure the consistency property, isolation precludes
-transactions from seeing any concurrent activity. The property of isolation is
-later dealt with in more detail.
+prevent this scenario and ensure the consistency property, \emph{isolation}
+precludes transactions from seeing any concurrent activity. The property of
+isolation is later dealt with in more detail.
 
-The last of the four ACID properties is durability. It ensures that all side
-effects incurred by a committed transaction must be durable across any
+The last of the four ACID properties is \emph{durability}. It ensures that all
+side effects incurred by a committed transaction must be durable across any
 subsequent system failure. Durability can be very hard to enforce, especially in
 the face of catastropic failures with failing backup media. Therefore its notion
 is often relaxed to a reasonable extent.
@@ -258,8 +258,8 @@ only if it guarantees that all its concurrent schedules are serializable.
 
 In order to enforce serializability, a decidable classification for serial
 transaction schedules is required. An early definition of serializability
-appeared in ANSI SQL \cite{ansi1992sql, melton1993understanding}. The idea
-is to identify and detect \emph{anomalies} of non-serializable schedules at
+appeared in ANSI SQL \cite{berenson1995critique, melton1993understanding}. The
+idea is to identify and detect \emph{anomalies} of non-serializable schedules at
 runtime. If an anomaly is detected then any affected transaction must fail.
 Based on whether these anomalies were permitted, several \emph{isolation levels}
 were defined. In terms of ANSI SQL, a transaction is serializable if none of the
@@ -277,7 +277,7 @@ $t_1$ making a conditional selection of items. If another transaction $t_2$ adds
 an item and $t_1$ repeats its selection then the result may contain the item
 which is inconsistent with the first result.
 
-Note that this formalization is built around the observable artifacts of
+Note that this formalization is built around observable artifacts of
 non-serializable schedules, rather than their cause such as read-write
 conflicts. While it is pragmatic to address only observable anomalies it is also
 unreliable as more complicated consistencies may remain undetected. In fact, it
@@ -294,6 +294,4 @@ only if all possible conflicts are precluded. This characterization has several
 advantages. Most importantly, it is more plausible to discuss non-serializable
 schedules in terms of causes instead of effects. In addition, as opposed to
 anomalies the number of conflicts is smaller and also fixed. Therefore, this
-thesis primariliy defines serializability in terms of conflicts.
-
-\todo[inline]{Conflict-Freedom seems to be stronger than Serializability}
+thesis primarily defines serializability in terms of conflicts.

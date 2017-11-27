@@ -58,17 +58,18 @@ otherwise, it must abort. Validation is crucial for consistency and its
 implementation substantially determines the achievable isolation level
 \cite{larson2011high}.
 
-Optimistic concurrency control protocols rely on Copy-on-Write (CoW) and
-timestamp ordering to synchronize data races of competing transactions
+Optimistic concurrency control protocols rely on Copy-on-Write and timestamp
+ordering to synchronize data races of competing transactions
 \cite{bernstein1981concurrency, kung1981optimistic}. While readers can access
 data without further means of synchronization, writers apply their modifications
 only on copies of the original data. Apart from short-duration locks for
-critical sections, this approach does not require locking and is therefore not
-subject to deadlocks or lock contention. A signature property is that readers
-never block which means that both readers and writers never wait for other
-readers. An important class of optimistic concurrency controls is
-multiversion concurrency control or multiversioning
-\cite{bernstein1983multiversion}.
+critical sections, this approach works without locking data for the duration of
+an accessing transaction. As a result, readers do not block other readers or
+writers. Depending on the type of concurrency control, however, concurrent
+writers may need to operate under mutual exclusion. This issue is addressed
+later on. An important class of optimistic concurrency controls is multiversion
+concurrency control or multiversioning \cite{reed1978naming,
+bernstein1983multiversion}.
 
 There are, however, disadvantages to this type of concurrency control. While
 validation is necessary to ensure that a transaction is not involved in data
@@ -114,7 +115,7 @@ a version, then it is performed in-place. In order to ensure isolation though, a
 transaction has to be protected against concurrent reading or writing. This is
 usually achieved by having each transaction acquire locks on its data which are
 only released once the transaction terminates. This approach is very effective
-in that it can provide the highest isolation level of serializability but it
+in that it can provide the highest isolation level of serializability but it is
 prone to deadlocks and lock contention \cite{berenson1995critique}.
 
 In a \emph{multiversion concurrency control}, there can be multiple versions of
@@ -126,7 +127,7 @@ concurrent updates. That means, in particular, that a read operation may access
 an item even when newer versions have been committed.
 
 \todo[inline]{Does RCU fit in here somewhere?}
-\todo[inline]{Does Shadow Paging fit in here somewhere?}
+% \todo[inline]{Does Shadow Paging fit in here somewhere?}
 \todo[inline]{Mention that MVCC is based on COW and TS}
 \todo[inline]{Mention that MVCC combines CC with recovery (implicit logging)}
 
@@ -164,8 +165,8 @@ paramount importance for MVCC protocols and the desired isolation level
 \subsubsection{Challenges}
 
 The most promising feature of multiversioning is the non-blocking nature of read
-operations due to the absence of in-place updates. However, there also important
-problems that need to be addressed in order to leverage the merits of
+operations due to the absence of in-place updates. However, there are also
+important problems that need to be addressed in order to leverage the merits of
 multiversion concurrency control.
 
 First, the maintenance of more than one version per item implies a significant
@@ -191,18 +192,20 @@ item.
 
 \subsection{Snapshot Isolation}
 
-The most widely used MVCC protocol to date is Snapshot Isolation
-\cite{larson2011high, neumann2015fast}. Originally, Snapshot Isolation was
-developed as a response to the insufficient definition of serializability in the
-SQL standard \cite{berenson1995critique}. Since then, it has been deployed in
-numerous databases and KVS \cite{cahill2009serializable, wu2017empirical}. This
-section introduces the concept of Snapshot Isolation and its properties.
+The most widely used MVCC protocol to date is snapshot isolation
+\cite{larson2011high, neumann2015fast}. Originally, SI was developed as a
+response to the insufficient definition of serializability in the SQL standard
+\cite{berenson1995critique}. Since then, it has been deployed in numerous
+databases and KVS \cite{cahill2009serializable, wu2017empirical}. In the context
+of isolation levels, SI defines a new isolation level that goes by the same
+name. Although SI is weaker than serializability, it provides a good trade-off
+between performance and consistency. This section introduces the concept of SI
+and its properties.
 
-The core principle of snapshot isolation is that a transaction $t$ only sees a
-private snapshot of the database as of when $t$ started. In this sense, the
-notion of a snapshot comprises the set of the latest versions that have been
-committed before $t$ was invoked. The key to this behaviour is the definition of
-the visibility property.
+The core principle of SI is that a transaction $t$ only sees a private snapshot
+of the database as of when $t$ started. In this sense, the notion of a snapshot
+comprises the set of the latest versions that have been committed before $t$ was
+invoked. The key to this behaviour is the definition of the visibility property.
 
 \subsubsection{Visibility}
 
@@ -238,20 +241,20 @@ version, thus making the earlier transaction the first committer.
 
 \subsubsection{Shortcomings}
 
-Under snapshot isolation reads can always be satisfied, provided the requested
-item exists. Note that even in the face of concurrent updates, a transaction
-under snapshot isolation always sees the same items. This precludes inconsistent
-reads, read skew, and phantoms. In addition, snapshot isolation does not allow
-dirty reads, since snapshots only contain committed data. However, snapshot
-isolation does not prevent all possible anomalies and is therefore not
-serializable \cite{berenson1995critique, fekete2004read}. In particular, these
-conflicts are write skew and non-serializable read-only transactions.
+Under SI reads can always be satisfied, provided the requested item exists. Note
+that even in the face of concurrent updates, a transaction under SI always sees
+the same items. This precludes inconsistent reads, read skew, and phantoms. In
+addition, SI does not allow dirty reads, since snapshots only contain committed
+data. However, snapshot isolation does not prevent all possible anomalies and is
+therefore not serializable \cite{berenson1995critique, fekete2004read}. In
+particular, these conflicts are write skew and non-serializable read-only
+transactions.
 
 \paragraph{Write Skew}
 
-The earliest known anomaly of Snapshot Isolation is write skew. The reason for
-its occurrence is that under snapshot isolation a transaction does not see
-modifications to versions that have been read during the transaction.
+The earliest known anomaly of SI is write skew. The reason for its occurrence is
+that under SI a transaction does not see modifications to versions that have
+been read during the transaction.
 
 Imagine two transactions $t_1, t_2$ reading two data items $x, y$ constrained by
 a predicate $C$. Next, $t_1$ updates $x$ and finds that $C(x^{*}, y)$ still
@@ -279,27 +282,28 @@ conflicts between transactions that are expected to exhibit write skew
 
 \paragraph{Non-Serializable Read-Only}
 
-Another anomaly was discovered almost 10 years after the introduction of
-snapshot isolation. It proved, contrary to common understanding, that even
-read-only transactions may not always be serializable \cite{fekete2004read}. The
-proof consists of a schedule of three transactions with one being read-only. The
-schedule is constructed in a way that at most two but never all three
-transactions can execute serializably.
+Another anomaly was discovered almost 10 years after the introduction of SI. It
+proved, contrary to common understanding, that even read-only transactions may
+not always be serializable \cite{fekete2004read}. The proof consists of a
+schedule of three transactions with one being read-only. The schedule is
+constructed in a way that at most two but never all three transactions can
+execute serializably.
 
-Suppose a pair of data items $x = 0$ and $y = 0$ and transactions $t_1, t_2,
-t_{RO}$. Further, let $t_1$ compute $y = y - 10$ and also subtract one if $x + y <
-0$, while $t_2$ sets $x = x + 20$. The schedule given in Figure
-\ref{fig:bad_read_only} shows that while $t_1$ is the first transaction to start
-execution, both $t_2$ and $t_{RO}$ start and commit sequentially before $t_1$
-issues its update on $y$. This means that $t_{RO}$ will see the update of $x$ by
-$t_2$ while $t_1$ does not. According to the output of $t_{RO}$ ($x = 20$, $y =
-0$), a serializable schedule would require $t_1$ to have been executed after
-both $t_2$ and $t_{RO}$. This however, is not possible since $t_1$ would have
-seen the update of $t_2$ and no penalty would have been applied as $20 - 10 \geq
-0$. Likewise, in order for $t_1$ to yield $y = -11$, it would have had to be
-executed before $t_2$ (and $t_{RO}$) which however is not consistent with the
-output of $t_{RO}$. In fact, the output of $t_{RO}$ corresponds the the exact
-opposite serial ordering as do those of $t_1$ and $t_2$.
+Suppose a pair of data items $x = 0$ and $y = 0$ and transactions $t_1, t_2$,
+and a read-only transaction $t_{RO}$. Further, let $t_1$ compute $y = y - 10$
+and also subtract one if $x + y < 0$, while $t_2$ sets $x = x + 20$. The
+schedule given in Figure \ref{fig:bad_read_only} shows that while $t_1$ is the
+first transaction to start execution, both $t_2$ and $t_{RO}$ start and commit
+sequentially before $t_1$ issues its update on $y$. This means that $t_{RO}$
+will see the update of $x$ by $t_2$ while $t_1$ does not. According to the
+output of $t_{RO}$ ($x = 20$, $y = 0$), a serializable schedule would require
+$t_1$ to have been executed after both $t_2$ and $t_{RO}$. This however, is not
+possible since $t_1$ would have seen the update of $t_2$ and no penalty would
+have been applied as $20 - 10 \geq 0$. Likewise, in order for $t_1$ to yield $y =
+-11$, it would have had to be executed before $t_2$ (and $t_{RO}$) which however
+is not consistent with the output of $t_{RO}$. In fact, the output of $t_{RO}$
+corresponds the the exact opposite serial ordering as do those of $t_1$ and
+$t_2$.
 
 \begin{figure}[h!]
     \centering
@@ -312,31 +316,30 @@ opposite serial ordering as do those of $t_1$ and $t_2$.
     \label{fig:bad_read_only}
 \end{figure}
 
-Both symptoms can be attributed to the fact, that snapshot isolation fails to
-observe read-write conflicts. When a transaction requests an item, it reads the
-latest version that has been committed before the transaction started. This way,
-a transaction always reads the same version even if a newer version has been
-committed concurrently. This relieves the system from locking a version when
-accessing it. The downside is that every transaction is effectively isolated
-from any concurrent modifications. As a consequence, transactions may
-successfully commit even if one or more versions they have read has been updated
-in the meantime. All anomalies known to be emitted by snapshot isolation can be
-reduced to read-write conflicts.
+Both symptoms can be attributed to the fact, that SI fails to observe read-write
+conflicts. When a transaction requests an item, it reads the latest version that
+has been committed before the transaction started. This way, a transaction
+always reads the same version even if a newer version has been committed
+concurrently. This relieves the system from locking a version when accessing it.
+The downside is that every transaction is effectively isolated from any
+concurrent modifications. As a consequence, transactions may successfully commit
+even if one or more versions they have read has been updated in the meantime.
+All anomalies known to be emitted by SI can be reduced to read-write conflicts.
 
 \subsection{Serializable MVCC}
 
-The previous section introduced the MVCC protocol Snapshot Isolation. SI
-provides affordable isolation but fails to preclude all non-serializable
-schedules such as write skew. Nevertheless, SI is the most widely adopted MVCC
-implementation \cite{larson2011high, bailey2013exploring, neumann2015fast}. In
-some cases, serializing alternatives are available but disabled by default. This
-policy is often motivated by significant performance benefits compared to
-strictly serializing concurrency control \cite{cahill2009serializable}. Others
-argue that SI anomalies may be negligible as even renowned ACID-compliant
-benchmarks such as TPC-C do not expose them \cite{fekete2005making}. However,
-the need for data integrity should not be based on benchmarks failing to prove
-it. Therefore, there are efforts to overcome the weaknesses of SI and provide
-strong consistency without falling back to pessimistic approaches. This section
+The previous section introduced the MVCC protocol SI. SI provides affordable
+isolation but fails to preclude all non-serializable schedules such as write
+skew. Nevertheless, SI is the most widely adopted MVCC implementation
+\cite{larson2011high, bailey2013exploring, neumann2015fast}. In some cases,
+serializing alternatives are available but disabled by default. This policy is
+often motivated by significant performance benefits compared to strictly
+serializing concurrency control \cite{cahill2009serializable}. Others argue that
+SI anomalies may be negligible as even renowned ACID-compliant benchmarks such
+as TPC-C do not expose them \cite{fekete2005making}. However, the need for data
+integrity should not be based on benchmarks failing to prove it. Therefore,
+there are efforts to overcome the weaknesses of SI and provide strong
+consistency without falling back to pessimistic approaches. This section
 presents an overview on approaches to making serializing MVCC affordable.
 
 The main reason for non-serializable schedules in SI is that it cannot detect
@@ -402,4 +405,3 @@ addressed in these works are transaction id assignment and shared memory access,
 in general.
 
 \todo[inline]{Überleitung zu CC in KVS für NVRAM}
-\todo[inline]{Hybride Ansätze: Optimistic + Locking (mao2012cache)}
