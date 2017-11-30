@@ -1,4 +1,5 @@
-The aim of this thesis is to design a KVS with affordable serializable transactions by exploiting the benefits of NVRAM. In order to provide the necessary groundwork, the previous chapters give an overview on recent research in NVRAM, KVS, and concurrency control in databases. It is further pointed out that, as of this writing, there appears to be no previous work on leveraging NVRAM specifically for concurrency control in KVS or MMDB. While recent works primarily see NVRAM as a means to increase transaction throughput, this thesis explores a different approach.
+
+In order to provide the necessary groundwork, the previous chapters give an overview on recent research in NVRAM, KVS, and concurrency control in databases. It is further pointed out that, as of this writing, there appears to be no previous work on leveraging NVRAM specifically for concurrency control in KVS or MMDB. While recent works primarily see NVRAM as a means to increase transaction throughput, this thesis explores a different approach.
 
 This chapter presents the concept for a NVRAM-aware KVS with serializable transactions. After a a brief overview in the next section, follow-up sections outline the architecture, concurrency control, and consistency measures.
 
@@ -20,9 +21,9 @@ NVRAM is especially significant for memory-resident databases as data no longer 
 		* co-existence of RAM and NVRAM
 		* hardware/software features to manage NVRAM
 	* workloads
-		* length of transactions is arbitrary
 		* assume read-mostly workloads
 		* [amount read-only tx unknown]
+		* length of transactions is arbitrary
 * design constraints
 	* in-memory for low latency
 	* concurrency for scalability
@@ -30,8 +31,8 @@ NVRAM is especially significant for memory-resident databases as data no longer 
 	* ACID
 		* A,C,I = serializability for consistency/recovery
 		* D = durability (unlike volatile KV caches)
-	* API
-		* <<example>>
+* API
+	* <<example>>
 
 ### Architecture
 
@@ -64,3 +65,10 @@ NVRAM is especially significant for memory-resident databases as data no longer 
 
 ### Concurrency Control
 
+* serializable snapshot isolation
+	* read tracking + validation
+	* first-updater-wins (as opposed to Echo)
+	* tweaks for omitting validation in some cases
+		* if r/w conflicting updaters are aborted, read-only transactions are always serializable
+			* implicit RO's can skip validation
+			* explicit RO's can skip read tracking + validation
