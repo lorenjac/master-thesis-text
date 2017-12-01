@@ -1,0 +1,67 @@
+### Intro
+
+### Motivation
+
+### Overview
+
+* goals
+	* concurrent transactional in-memory key-value store based on NVRAM
+	* compensate cost of serializability through NVRAM benefits
+	* perform as good as non-serial. KVS on volatile RAM
+* assumptions
+	* technical
+		* multi-core architecture
+		* co-existence of RAM and NVRAM
+		* hardware/software features to manage NVRAM
+	* workloads
+		* assume read-mostly workloads
+		* [amount read-only tx unknown]
+		* length of transactions is arbitrary
+* design constraints
+	* in-memory for low latency
+	* concurrency for scalability
+	* full-fledged transactions (for generality)
+	* ACID
+		* A,C,I = serializability for consistency/recovery
+		* D = durability (unlike volatile KV caches)
+* API
+	* <<example>>
+
+### Architecture
+
+* multicore system w/ hybrid memory architecture
+	* RAM and NVRAM co-exist
+	* both accessible through system memory interface
+	* OS provides means to map NVM regions into a process' VM space
+	* FIGURE!!!
+* two-level store
+	* buffer updates in volatile RAM
+		* no consistency guarantees required
+		* less latency
+		* less wear
+	* write updates to NVRAM only on commit
+		* here we need to ensure consistency across crashes
+		* (see below)
+	* FIGURE!!!
+* structures
+	* index (NVRAM)
+	* index recovery segment (NVRAM)
+	* tx table (RAM)
+* FIGURE!!!
+
+### Consistency
+
+* in accordnance with recent research, the target KVS requires
+	* a way to control memory instruction order
+	* a way to evict cache lines
+	* ADR
+
+### Concurrency Control
+
+* serializable snapshot isolation
+	* read tracking + validation
+	* first-updater-wins (as opposed to Echo)
+	* tweaks for omitting validation in some cases
+		* if r/w conflicting updaters are aborted, read-only transactions are always serializable
+			* implicit RO's can skip validation
+			* explicit RO's can skip read tracking + validation

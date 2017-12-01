@@ -12,8 +12,6 @@ At the moment there are several designs for NVRAM-aware KVS: Echo {bailey2013exp
 
 ### Echo
 
-
-
 ### NVHT
 
 ### NVMcached
