@@ -11,6 +11,7 @@
 * assumptions
 	* technical
 		* multi-core architecture
+		* single-node (non-distributed)
 		* co-existence of RAM and NVRAM
 		* hardware/software features to manage NVRAM
 	* workloads
