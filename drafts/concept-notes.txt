@@ -44,10 +44,24 @@
 		* here we need to ensure consistency across crashes
 		* (see below)
 	* FIGURE!!!
+* concurrency control
+	* MVCC
+		* <<short explanation>>
+		* no transaction-duration locking
+		* no deadlocks
+		* no lock contention
+		* proved efficient even for NVRAM KVS (Echo)
+		* versions/histories are durable
+		* perform scan before operation
+		* more in section on CC ...
 * structures
 	* index (NVRAM)
+	* version chains (NVRAM)
 	* index recovery segment (NVRAM)
 	* tx table (RAM)
+		* volatile (incomplete transactions are negligible)
+	* tx (RAM)
+		* volatile (incomplete transactions are negligible)
 * FIGURE!!!
 
 ### Consistency
@@ -59,7 +73,7 @@
 
 ### Concurrency Control
 
-* serializable snapshot isolation
+* serializable snapshot isolation (as opposed to NVHT)
 	* read tracking + validation
 	* first-updater-wins (as opposed to Echo)
 	* tweaks for omitting validation in some cases

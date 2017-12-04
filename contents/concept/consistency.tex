@@ -27,7 +27,7 @@ moment, programmers have to meticulously manage and optimize updates to NVRAM.
 
 Summing up, preserving consistency across crashes is necessary but also
 introduces adverse effects on performance. In accordance with recent research,
-this concept anticipates to provide the following features
+this work requires the following features
 
 \begin{itemize}
     \item means to enforce program order for memory accesses
@@ -38,6 +38,6 @@ this concept anticipates to provide the following features
 
 Apart from ADR, all of these features are provided by many instruction sets
 including \code{x86\_64}, SPARC, and IBM POWER and zSeries
-\cite{mckenney2007memory}. ADR is platform feature that is required for future
-systems featuring NVRAM. Therefore, no changes to existing hardware are
-required.
+\cite{mckenney2007memory}. ADR, on the other hand, is a platform feature that is
+required for future systems featuring NVRAM. Therefore, no changes to existing
+hardware are needed.
