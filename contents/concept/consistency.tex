@@ -1,31 +1,33 @@
-As pointed out in Chapter \ref{sec:nvram-consistency}, posting updates to NVRAM
-is different from traditional non-volatile storage media. With NVRAM, write-back
-is not directly observable by software and the underlying memory subsystem is
-unaware of transactional semantics. As a result, updates may be reordered or get
-stuck in store buffers and caches, thus threathing consistency across crashes.
+Posting updates to NVRAM is different from traditional non-volatile storage
+media. With NVRAM, write-back is not directly observable by software and the
+underlying memory subsystem is unaware of transactional semantics. As a result,
+updates may be reordered or get stuck in store buffers and caches, thus
+threatening consistency across crashes.
 
-The current state of affairs requires programmers to manually enforce
-write-back, in order to preserve consistency. At first, it is important to
-enforce strict program order for transactionally related memory operations. This
-can be done with memory barriers or fences. While such measures usually include
-flushing store buffers, in-flight updates may still get stuck in caches. To
-prevent this, cache line flushes or non-temporal stores could be used. When
-reaching a memory controller, stores are usually enqueued in another buffer to
+As pointed out in Chapter \ref{sec:nvram-consistency}, programmers need to
+manually enforce write-back, in order to preserve consistency. At first, it is
+important to enforce strict program order for transactionally related memory
+operations. This can be done with memory barriers or fences. While such measures
+usually include flushing store buffers, in-flight updates may still get stuck in
+caches. To prevent this, cache line flushes or non-temporal stores could be
+used. Even when reaching a memory controller, stores are once again buffered to
 speed up subsequent reads to that item. While earlier works anticipated
 designated flush instructions for controller buffers, both researchers and
 hardware vendors have agreed on the platform feature ADR. When power fails, it
-receives a signal and utilizes the residual electric energy to flush memory
-controller buffers. With the exception of ADR, all of these measures can
-significantly increase execution latencies as they work against many aspects of
-modern microprocessors. Deferred write-backs for example are useful to decrease
-access times for recently written data. Flushing store buffers, however, also
-affects data that are not involved in transactions. In addition, strict program
-order usually result in pipeline stalls. Since there are no other options at the
+receives a signal and utilizes the remaining electrical energy to flush all
+memory controller buffers.
+
+With the exception of ADR, all of these methods can significantly increase
+execution latencies as they work against many aspects of modern microprocessors.
+Deferred write-backs for example are useful to decrease access times for
+recently written data. Flushing store buffers, however, also affects data that
+are not involved in transactions. In addition, enforcing strict program order
+usually results in pipeline stalls. Since there are no other options at the
 moment, programmers have to meticulously manage and optimize updates to NVRAM.
 
 Summing up, preserving consistency across crashes is necessary but also
-introduces adverse effects on performance. In particular, this concept
-anticipates to provide the following features
+introduces adverse effects on performance. In accordance with recent research,
+this concept anticipates to provide the following features
 
 \begin{itemize}
     \item means to enforce program order for memory accesses
@@ -33,3 +35,9 @@ anticipates to provide the following features
     \item means to flush individual cache lines
     \item ADR
 \end{itemize}
+
+Apart from ADR, all of these features are provided by many instruction sets
+including \code{x86\_64}, SPARC, and IBM POWER and zSeries
+\cite{mckenney2007memory}. ADR is platform feature that is required for future
+systems featuring NVRAM. Therefore, no changes to existing hardware are
+required.
