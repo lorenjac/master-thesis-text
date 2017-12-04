@@ -23,11 +23,13 @@ and workloads characteristics.
 In order to take advantage of concurrency, the concept is designed for
 multi-core architectures. While this increases the number of threads that can be
 run in parallel, it also introduces synchronization issues for access to shared
-memory which must be handled wit care. In accordance with recent research, it is
-assumed that volatile RAM will continue to be present and share the same memory
-interface with NVRAM. This reduces individual bandwidths but enables uniform
-access methods. It is further assumed that target systems provide sufficient
-hardware and software facilities to manage NVRAM.
+memory which must be handled wit care. However, to keep complexity manageable,
+the concept refrains from distributed computing and targets single-node
+databases. In accordance with recent research, it is assumed that volatile RAM
+will continue to be present and share the same memory interface with NVRAM. This
+reduces individual bandwidths but enables uniform access methods. It is further
+assumed that target systems provide sufficient hardware and software facilities
+to manage NVRAM.
 
 \paragraph{Workloads}
 
