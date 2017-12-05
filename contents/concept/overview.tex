@@ -2,7 +2,7 @@ This section provides an overview on the concept of this work. For this purpose,
 goals, assumptions, and design constraints are outlined. The section concludes
 with an outline of the desired API and practical examples.
 
-\subsubsection{Goal}
+\subsection{Goal}
 
 The intent of this thesis to determine whether MMDB could exploit NVRAM to make
 transactions with strong consistency affordable. Given the overwhelming
@@ -13,7 +13,7 @@ leverage the headroom to compensate for the cost of serializability. The goal is
 to design a serializing in-memory KVS for NVRAM which performs on par with
 non-serializing KVS based on volatile RAM.
 
-\subsubsection{Assumptions}
+\subsection{Assumptions}
 
 The concept is based on several assumptions concerning both technical aspects
 and workloads characteristics.
@@ -29,7 +29,8 @@ databases. In accordance with recent research, it is assumed that volatile RAM
 will continue to be present and share the same memory interface with NVRAM. This
 reduces individual bandwidths but enables uniform access methods. It is further
 assumed that target systems provide sufficient hardware and software facilities
-to manage NVRAM.
+to manage NVRAM. Details concerning crash consistency are provided in Chapter
+\ref{ch:concept-consistency}
 
 \paragraph{Workloads}
 
@@ -41,7 +42,7 @@ transactions are supported, there seems to be no hard evidence on the importance
 or quantity of such transactions. Likewise, long-running transactions are not
 handled separately, as their share could not be determined.
 
-\subsubsection{Design Constraints}
+\subsection{Design Constraints}
 
 \paragraph{In-Memory Operation}
 
@@ -61,12 +62,12 @@ within a transaction. Likewise, full ACID support is required to guarantee sound
 transactional semantics. In order to guarantee strong consistency and isolation
 in the presence of concurrent transactions, serializability is a central
 requirement. Note that, in contrast to some KVS which are designed as caches the
-target KVS in this work supports durability. Concerning nature of key-value
-pairs, this work imposes no requirements regarding their datatypes. Still,
-implementations are free to, for instance, limit the length of keys if the
-underlying data structures requires it.
+target KVS in this work supports durability. Concerning the nature of key-value
+pairs, this work imposes no restrictions on their datatypes. Still,
+implementations are free to limit the length of keys, for instance, if the
+underlying data structure requires it.
 
-\subsubsection{API \& Examples}
+\subsection{API}
 
 Given the simplistic nature of KVS, this concept anticipates a narrow API that
 features the very basic building blocks of transactional semantics. The API can
@@ -102,25 +103,16 @@ Listing \ref{lst:api_ex} shows an example where a transaction checks whether the
 balance is negative and, if so, applies a penalty.
 
 \begin{lstlisting}
-// create key-value store
 kvstore kvs;
 
-// ... lots of transactions ...
+/* ... lots of transactions ... */
 
-// begin transaction
 auto tx = kvs.begin();
-
-// retrieve current balance
-auto balance = kvs.get("balance");
-
-// test if balance is negative
-if (isNegative(balance)) {
-
-	// apply penalty
-	kvs.put("balance", decrement(balance), tx);
+auto deb = kvs.get("debit", tx);
+auto sav = kvs.get("saving", tx);
+if (getBalance(sav, deb) < 0.0) {
+	kvs.put("debit", applyInterest(deb), tx);
 }
-
-// commit transaction
 tx->commit();
 \end{lstlisting}\label{lst:api_ex}
 
