@@ -31,13 +31,13 @@ this work requires the following features
 
 \begin{itemize}
     \item means to enforce program order for memory accesses
-    \item means to flush potential memory order buffers
-    \item means to flush individual cache lines
+    % \item means to flush potential memory order buffers
+    \item means to flush cashes or individual cache lines
     \item ADR
 \end{itemize}
 
-Apart from ADR, all of these features are provided by many instruction sets
-including \code{x86\_64}, SPARC, and IBM POWER and zSeries
-\cite{mckenney2007memory}. ADR, on the other hand, is a platform feature that is
-required for future systems featuring NVRAM. Therefore, no changes to existing
+Both memory order enforcement and fine-grained cache flushes are provided by
+many instruction sets including \code{x86\_64}, SPARC, and IBM POWER and zSeries
+\cite{mckenney2007memory}. ADR, on the other hand, is a new platform feature
+that is already supported on some systems. Therefore, no changes to existing
 hardware are needed.

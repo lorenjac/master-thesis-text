@@ -1,0 +1,12 @@
+After outlining goals and preconditions in the previous section, this section
+presents the architecture of the KVS. It covers all aspects, except crash
+consistency and concurrency control which are dealt with in more detail in
+subsequent sections.
+
+The KVS is designed for multi-core architectures and relies on both volatile and
+non-volatile memory attached to the system memory interface. In order to take
+advantage of both types of memory, the KVS is designed as a two-level store
+which only updates NVRAM when a transaction commits. Consistency across crashes
+is ensured with existing hardware primitives and upcoming platform features.
+Concurrent transactions are controlled with a serializable variant of SI. The
+reasoning behind these design decisions is further elaborated below.
