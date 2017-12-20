@@ -1,10 +1,30 @@
 After outlining goals and preconditions in the previous section, this section presents the architecture of the KVS. It covers all aspects, except crash consistency and concurrency control which are dealt with in more detail in subsequent sections.
 
-The KVS is designed for multi-core architectures and relies on both volatile and non-volatile memory attached to the system memory interface. In order to take advantage of both types of memory, the KVS is designed as a two-level store which only updates NVRAM when a transaction commits. Consistency across crashes is ensured with existing hardware primitives and upcoming platform features. Concurrent transactions are controlled with a serializable variant of SI. The reasoning behind these design decisions is further elaborated below.
+The KVS is designed for multi-core architectures and relies on both volatile and non-volatile memory attached to the system memory interface. In order to take advantage of both types of memory, the KVS is designed as a two-level store which only updates NVRAM when a transaction commits. Consistency across crashes is ensured with existing hardware primitives and upcoming platform features. Concurrent transactions are controlled by a serializable variant of SI. Background on these design decisions is given below.
 
-### System Overview
+## System Architecture
 
+Designing a performance-critical software such as databases not only involves knowledge about expected workloads but also about the underlying platform. While workloads have been discussed earlier, this section describes the target system architecture for the intended KVS.
 
+### Single-Node
+
+First and foremost, the KVS is designed for a single-nodes. Even though distributed databases are fairly common, there seems to be no apparent reason for them to reveal any more insight on leveraging NVRAM for concurrency. Also distributed systems involve much more complex mechanisms such as consensus among distributed transactions, all of which are beyond the scope of this work. However, future work should investigate whether the conclusions of this work also hold for distributed databases.
+
+### Multi-Core Processors
+
+In order to achieve scalable transaction throughput through concurrency, the target system is a multi-core architecture. That means, the system features one or more processors with multiple cores, where each core may support multiple hardware threads. On such a system, each transaction is executed in the context of a thread which is scheduled and assigned to a processor core by the operating system. [Should future work address many-cores? Could memory bandwidth (bus contention) become a problem there?] In order to coordinate their work, processor cores usually communicate via some form of chip interconnect. This work makes no assumptions concerning the nature of such networks or their topologies.
+
+### Hybrid Memory Architecture
+
+Recent research shows that on traditional hardware it is advisable to continue integrating volatile RAM together with NVRAM. The reason is that not all data is meant to be durable which is especially true for NVRAM where crash consistency is linked with considerable overhead. Manufacturing NVRAM is still challenging, especially in terms of access latency and endurance, but it is expected that these issues will be resolved in the near future. Therefore, in an effort to combine the benefits of both technologies, the memory subsystem is required to feature both volatile RAM and NVRAM. [Move to top of segment?] In accordance with recent research it is assumed that both kinds of memory can be access through the same memory interface.
+
+This work assumes a shared memory architecture. Conceptually, cache coherence is not required but has the advantage that less software is required to coordinate concurrent access to shared data thus saving both bandwidth and execution cycles. Although worth investigating, questions concerning uniform and non-uniform memory access are beyond the scope of this work.
+
+## Key-Value Store
+
+The KVS is designed to exclusively reside in main memory. All data that is not required across restarts is stored in volatile RAM, whereas all other data are stored in NVRAM. Multiple recent works have demonstrated that NVRAM can be used to build MMDB without conventional non-volatile storage such as hard drives. As a result, ensuring recovery, which has always been an inherent bottleneck of MMDB, can be eliminated. In addition, near instantaneous restarts become feasible. 
+
+As a consequence, candidate systems must provide sufficient NVRAM capacity to hold the entire database.
 
 ### Two-Level Store
 
