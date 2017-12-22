@@ -8,17 +8,17 @@ non-volatile memory attached to the system memory interface. In order to take
 advantage of both types of memory, the KVS is designed as a two-level store
 which only updates NVRAM when a transaction commits. Consistency across crashes
 is ensured with existing hardware primitives and upcoming platform features.
-Concurrent transactions are controlled with a serializable variant of SI. The
-reasoning behind these design decisions is further elaborated below.
+Concurrent transactions are controlled by a serializable variant of SI.
+Background on these design decisions is given below.
 
 \subsection{System Architecture}
 
 Designing a runtime-critical software such as databases not only involves
-knowledge about expected workloads but also about the underlying hardware. While
-workloads have been discussed earlier, this section describes the system
-architecture of the intended KVS.
+knowledge about expected workloads but also about the underlying computing
+device. While workloads have been discussed earlier, this section describes the
+system architecture of the intended KVS.
 
-\paragraph{Single-Node}
+\subsubsection{Single-Node}
 
 First and foremost, the KVS is designed for a single-nodes. Even though
 distributed databases are fairly common, there seems to be no apparent reason
@@ -28,7 +28,7 @@ distributed transactions, all of which are beyond the scope of this work.
 However, future work should investigate whether the conclusions of this work
 also hold for distributed databases.
 
-\paragraph{Multi-Core Processors}
+\subsubsection{Multi-Core Processors}
 
 In order to achieve scalable transaction throughput through concurrency, the
 target system is a multi-core architecture. That means, the system features one
@@ -40,7 +40,7 @@ contention) become a problem there?] In order to coordinate their work,
 processors usually communicate via some form of chip interconnect. This work
 makes no assumptions concerning the nature of such networks or their topologies.
 
-\paragraph{Hybrid Memory Architecture}
+\subsubsection{Hybrid Memory Architecture}
 
 Recent research shows that on traditional hardware it is advisable to continue
 integrating volatile RAM together with NVRAM. The reason is that not all data is
@@ -54,15 +54,15 @@ with recent research it is assumed that both kinds of memory can be access
 through the same memory interface. This work assumes a shared memory
 architecture. That is, processors may one or more private cache levels but main
 memory is accessible to all processors. Conceptually, cache coherence is not
-required but has the advantage that less programming effort is spent on
-coordinating concurrent access to shared data.
+required but has the advantage that less effort is spent on coordinating
+concurrent access to shared data.
 
 The KVS is designed to exclusively reside in main memory. All data that is not
 required across restarts is stored in volatile RAM, whereas all other data are
 stored in NVRAM. Multiple recent works have demonstrated that NVRAM can be used
 to build MMDB without conventional non-volatile storage such as hard drives. As
 a result, ensuring recovery, which has always been an inherent bottleneck of
-MMDB, can be eliminated. In addition, near instantaneous restarts become
+MMDB, can be eliminated. In addition, near-instantaneous restarts become
 feasible. As a consequence, conventional storage is not part of the concept for
 this KVS. While such components may very well be present in a system, they are
 never used to store any data of the KVS other than its binaries. This way, data
@@ -70,22 +70,39 @@ access incurs no I/O and restarts do not have to fetch data from slower storage
 devices. In return, candidate systems must provide sufficient NVRAM capacity to
 hold the entire database.
 
-A disadvantage of this approach is that the size of the database is strictly
-limited to the amount of available NVRAM. In contrast, many MMDB allow for
-larger amounts of data by keeping frequently used data in memory, while others
-are moved to another medium. However, main memory capacities have been steadily
-growing and NVRAM capacities are projected to have at least twice the capacity
-of DRAM. Another drawback is recoverability in case of device failures. Disk
-storage not only scales better in terms of capacity, it can also be used to
-employ redundancy through RAID, for instance. With NVRAM, both capacity and
-scalability are lower, so employing redundancy could be a problem. Without
-redundant data, a single failed device may incur expensive data loss. This issue
-could be investigated in future work.
+A disadvantage of this approach is that the size of the database is bounded by
+the amount of available NVRAM. In contrast, MMDB usually allow for larger data
+sets by keeping frequently used data in memory, while others are moved to slower
+mass storage media. However, main memory capacities have been steadily growing
+and NVRAM capacities are projected to have at least twice the capacity of DRAM.
+Another drawback is recoverability in case of device failures. Mass storage not
+only scales better in terms of capacity, it can also be used to employ
+redundancy through RAID, for instance. With NVRAM, both capacity and scalability
+are lower, so employing information redundancy may be prohibitively expensive.
+Without such measures of fault tolerance, however, a single failed NVRAM module
+may lead to permanent data loss. This issue is not tackled in this thesis and is
+therefore left for future work.
 
-\subsection{Key-Value Store}
+\subsection{Key-Value Store Design}
 
-\paragraph{Two-Level Store}
+This section describes the software architecture of the KVS. That includes the
+operation principle in terms of storage and concurrency as well as the general
+structure.
 
-\paragraph{Multiversioning}
+\subsubsection{Two-Level Store}
 
-\paragraph{Structures}
+As mentioned above, the KVS resides entirely in main memory. This has the
+disadvantage that the size of the databases is bounded by the total NVRAM
+capacity but allows for fast access to all parts of the database.
+
+With both DRAM and NVRAM in a system, the KVS has access to memory that is fast
+but volatile or slightly slower but durable. As pointed out in Chapter
+\ref{ch:nvram}, NVRAM latencies mainly affect writes and are attributed to both
+technology parameters and crash consistency measures. Details on how the KVS
+preserves consistency across crashes are given in Chapter
+\ref{sec:concept-consistency}. In order to benefit from both memory
+technologies, the KVS employs a two-level store architecture.
+
+\subsubsection{Multiversioning}
+
+\subsubsection{Structures}
