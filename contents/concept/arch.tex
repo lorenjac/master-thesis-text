@@ -183,3 +183,51 @@ Ensuring durability and consistency with NVRAM requires special attention and is
 covered in Chapter \ref{ch:concept-consistency}.
 
 \subsubsection{Structures}
+
+The KVS resides entirely in main memory, that is, both volatile and non-volatile
+memory. According to the two-level store architecture, the KVS is partitioned
+into two sections: a volatile and a non-volatile section.
+
+The volatile section only contains strictly volatile data, that is, losing these
+data in a crash can never affect the durable part of the database. Most
+importantly, that includes transaction control blocks and a transaction table.
+
+\paragraph{Transaction Control Blocks}
+
+From a software point of view, transactions can be modeled as a tuple of
+attributes that describe the current state of a transactional context. Typical
+attributes could be:
+
+\begin{itemize}
+    \item begin and end timestamps
+    \item execution phase
+    \item change sets
+\end{itemize}
+
+Throughout its lifetime, a transaction usually transitions through several
+execution phases. Beginning with an \code{active} state once a transaction has
+started, it may transition to \code{try\_commit} upon commit and finally
+\code{committed} when it succeeds. Upon failure, a transaction could indicate a
+\code{failed} state. The concrete set of phases is left to the implementation.
+
+Change sets are required to buffer all modifications that a transaction carries
+out. When a transaction commits all modifications are propagated to durable
+memory. There may be several different change sets depending on the type of
+operation, such as deleting or updating.
+
+Transaction control blocks are volatile because, otherwise, incomplete
+transactions would still have to be rolled back to satisfy atomicity.
+Furthermore, preventing or removing partially committed change sets is handled
+by recovery and NVRAM management.
+
+\paragraph{Transaction Table}
+
+In order to manage currently running transactions, each new transaction is
+placed inside a container. Especially with MVCC, transactions may need a way to
+inspect other transactions to detect conflicts. Since transactions run on
+different threads or cores, respectively, the container is a globally shared
+lookup table. In order to protect critical sections when accessing the table
+locking or lock-free append-only approaches could be used. Completed
+transactions may not be automatically removed from the table but collected by
+garbage collector. The transaction table is volatile by implication as it only
+contains transaction control blocks which are explicitly volatile.
