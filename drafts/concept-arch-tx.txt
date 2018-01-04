@@ -1,0 +1,19 @@
+The KVS supports full-featured and ACID-compliant transactions. Unlike other works, this KVS allows multiple operations to be enclosed in a single transaction. The primary motivation behind this decision is to preserve generality with regard to more complex DBMS. Likewise, all transactions must conform to the ACID properties to ensure data consistency. Nesting transactions is not supported as use cases are too few to justify the additional complexity.
+
+Providing ACID support requires a conjunction of preventing erroneous behaviour and restoring a previously sane state if an error occurs.
+
+\paragraph{Isolation}
+
+The cornerstone of this work is to ensure isolation between concurrent transactions, that is concurrent transactions cannot observe each others uncommitted actions. This is achieved with two aspects: the two-level store architecture and MVCC. 
+
+Transactions are run as individual threads. All modifications within a transaction are buffered in thread-local volatile memory as opposed to a global in-place update. As a result, NVRAM does not reflect uncommitted changes and can therefore not be used to observe such activity. Technically, threads could spy on each others change buffers but such behaviour is neither required nor intended.
+
+Protecting transactions from observing concurrent updates, however, does not imply transactionally consistent data. For this purpose, the KVS employs a serializing MVCC protocol. The concrete protocol which is a serializing variant of SI serves two purposes: ensuring all transactions behave as if run serially and recovery. On the one hand, timestamped versions are used to keep track of modifications. On the other hand, a COW mechanism is used to enable recoverable version histories without logging. Details on the nature of the concurrency control protocol are given in Chapter \ref{sec:concept-cc}.
+
+\paragraph{Atomicity}
+
+Atomicity means that a transactions either succeeds as a whole or it fails entirely. This means that any traces of a failed transactions must be either neutral or reverted. As with isolation, atomicity is based on the two-level store architecture and MVCC. The former ensures that only modifications of committing transactions are written to durable memory. That way, an incomplete or failed transaction cannot be globally observed. In addition, the SI protocol allows the system to always retrieve the latest committed version of an item. Even if an update to NVRAM fails, the KVS can always go back to the lastest committed version without performing an actual rollback. However, in the event an update propagation to NVARM is interrupted, then partial write-backs may become durable. A typical scenario would be a system crash or a power failure. In this case, the KVS must ensure that any torn writes to not harm the consistency of data. Possible solutions for this problem are recovery routines that locate and invalidate corrupted data or designated bitfields that are guaranteed to be set only after the entire payload has been written. The concrete recovery method to be used is implementation-defined.
+
+\paragraph{Durability & Consistency}
+
+Ensuring durability and consistency with NVRAM requires special attention and is covered in Chapter \ref{sec:concept-consistency}.

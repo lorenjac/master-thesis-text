@@ -36,10 +36,6 @@ The aim of the two-level store architecture is to reduce the impact of NVRAM-rel
 
 ### Transactions
 
-* type: flat whole transactions; no auto commit
-* concurrency: MVCC
-* recovery: implementation-defined
-
-In the event an update propagation is interrupted, for instance by a crash, then partial write-backs may become durable. In this case, the KVS must ensure that any torn writes to not harm the consistency of data. Possible solutions for this problem are recovery routines that locate and invalidate corrupted data or designated bitfields that are guaranteed to be set only after the entire payload has been written. The concrete recovery method to be used is implementation-defined.
+/concept-arch-tx.txt
 
 ### Structures
