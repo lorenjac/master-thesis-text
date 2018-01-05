@@ -24,3 +24,28 @@ In order to manage currently running transactions, each new transaction is place
 Completed transactions may not be automatically removed from the table but collected by garbage collector. The transaction table is volatile by implication as it only contains transaction control blocks which are explicitly volatile.
 
 ### Non-Volatile
+
+The non-volatile section stores all data that are durable across restarts. It comprises a control block and the index structure of the KVS.
+
+\paragraph{Control Block}
+
+The control block is used to store essential meta data and for locating the index after a restart. For that purpose, the control block is placed in a fixed position of the KVS' NVRAM region. Possible locations are the front or rear end of the memory region. The index can be found by storing an offset or pointer. Either way, the underlying system must provide a way to reuse or recover a previous memory mapping, so both location methods are sufficient.
+
+\paragraph{Index}
+
+The index implements the actual KVS paradigm by mapping keys to individual data items. 
+
+* data structure
+	* must be fast
+	* is highly contended
+	* ideally lock-free
+	* possible solutions are cuckoo hashing which has lock-free variants
+* due to use of MVCC, index does not map items but histories
+
+\paragraph{Histories}
+
+* a chain of versions
+	* may be iterated frequently
+	* ideally consecutive to prevent page faults and leverage prefetching
+	* append-only (unless GC interferes)
+	* may be an array or a linked list
