@@ -8,7 +8,7 @@ The cornerstone of this work is to ensure isolation between concurrent transacti
 
 Each transaction is run in a separate thread. All modifications within a transaction are buffered in thread-local volatile memory as opposed to a global in-place update. As a result, NVRAM does not reflect uncommitted changes and can therefore not be used to observe such activity. Technically, threads could spy on each others change buffers but such behaviour is neither required nor intended.
 
-Protecting transactions from observing concurrent updates, however, does not imply transactionally consistent data. For this purpose, the KVS employs a serializing MVCC protocol. The concrete protocol which is a serializing variant of SI serves two purposes: ensuring all transactions behave as if run serially and recovery. On the one hand, timestamped versions are used to keep track of modifications. On the other hand, a COW mechanism is used to enable recoverable version histories without logging. Details on the nature of the concurrency control protocol are given in Chapter \ref{sec:concept-cc}.
+Protecting transactions from observing concurrent updates, however, does not imply transactionally consistent data. For this purpose, the KVS employs a serializing MVCC protocol. The concrete protocol which is a serializing variant of SI serves two purposes: ensuring all transactions behave as if run serially and recovery. On the one hand, timestamped versions are used to keep track of modifications. On the other hand, a COW mechanism is used to enable recoverable version histories without logging. Details on the nature of the concurrency control protocol are given in Chapter \ref{ch:concept-cc}.
 
 \paragraph{Atomicity}
 
@@ -16,4 +16,4 @@ Atomicity means that a transactions either succeeds as a whole or it fails entir
 
 \paragraph{Durability & Consistency}
 
-Ensuring durability and consistency with NVRAM requires special attention and is covered in Chapter \ref{sec:concept-consistency}.
+Ensuring durability and consistency with NVRAM requires special attention and is covered in Chapter \ref{ch:concept-consistency}.

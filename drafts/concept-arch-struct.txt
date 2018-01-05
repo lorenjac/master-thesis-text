@@ -25,7 +25,7 @@ Completed transactions may not be automatically removed from the table but colle
 
 ### Non-Volatile
 
-The non-volatile section stores all data that are durable across restarts. It comprises a control block and the index structure of the KVS.
+The non-volatile section stores all data that are durable across restarts. It holds a control block, the index structure, and all data items mapped by the index.
 
 \paragraph{Control Block}
 
@@ -33,19 +33,10 @@ The control block is used to store essential meta data and for locating the inde
 
 \paragraph{Index}
 
-The index implements the actual KVS paradigm by mapping keys to individual data items. 
+The index implements the actual KVS paradigm by mapping keys to individual data items. Note that, due to MVCC, instead of mapping concrete data items, each key maps to a history of versions of that item. It is the core data structure of a KVS and accessed by all transactions concurrently. As such, the index is a strong contention point that is also very critical for the performance of the KVS. For that reason, selecting a suitable data structure is crucial. The domain analysis in Chapter \ref{ch:kvs-nvram} shows that many, if not most, KVS rely hash tables. Reasons are amortized constant access, well-known array-like allocation schemes, and comparably low complexity. B-trees or radix trees, on the other hand, are slower and optimized for disk storage which was shown to inappropriate for NVRAM. Therefore, this work opts for an index based on a hash table.
 
-* data structure
-	* must be fast
-	* is highly contended
-	* ideally lock-free
-	* possible solutions are cuckoo hashing which has lock-free variants
-* due to use of MVCC, index does not map items but histories
+Operations on the index include adding, retrieving, and removing a key-value pair. To prevent inconsistencies through race conditions, access must be mutually exclusive. While locking can quickly become a bottleneck in read-dominated scenarios, non-blocking data structures are generally slower and more complex. Still, this work strives to use modern approaches such as lock-free variants of cuckoo hashing. The actual hashing method is an implementation detail.
 
 \paragraph{Histories}
 
-* a chain of versions
-	* may be iterated frequently
-	* ideally consecutive to prevent page faults and leverage prefetching
-	* append-only (unless GC interferes)
-	* may be an array or a linked list
+The index maps each key to a history of version of its designated data item. Before an operation on an item can begin, the MVCC algorithm has to determine which version of the item is visible to the requesting transaction. As a result, histories may be iterated frequently. Also multiple transactions may access the same history at a time, so there may be overlapping accesses. However, transactions never remove and only add new versions at the back of the history. Therefore, contention may be high but mostly read-only. In order to account for these characteristics, an array-like data structure may be the most appropriate choice as opposed to a list. Consecutive access in array is less likely to cause page faults and can benefit from hardware prefetching. Also array have simpler allocation patterns compared to lists. Problems arise when garbage collection which could perform random-access modifications to the history. Since garbage collection would break the scope of this work, it is assumed to absent or as non-invasive as possible.

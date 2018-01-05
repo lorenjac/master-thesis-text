@@ -4,7 +4,7 @@ underlying memory subsystem is unaware of transactional semantics. As a result,
 updates may be reordered or get stuck in store buffers and caches, thus
 threatening consistency across crashes.
 
-As pointed out in Chapter \ref{sec:nvram-consistency}, programmers need to
+As pointed out in Chapter \ref{ch:nvram-consistency}, programmers need to
 manually enforce write-back, in order to preserve consistency. At first, it is
 important to enforce strict program order for transactionally related memory
 operations. This can be done with memory barriers or fences. While such measures

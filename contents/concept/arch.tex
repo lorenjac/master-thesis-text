@@ -37,6 +37,8 @@ system. Processors usually coordinate their work by communicating via some form
 of chip interconnect. In order to preserve generality, this work makes no
 assumptions concerning the nature of such interconnect networks.
 
+\todo[inline]{insert figure here}
+
 \subsubsection{Memory Architecture}
 
 Recent research shows that on traditional hardware it is advisable to continue
@@ -65,6 +67,8 @@ never used to store any data of the KVS other than its binaries. This way, data
 access incurs no I/O and restarts do not have to fetch data from slower storage
 devices. In return, candidate systems must provide sufficient NVRAM capacity to
 hold the entire database.
+
+\todo[inline]{insert figure here (point out KVS in memory hierarchy)}
 
 A disadvantage of this approach is that the size of the database is bounded by
 the amount of available NVRAM. In contrast, MMDB usually allow for larger data
@@ -120,6 +124,8 @@ repeatedly for a single transaction. Third, updated items in volatile memory can
 be accessed with lower latencies, which is true for both read and write
 operations. In the end, buffering updates also aids recovery, as uncommitted
 data is guaranteed to be lost after a restart.
+
+\todo[inline]{insert figure here}
 
 \subsubsection{Transactions}
 
@@ -233,5 +239,58 @@ garbage collector. The transaction table is volatile by implication as it only
 contains transaction control blocks which are explicitly volatile.
 
 \todo[inline]{insert figure here (WITHOUT details on durable section)}
+
+The non-volatile section stores all data that are durable across restarts. It
+holds a control block, the index structure, and all data items mapped by the
+index.
+
+\paragraph{Control Block}
+
+The control block is used to store a few essential meta data and for locating
+the index after a restart. For that purpose, the control block is placed in a
+fixed position of the KVS' non-volatile region. Possible locations are the front
+or rear end of the memory region. The index can be found by storing an offset or
+pointer. Either way, the underlying system must provide a way to reuse or
+recover a previous memory mapping, so both location methods are sufficient.
+
+\paragraph{Index}
+
+The index implements the actual KVS paradigm by mapping keys to individual data
+items. Note that, due to MVCC, instead of mapping concrete data items, each key
+maps to a history of versions of its associated item. It is the core data
+structure of a KVS and accessed by all transactions concurrently. As such, the
+index is a strong contention point that is also very critical for the
+performance of the KVS. For that reason, selecting a suitable data structure is
+crucial. The domain analysis in Chapter \ref{ch:kvs-nvram} shows that many, if
+not most, KVS rely on hash tables. Reasons are amortized constant access,
+well-known array-like allocation schemes, and comparably low complexity. B-trees
+or radix trees, on the other hand, are slower and optimized for disk storage
+which was shown to be inappropriate for NVRAM. Therefore, this work opts for an
+index based on a hash table.
+
+Operations on the index include adding, retrieving, and removing a key-value
+pair. To prevent inconsistencies through race conditions, access must be
+mutually exclusive. While locking can quickly become a bottleneck in
+read-dominated scenarios, non-blocking data structures are generally slower and
+more complex. Still, this work strives to use modern approaches such as
+lock-free variants of cuckoo hashing. The actual hashing method is an
+implementation detail.
+
+\paragraph{Histories}
+
+The index maps each key to a chain of versions of a data item. Before an
+operation on an item can begin, the MVCC algorithm has to determine which
+version of the item is visible to the requesting transaction. As a result,
+histories may be iterated frequently. Also multiple transactions may access the
+same history at a time, so there may be overlapping accesses. However,
+transactions never remove and only add new versions at the back of the history.
+Therefore, contention may be high but mostly read-only. In order to account for
+these characteristics, an array-like data structure may be the most appropriate
+choice as opposed to a list. Consecutive access in arrays is less likely to
+cause page faults and can benefit from hardware prefetching. Also arrays have
+simpler allocation patterns compared to lists. Problems arise with garbage
+collection which could perform random-access modifications to the history. Since
+garbage collection would break the scope of this work, it is assumed to be
+absent or as non-invasive as possible.
 
 \todo[inline]{insert figure here (WITH details on durable section)}
