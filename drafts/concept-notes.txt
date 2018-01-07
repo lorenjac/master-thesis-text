@@ -73,7 +73,7 @@
 
 ### Concurrency Control
 
-* serializable snapshot isolation (as opposed to NVHT)
+* serializable snapshot isolation (as opposed to NVHT, Echo)
 	* read tracking + validation
 	* first-updater-wins (as opposed to Echo)
 	* tweaks for omitting validation in some cases
