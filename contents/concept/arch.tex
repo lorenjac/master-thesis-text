@@ -37,8 +37,6 @@ system. Processors usually coordinate their work by communicating via some form
 of chip interconnect. In order to preserve generality, this work makes no
 assumptions concerning the nature of such interconnect networks.
 
-% \todo[inline]{insert figure here}
-
 \begin{figure}[!ht]
     \centering
     \includegraphics[scale=0.5]{figures/drafts/concept-sys-cpu.pdf}
@@ -74,8 +72,6 @@ never used to store any data of the KVS other than its binaries. This way, data
 access incurs no I/O and restarts do not have to fetch data from slower storage
 devices. In return, candidate systems must provide sufficient NVRAM capacity to
 hold the entire database.
-
-% \todo[inline]{insert figure here (point out KVS in memory hierarchy)}
 
 \begin{figure}[!ht]
     \centering
@@ -139,8 +135,6 @@ be accessed with lower latencies, which is true for both read and write
 operations. In the end, buffering updates also aids recovery, as uncommitted
 data is guaranteed to be lost after a restart.
 
-% \todo[inline]{insert figure here}
-
 \begin{figure}[!ht]
     \centering
     \includegraphics[width=\textwidth]{figures/drafts/concept-sys-two-level-store.pdf}
@@ -178,14 +172,11 @@ Protecting transactions from observing concurrent updates, however, does not
 imply transactionally consistent data. For this purpose, the KVS employs a
 serializing MVCC protocol. When compared to locking-based approaches, MVCC
 protocols have shown better performance in read-intensive environments and are
-used databases. In this case, the concrete protocol is a serializing variant of
-SI and serves two purposes: ensuring all transactions behave as if run serially
-and recovery. On the one hand, timestamped versions are used to keep track of
-modifications. On the other hand, a COW mechanism is used to enable recoverable
-version histories without logging.
-
-% Details on the nature of the concurrency
-% control protocol are given in Chapter \ref{ch:concept-cc}.
+used in many databases. In this case, the concrete protocol is a serializing
+variant of SI and serves two purposes: recovery and ensuring all transactions
+behave as if run serially. On the one hand, timestamped versions are used to
+keep track of modifications. On the other hand, a copy-on-write mechanism is
+used to enable recoverable version histories without logging.
 
 \paragraph{Atomicity}
 
@@ -302,9 +293,7 @@ Operations on the index include adding, retrieving, and removing a key-value
 pair. To prevent inconsistencies through race conditions, access must be
 mutually exclusive. While locking can quickly become a bottleneck in
 read-dominated scenarios, non-blocking data structures are generally slower and
-more complex. Still, this work strives to use modern approaches such as
-lock-free variants of cuckoo hashing. The actual hashing method is an
-implementation detail.
+more complex. The actual hashing method is an implementation detail.
 
 \paragraph{Histories}
 

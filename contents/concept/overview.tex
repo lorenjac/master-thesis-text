@@ -4,8 +4,8 @@ with an outline of the desired API and practical examples.
 
 \subsubsection{Goal}
 
-The intent of this thesis to determine whether MMDB could exploit NVRAM to make
-transactions with strong consistency affordable. Given the overwhelming
+The intent of this thesis is to determine whether MMDB could exploit NVRAM to
+make transactions with strong consistency affordable. Given the overwhelming
 complexity of full-scale DBMS, this work resorts to in-memory KVS. NVRAM
 significantly reduces the required recovery overhead. While others have used
 this circumstance to increase transaction throughput alone, this work chooses to
@@ -23,7 +23,7 @@ and workloads characteristics.
 In order to take advantage of concurrency, the concept is designed for
 multi-core architectures. While this increases the number of threads that can be
 run in parallel, it also introduces synchronization issues for access to shared
-memory which must be handled wit care. However, to keep complexity manageable,
+memory which must be handled with care. However, to keep complexity manageable,
 the concept refrains from distributed computing and targets single-node
 databases. In accordance with recent research, it is assumed that volatile RAM
 will continue to be present and share the same memory interface with NVRAM. This
@@ -35,12 +35,12 @@ to manage NVRAM. Details concerning crash consistency are provided in Chapter
 \paragraph{Workloads}
 
 When designing systems and transaction processors, in particular, it is helpful
-know in advance which kind of workloads are expected or should be given
-priority. Given that many MMDB are dominated by read operations, this work is
-intended for read-mostly workloads \cite{andrei2017sap}. While read-only
-transactions are supported, there seems to be no hard evidence on the importance
-or quantity of such transactions. Likewise, long-running transactions are not
-handled separately, as their share could not be determined.
+to know in advance which kind of workloads are expected or should be given
+priority. Given that many MMDB are dominated by read operations
+\cite{andrei2017sap}, this work is intended for read-mostly workloads. While
+read-only transactions are supported, there seems to be no hard evidence on the
+importance or quantity of such transactions. Likewise, long-running transactions
+are not handled separately, as their share could not be determined.
 
 \subsubsection{Design Constraints}
 
