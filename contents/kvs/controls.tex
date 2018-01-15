@@ -120,28 +120,32 @@ prone to deadlocks and lock contention \cite{berenson1995critique}.
 
 In a \emph{multiversion concurrency control}, there can be multiple versions of
 data items. This fundamentally changes the nature of both read and write
-operations. Instead of updating an item in-place which would have to be
+operations. Instead of updating versions in-place, which would have to be
 isolated, write operations create copies of existing versions and only modify
 those copies. As a result, read operations are implicitly decoupled from
 concurrent updates. That means, in particular, that a read operation may access
-an item even when newer versions have been committed.
+an item even when newer versions have been committed. In order to keep track of
+when versions were created or modified, versions are usually equipped with
+timestamps, respectively.
 
-\todo[inline]{Does RCU fit in here somewhere?}
-% \todo[inline]{Does Shadow Paging fit in here somewhere?}
-\todo[inline]{Mention that MVCC is based on COW and TS}
-\todo[inline]{Mention that MVCC combines CC with recovery (implicit logging)}
+Through its copy-on-write approach, multiversioning can effectively isolate read
+operations from concurrent operations without the need for locking. An important
+implication of this circumstance is that read operations never wait for write
+operations and vice versa. This is a significant advantage over single-version
+schemes especially in applications where reading is much more frequent than
+writing. In fact, it has been shown that many workloads are dominated by queries
+\cite{krueger2011fast, andrei2017sap}. This is also reflected in the MMDB
+benchmark TATP which assumes 80 \% of all transactions to be read-only
+\cite{larson2011high}. Another useful side effect of multiversioning is that it
+encodes an implicit logging infrastructure which can be used for recovery
+purposes \cite{condit2009better, venkataraman2011consistent}. MVCC is similar to
+RCU \cite{mckenney1998read} but differs in that it can manage more than two
+versions of an item at a time.
 
-Multiversioning can effectively isolate read operations from concurrent
-operations without the need for locking. An important implication of this
-circumstance is that read operations never wait for write operations and vice
-versa. This is a significant advantage over single-version schemes especially in
-applications where reading is much more frequent than writing. In fact, it has
-been shown that many workloads are dominated by queries \cite{krueger2011fast,
-andrei2017sap}. This is also reflected in the TATP benchmark which assumes 80 \%
-of all transactions to be read-only \cite{larson2011high}. Write operations on
-the other hand, are more complicated. Updating a version incorporates additional
-overhead for allocating a new version and copying the original version before
-modifying it.
+While read operations benefit from copy-on-write, updates can be expensive.
+Updating a version incorporates additional overhead for allocating a new version
+and copying the original version before modifying it. In the case of KVS,
+however, copyies may not be necessary if entire values are updated.
 
 \subsubsection{Visibility}
 
