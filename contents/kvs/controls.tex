@@ -75,8 +75,8 @@ There are, however, disadvantages to this type of concurrency control. While
 validation is necessary to ensure that a transaction is not involved in data
 conflicts, it can also introduce a significant overhead. First, even when there
 are no conflicts, validation is conducted nevertheless. Second, validation
-usually requires certain meta data about the operations within a transaction. As
-a result, validation complexity scales in size of meta data required to
+usually requires certain metadata about the operations within a transaction. As
+a result, validation complexity scales in size of metadata required to
 determine conflict freedom. Another drawback is that aborting a conflicting
 transaction means that its entire progress is discarded. In this case, valuable
 computing resources have been wasted. This is especially true for update
