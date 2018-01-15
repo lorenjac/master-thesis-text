@@ -92,7 +92,7 @@ That way, an incomplete or failed transaction cannot be globally observed. In
 addition, the SI protocol allows the system to always retrieve the latest
 committed version of an item. Even if an update to NVRAM fails, the KVS can
 always go back to the lastest committed version without performing an actual
-rollback. However, in the event an update propagation to NVARM is interrupted,
+rollback. However, in the event an update propagation to NVRAM is interrupted,
 partial write-backs may become durable. A typical scenario would be a system
 crash or a power failure. In this case, the KVS must ensure that torn writes
 do not harm the consistency of data. Possible solutions for this problem are
