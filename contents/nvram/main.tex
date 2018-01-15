@@ -1,15 +1,15 @@
 \chapter{Non-Volatile RAM}
 \label{ch:nvram}
 
-Conventional non-volatile memories such as HDD or SSD provide large capacities
-but are only block-oriented and incur substantial access latencies compared to
-RAM. Therefore, IO-bound applications tend to keep as much data in RAM as
-possible but are eventually forced to access slower media for durable storage.
-This led to the development of non-volatile variants of RAM. Recent research
-suggests that both fast and high-capacity NVRAM will become widely available in
-the near future.
+Conventional non-volatile memories such as \ac{HDD} or \ac{SSD} provide large
+capacities but are only block-oriented and incur substantial access latencies
+compared to \ac{RAM}. Therefore, \ac{IO}-bound applications tend to keep as much
+data in \ac{RAM} as possible but are eventually forced to access slower media
+for durable storage. This led to the development of non-volatile variants of
+\ac{RAM}. Recent research suggests that both fast and high-capacity \ac{NVRAM}
+will become widely available in the near future.
 
-This chapter gives an overview on the state-of-the-art in NVRAM research.
+This chapter gives an overview on the state-of-the-art in \ac{NVRAM} research.
 Included is a discussion of opportunities and challenges, such as the notorious
 consistency issues in the presence of failures.
 
@@ -32,26 +32,27 @@ consistency issues in the presence of failures.
 \section{Summary}
 \label{ch:nvram-summary}
 
-NVRAM is a promising technology, especially in storage-bound environments. Until
-recently, both latencies and capacities had fallen short of expectations.
-However, recent advances in the manufacture of NVRAM have shown promising
-results. Technologies such as PCM provide larger capacities than DRAM at
-comparable latencies.
+\ac{NVRAM} is a promising technology, especially in storage-bound environments.
+Until recently, both latencies and capacities had fallen short of expectations.
+However, recent advances in the manufacture of \ac{NVRAM} have shown promising
+results. Technologies such as \ac{PCM} provide larger capacities than \ac{DRAM}
+at comparable latencies.
 
-Apart from other more intricate use cases, recent research shows that MMDB can
-benefit greatly from NVRAM. While access latencies are comparable to
-conventional MMDB, NVRAM largely eliminates the need to ensure recoverability on
-slower mass storage. This enables higher transaction throughput and
-near-instantaneous restarts.
+Apart from other more intricate use cases, recent research shows that \ac{MMDB}
+can benefit greatly from \ac{NVRAM}. While access latencies are comparable to
+conventional \ac{MMDB}, \ac{NVRAM} largely eliminates the need to ensure
+recoverability on slower mass storage. This enables higher transaction
+throughput and near-instantaneous restarts.
 
-Still, there are also challenges to be addressed. First, current NVRAM
+Still, there are also challenges to be addressed. First, current \ac{NVRAM}
 technologies tend to have either high latency, low capacity, or low endurance.
-Even though PCM is a promising candidate, it is still slower than DRAM,
-especially when writing. Hence, manufacture still needs significant improvement.
-Furthermore, there is, as of this writing, no generally accepted programming
-model for NVRAM. In general, there is no way for software to determine whether a
-store has arrived in NVRAM or not. Since CPUs are unaware of any transactional
-semantics between stores, programmers need to manually ensure consistency for
-data in NVRAM. Otherwise, a torn write from a crash may lead to irreversible
-data corruption. As the counter measures presented in this chapter must be
-applied judiciously as they may incur significant runtime penalties.
+Even though \ac{PCM} is a promising candidate, it is still slower than
+\ac{DRAM}, especially when writing. Hence, manufacture still needs significant
+improvement. Furthermore, there is, as of this writing, no generally accepted
+programming model for \ac{NVRAM}. In general, there is no way for software to
+determine whether a store has arrived in \ac{NVRAM} or not. Since \ac{CPU}s are
+unaware of any transactional semantics between stores, programmers need to
+manually ensure consistency for data in \ac{NVRAM}. Otherwise, a torn write from
+a crash may lead to irreversible data corruption. As the counter measures
+presented in this chapter must be applied judiciously as they may incur
+significant runtime penalties.

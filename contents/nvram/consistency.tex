@@ -1,11 +1,11 @@
-As pointed out earlier, the consistency of data stored in NVRAM is vulnerable to
-crashes or power failures. Since NVRAM is directly attached to the processor
-memory interface, there is no need to use techniques such as DMA to transfer a
-modified page to external storage. This also means that a memory operation
-solely relies on the CPU which usually gives no confirmation when that operation
-completes. In this context, there are two major issues that threaten the
-consistency of data written to NVRAM, namely out-of-order execution and deferred
-write-back.
+As pointed out earlier, the consistency of data stored in \ac{NVRAM} is
+vulnerable to crashes or power failures. Since \ac{NVRAM} is directly attached
+to the processor memory interface, there is no need to use techniques such as
+\ac{DMA} to transfer a modified page to external storage. This also means that a
+memory operation solely relies on the \ac{CPU} which usually gives no
+confirmation when that operation completes. In this context, there are two major
+issues that threaten the consistency of data written to \ac{NVRAM}, namely
+out-of-order execution and deferred write-back.
 
 \paragraph{Out-Of-Order Execution}
 
@@ -19,20 +19,20 @@ utilization and hide latencies of time-consuming instructions. However, only
 reorderings that do not violate data dependencies between instructions are
 possible. While processors do prevent such conflicts, there are dependencies
 that cannot be observed. For example, in order to mark a chunk of data as
-durable in NVRAM, one might store a designated flag immediately after the
+durable in \ac{NVRAM}, one might store a designated flag immediately after the
 operation completed. With out-of-order execution it is possible that the flag is
 written before the payload. This can lead to severe inconsistencies especially
 when a crash prevents the chunk from being written.
 
 A common method to counter this issue is to enforce memory order with memory
 barriers (also fences) \cite{dulloor2014system, schwalb2016hyrise,
-oukid2017data}. A memory barrier prevents the CPU from proceeding until all
+oukid2017data}. A memory barrier prevents the \ac{CPU} from proceeding until all
 prior memory operations have completed. Although a barrier does not directly
 order its preceding instructions, it can be used to impose an order on separate
 sequences of instructions. An example for a memory barrier is \code{sfence} on
 x86 architectures. While this approach solves the initial problem, it has a
 notable drawback. Memory barriers defeat the purpose of out-of-order execution.
-As a result, CPU pipelines are likely to stall, hence reducing resource
+As a result, \ac{CPU} pipelines are likely to stall, hence reducing resource
 utilization. Furthermore, store buffers are flushed leading to higher latencies
 when accessing data of deferred store operations. Therefore, barriers can have
 significant impact on runtime performance, unless used judiciously. With
@@ -45,7 +45,7 @@ In many modern processor architectures store operations may not  be immediately
 lead to an update in main memory. This behaviour can be caused by intermediary
 buffers such as memory order buffers, caches, and memory controller buffers.
 While their individual purpose may vary, they all defer memory write-back
-operations. This is a known vulnerability for consistency in NVRAM as the
+operations. This is a known vulnerability for consistency in \ac{NVRAM} as the
 mentioned buffers are volatile and deferred stores may be lost when power fails
 \cite{condit2009better, oukid2017data}. In order to preserve consistency, it is
 necessary to force write-back in all of these cases.
@@ -109,18 +109,19 @@ instruction.
 Once a cache line is flushed, it is propagated to the memory controller where it
 is buffered in a write-back queue before being written onto the device. Again,
 the problem is that such a buffer is usually volatile. This means that a power
-failure could lead to lost updates to NVRAM. Even though residual power in DRAM
-has been shown to be substantial, there is no reliable way to ensure a full
-buffer flush \cite{halderman2008lest}. This circumstance has given rise to many
-discussions in the past \cite{condit2009better, dulloor2014system,
+failure could lead to lost updates to \ac{NVRAM}. Even though residual power in
+\ac{DRAM} has been shown to be substantial, there is no reliable way to ensure a
+full buffer flush \cite{halderman2008lest}. This circumstance has given rise to
+many discussions in the past \cite{condit2009better, dulloor2014system,
 kolli2016high}. Some authors proposed a designated instruction for flushing
 write-back queues. An example is the meanwhile deprecated \code{pcommit},
 formerly known as \code{pm\_wbarrier} \cite{dulloor2014system, oukid2015instant,
 schwalb2015nvm_malloc, volos2017whisper}. Others have developed more general
-mechanisms for preserving consistency in NVRAM that also address this issue
-\cite{condit2009better, pelley2014memory}. The current state of affairs is
-that platforms must provide a feature called ADR \cite{volos2017whisper}. It
+mechanisms for preserving consistency in \ac{NVRAM} that also address this issue
+\cite{condit2009better, pelley2014memory}. The current state of affairs is that
+platforms must provide a feature called \ac{ADR} \cite{volos2017whisper}. It
 works by exploiting the fact that even in case of a power failure there is
 sufficient power to flush the write buffers of all memory controllers. For this
 to work, the power supply unit has to detect a power failure and issue a signal
-to all memory controllers. As a result, neither programmers nor processors need to worry about memory controller queues and no overhead is incurred.
+to all memory controllers. As a result, neither programmers nor processors need
+to worry about memory controller queues and no overhead is incurred.
