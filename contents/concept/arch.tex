@@ -252,8 +252,6 @@ transactions may not be automatically removed from the table but collected by
 garbage collector. The transaction table is volatile by implication as it only
 contains transaction control blocks which are explicitly volatile.
 
-% \todo[inline]{insert figure here (WITHOUT details on durable section)}
-
 \begin{figure}[!ht]
     \centering
     \includegraphics[width=\textwidth]{figures/drafts/concept-struct-volatile.pdf}
@@ -311,8 +309,6 @@ simpler allocation patterns compared to lists. Problems arise with garbage
 collection which could perform random-access modifications to the history. Since
 garbage collection would break the scope of this work, it is assumed to be
 absent or as non-invasive as possible.
-
-% \todo[inline]{insert figure here (WITH details on durable section)}
 
 \begin{figure}[!ht]
     \centering

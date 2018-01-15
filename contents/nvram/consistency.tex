@@ -85,7 +85,7 @@ but is not evicted from cache. Then a transaction $t2$ based on the result of
 $t1$ commits and gets evicted from cache. If the system crashes at this point,
 $t2$'s result will be durable while $t1$'s initial update is lost.
 
-\todo[inline]{graphic example?}
+\todo[inline]{Insert figure showing inconsistency due to crash}
 
 \begin{lstlisting}
 T1: r(A) w(A) c*   -- Cache ---------------------- (crash)
