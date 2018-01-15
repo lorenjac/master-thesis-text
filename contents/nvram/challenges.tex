@@ -13,31 +13,45 @@ state.
 Other data such as passwords, encryption keys, or decrypted data may be
 confidential and should not be durable. It has been shown that even volatile RAM
 holds its charge long enough so that a module can be moved to an attacker's
-machine for read-out \cite{halderman2008lest}. By cooling the module, capacitor
-discharge can be slowed so that it can be moved to another machine where its
-content may be read and parsed. Despite being countered with hardware
-scramblers, researchers still managed to apply variations of the technique and
-obtain vital information \cite{yitbarek2017cold}. Such attacks would be trivial
-on NVRAM, as durability is its primary feature \cite{bailey2011operating}. Of
-course, confidential data could be overwritten with zeros after usage, but there
-is always a possibility that a crash might prevent such clean up tasks from
-completing. That said, sensitive data should at all times remain in volatile
-memory and be nulled after use. Although information security is an important
-matter, this thesis does not address such issues. Although it is important,
-information security in terms of attack resilience contributes little to the aim
-of this thesis and is therefore not addressed further. Also, since volatile RAM continues to be available, there is no need to use NVRAM for sensitive data.
+machine for read-out \cite{halderman2008lest}. Despite being countered with
+hardware scramblers, researchers still managed to apply variations of the
+technique and obtain vital information \cite{yitbarek2017cold}. Such attacks
+would be trivial on NVRAM \cite{bailey2011operating}, but that is beyond the
+scope of this work.
 
-When an operating system or application behaves in erratic fashion or crashes it
-may produce corrupt data in memory. Unless memory is cleared or rewritten,
-systems incorporating NVRAM could face durable memory corruptions. The latter
-may lead to an unstable system producing even more corrupted data. Although the
-same is true for conventional non-volatile memory, it is still operated through
-the operating system in terms of an API and volatile page caches. NVRAM on the
-other hand is expected to be connected to the memory bus, enabling unbuffered
-access through virtual memory addresses. This makes NVRAM vulnerable to stray
-writes \cite{condit2009better, venkataraman2011consistent}. However, it has been
-shown that, compared to disk storage, stray writes do not occur significantly
-more often in NVRAM \cite{chen1996rio}. That said, stray writes are not considered an issue in this work.
+% By cooling the module, capacitor
+% discharge can be slowed so that it can be moved to another machine where its
+% content may be read and parsed. Despite being countered with hardware
+% scramblers, researchers still managed to apply variations of the technique and
+% obtain vital information \cite{yitbarek2017cold}. Such attacks would be trivial
+% on NVRAM, as durability is its primary feature \cite{bailey2011operating}. Of
+% course, confidential data could be overwritten with zeros after usage, but there
+% is always a possibility that a crash might prevent such clean up tasks from
+% completing. That said, sensitive data should at all times remain in volatile
+% memory and be nulled after use. Although information security is an important
+% matter, this thesis does not address such issues. Although it is important,
+% information security in terms of attack resilience contributes little to the aim
+% of this thesis and is therefore not addressed further. Also, since volatile RAM
+% continues to be available, there is no need to use NVRAM for sensitive data.
+
+When an operating system or application behaves in an erratic fashion or
+crashes, it may produce corrupt data in memory. This is called a stray write. In
+this case, systems incorporating NVRAM could face durable memory corruptions
+\cite{condit2009better, venkataraman2011consistent}. In contrast to conventional
+non-volatile memory, NVRAM is particularly vulnerable as it is directly
+accessible through the CPU. However, it has been shown that, compared to disk
+storage, stray writes do not occur significantly more often in NVRAM
+\cite{chen1996rio}. Therefore, stray writes are not an issue in this work.
+
+% When an operating system or application behaves in an erratic fashion or crashes, it
+% may produce corrupt data in memory. Unless memory is cleared or rewritten,
+% systems incorporating NVRAM could face durable memory corruptions. NVRAM on the
+% other hand is expected to be connected to the memory bus, enabling unbuffered
+% access through virtual memory addresses. This makes NVRAM vulnerable to stray
+% writes \cite{condit2009better, venkataraman2011consistent}. However, it has been
+% shown that, compared to disk storage, stray writes do not occur significantly
+% more often in NVRAM \cite{chen1996rio}. That said, stray writes are not
+% considered an issue in this work.
 
 \paragraph{Memory Management}
 
