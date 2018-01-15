@@ -233,11 +233,11 @@ principle is applied and $t_1$ must abort as $t_2$ also modified the same item
 and committed earlier \cite{berenson1995critique}. A popular variant of this
 property is the equivalent \emph{first-updater-wins} principle
 \cite{fekete2004read, larson2011high}. According to this property, a writer
-fails immediately if it is not the first to attempt an update on a given
-version, thus making the earlier transaction the first committer.
-
-\todo[inline]{SI does not need validation with first-updater-wins}
-\todo[inline]{first-updater wins is similar to pessimism but writes are rare + no waiting}
+fails immediately if he is not the first to attempt an update on a given
+version, thus making the earlier transaction the first committer. Note, that
+based on this strategy, SI can be implemented without validation on commit. It
+can also reduce the size of individual rollbacks as write-write conflicts are
+detected immediately.
 
 \subsubsection{Shortcomings}
 
@@ -403,5 +403,3 @@ response, some authors have proposed protocols featuring decentralized timestamp
 assignment \cite{tu2013speedy, zhou2017posterior}. Further sources of contention
 addressed in these works are transaction id assignment and shared memory access,
 in general.
-
-\todo[inline]{Überleitung zu CC in KVS für NVRAM}
