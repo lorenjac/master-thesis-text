@@ -1,5 +1,5 @@
-Posting updates to NVRAM is different from traditional non-volatile storage
-media. With NVRAM, write-back is not directly observable by software and the
+Posting updates to \ac{NVRAM} is different from traditional non-volatile storage
+media. With \ac{NVRAM}, write-back is not directly observable by software and the
 underlying memory subsystem is unaware of transactional semantics. As a result,
 updates may be reordered or get stuck in store buffers and caches, thus
 threatening consistency across crashes.
@@ -13,17 +13,17 @@ caches. To prevent this, cache line flushes or non-temporal stores could be
 used. Even when reaching a memory controller, stores are once again buffered to
 speed up subsequent reads to that item. While earlier works anticipated
 designated flush instructions for controller buffers, both researchers and
-hardware vendors have agreed on the platform feature ADR. When power fails, it
+hardware vendors have agreed on the platform feature \ac{ADR}. When power fails, it
 receives a signal and utilizes the remaining electrical energy to flush all
 memory controller buffers.
 
-With the exception of ADR, all of these methods can significantly increase
+With the exception of \ac{ADR}, all of these methods can significantly increase
 execution latencies as they work against many aspects of modern microprocessors.
 Deferred write-backs for example are useful to decrease access times for
 recently written data. Flushing store buffers, however, also affects data that
 are not involved in transactions. In addition, enforcing strict program order
 usually results in pipeline stalls. Since there are no other options at the
-moment, programmers have to meticulously manage and optimize updates to NVRAM.
+moment, programmers have to meticulously manage and optimize updates to \ac{NVRAM}.
 
 Summing up, preserving consistency across crashes is necessary but also
 introduces adverse effects on performance. In accordance with recent research,
@@ -33,11 +33,11 @@ this work requires the following features
     \item means to enforce program order for memory accesses
     % \item means to flush potential memory order buffers
     \item means to flush cashes or individual cache lines
-    \item ADR
+    \item \ac{ADR}
 \end{itemize}
 
 Both memory order enforcement and fine-grained cache flushes are provided by
 many instruction sets including \code{x86\_64}, SPARC, and IBM POWER and zSeries
-\cite{mckenney2007memory}. ADR, on the other hand, is a new platform feature
+\cite{mckenney2007memory}. \ac{ADR}, on the other hand, is a new platform feature
 that is already supported on some systems. Therefore, no changes to existing
 hardware are needed.
