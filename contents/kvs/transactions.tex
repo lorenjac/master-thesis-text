@@ -107,11 +107,11 @@ subsequent system calls could be executed as a unit and be undone if one of them
 fails. Another application that sees increasing attention is transactional
 memory which aims to provide a synchronization alternative to locking
 \cite{knight1986architecture, herlihy1993transactional, shavit1997software}.
-With regard to this thesis, recent use cases include transactions in a MMDB
-\cite{leis2014exploiting} and durable updates to NVRAM
+With regard to this thesis, recent use cases include transactions in a \ac{MMDB}
+\cite{leis2014exploiting} and durable updates to \ac{NVRAM}
 \cite{volos2011mnemosyne}. Despite being an intriguing concept, transactional
 memory is beyond the scope of this work. Instead this work sets its focus on
-plain software-based transactions in the field of databases and KVS, in
+plain software-based transactions in the field of databases and \ac{KVS}, in
 particular.
 
 \paragraph{Transactional Semantics}
@@ -154,7 +154,7 @@ is often relaxed to a reasonable extent.
 
 The ACID criteria have become the prevalent reference for characterizing
 transactional systems. However, not all systems enforce the complete set of
-properties. Notable examples are transactional memory for conventional RAM and
+properties. Notable examples are transactional memory for conventional \ac{RAM} and
 some cache-like databases which do not support durability as they are volatile
 by design. A prominent example for relaxation that is also fundamental to this thesis is the isolation of concurrent transactions.
 

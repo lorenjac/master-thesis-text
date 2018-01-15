@@ -1,91 +1,93 @@
 The previous sections have introduced the fundamentals on transactions,
 serializability, and modern concurrency control protocols. The aim is to design
-and implement a robust concurrency control for an in-memory KVS based on NVRAM.
-Hence, the chapter concludes with an overview on concurrency in KVS for NVRAM.
+and implement a robust concurrency control for an in-memory \ac{KVS} based on
+\ac{NVRAM}. Hence, the chapter concludes with an overview on concurrency in
+\ac{KVS} for \ac{NVRAM}.
 
-NVRAM is not yet commercially available, but there is a number of studies
-involving KVS and NVRAM. In essence, there are three research branches:
+\ac{NVRAM} is not yet commercially available, but there is a number of studies
+involving \ac{KVS} and \ac{NVRAM}. In essence, there are three research
+branches:
 
 \begin{itemize}
-    \item Evaluation of programming facilities for NVRAM
-    \item Evaluation of implications of NVRAM for existing KVS
-    \item Design of NVRAM-aware KVS
+    \item Evaluation of programming facilities for \ac{NVRAM}
+    \item Evaluation of implications of \ac{NVRAM} for existing \ac{KVS}
+    \item Design of \ac{NVRAM}-aware \ac{KVS}
 \end{itemize}
 
-While, ultimately, all branches aim to understand the implications of NVRAM,
-individual scenarios and approaches differ substantially. As for the aim of this
-work, focus is given to KVS specifically designed for NVRAM. The remaining areas
-are omitted as none of the respective studies in
+While, ultimately, all branches aim to understand the implications of
+\ac{NVRAM}, individual scenarios and approaches differ substantially. As for the
+aim of this work, focus is given to \ac{KVS} specifically designed for
+\ac{NVRAM}. The remaining areas are omitted as none of the respective studies in
 \cite{venkataraman2011consistent, pelley2013storage, volos2014aerie,
 lersch2017analysis, malinowski2017using} give insight on the implications of
-NVRAM for transactions and concurrency control.
+\ac{NVRAM} for transactions and concurrency control.
 
-% As pointed out in Chapter {ch:nvram}, working with NVRAM requires additional programming mechanisms not needed for DRAM or conventional durable storage. Issues comprise recoverable memory mappings, consistency ensurance, and memory management accounting for the byte-addressable nature of NVRAM. In this regard, a number of facilities to address these issues have been proposed. Due to their recent prevalence in high-performance environments, some these techniques have been evaluated against KVS. In {venkatamaran2011consistent} NVRAM-ware b-trees based on versioning were designed and integrated into the Redis KVS for evaluation. However, the described implementation of versioning is was only meant to replace logging and all simulations were conducted on a single thread.
+% As pointed out in Chapter {ch:nvram}, working with \ac{NVRAM} requires additional programming mechanisms not needed for \ac{DRAM} or conventional durable storage. Issues comprise recoverable memory mappings, consistency ensurance, and memory management accounting for the byte-addressable nature of \ac{NVRAM}. In this regard, a number of facilities to address these issues have been proposed. Due to their recent prevalence in high-performance environments, some these techniques have been evaluated against \ac{KVS}. In {venkatamaran2011consistent} \ac{NVRAM}-ware b-trees based on versioning were designed and integrated into the Redis \ac{KVS} for evaluation. However, the described implementation of versioning is was only meant to replace logging and all simulations were conducted on a single thread.
 
-At the moment, there are few designs for NVRAM-aware KVS: Echo
+At the moment, there are few designs for \ac{NVRAM}-aware \ac{KVS}: Echo
 \cite{bailey2013exploring}, NVHT \cite{zhou2016nvht}, and MetraDB
-\cite{marmol2016nonvolatile}. Below, the architecture of these KVS is outlined
+\cite{marmol2016nonvolatile}. Below, the architecture of these \ac{KVS} is outlined
 with an emphasis on transactions and concurrency control.
 
 \subsubsection{Echo}
 
-Echo is one of the earliest KVS designed to leverage the benefits of NVRAM
+Echo is one of the earliest \ac{KVS} designed to leverage the benefits of \ac{NVRAM}
 \cite{bailey2013exploring}. It aims to achieve scalable high-performance
 transactions through optimistic concurrency control and light-weight persistence
 management. For this purpose, Echo uses a two-level store architecture featuring
-both volatile and non-volatile RAM. Only committed data are written to NVRAM,
-while uncommitted data are kept in volatile RAM. Moreover, there are two groups
+both volatile and non-volatile \ac{RAM}. Only committed data are written to \ac{NVRAM},
+while uncommitted data are kept in volatile \ac{RAM}. Moreover, there are two groups
 of threads: workers and masters. The former execute the operations of
 transactions and buffer their updates, whereas masters are in charge of
-committing them. By keeping updates from NVRAM until commit, persistence
+committing them. By keeping updates from \ac{NVRAM} until commit, persistence
 guarantees need to be enforced less often and degradation effects such as
 wearing are reduced. Also, updates are buffered locally in each thread which
 avoids contention on shared data. In order to ensure isolation between
-concurrent transactions, Echo employs classic SI. As a result, some
+concurrent transactions, Echo employs classic \ac{SI}. As a result, some
 non-serializable schedules of transactions are permitted. Contrary to many other
 works, Echo resolves write-write conflicts using the original
 first-committer-wins strategy. This eliminates the need to acquire exclusive
 ownership when updating an item but leads to late conflict detection with larger
 rollbacks. The core data structure beneath Echo is a hash table which maps keys
-to version histories. Concerning NVRAM consistency, Echo settles for existing
+to version histories. Concerning \ac{NVRAM} consistency, Echo settles for existing
 instruction sets with cache line flushes and store fences. The authors further
-anticipate a hardware capability, such as the now obligatory ADR, which ensures
+anticipate a hardware capability, such as the now obligatory \ac{ADR}, which ensures
 that cache flushes always become durable. During the evaluation of Echo, its
 design is shown to provide strong durability and consistency while providing
-performance characteristics of volatile main-memory KVS. However, the evaluation
-is carried out on volatile RAM and does account for latencies of NVRAM and cache
+performance characteristics of volatile main-memory \ac{KVS}. However, the evaluation
+is carried out on volatile \ac{RAM} and does account for latencies of \ac{NVRAM} and cache
 flushes. Also, the separation of worker and master threads is effectively
 removed, as workers \emph{become} masters and commit their own transactions.
 
-Being one of the most meticulously designed and documented KVS for NVRAM, Echo
+Being one of the most meticulously designed and documented \ac{KVS} for \ac{NVRAM}, Echo
 is a guiding example for this thesis. It achieves high performance through its
 two-level architecture and optimistic concurrency control. Drawbacks include
-non-serializing SI and the first-committer-wins strategy. In th end, the
+non-serializing \ac{SI} and the first-committer-wins strategy. In th end, the
 authors' evaluation is not entirely conclusive as some design aspects were
 considerably altered.
 
 \subsubsection{NVHT}
 
-The goal of NVHT is to leverage NVRAM to achieve fast updates without
+The goal of NVHT is to leverage \ac{NVRAM} to achieve fast updates without
 sacrificing durability \cite{zhou2016nvht}. The architecture of NVHT differs
 significantly from that of Echo. Most importantly, NVHT only supports
 transactional updates instead of full-grown transactions. That means, that each
 operation is implicitly committed, which is sometimes called auto-commit.
 Nevertheless its architecture may give valuable insights into the design of a
-KVS for NVRAM. Similar to Echo, NVHT relies on a hybrid memory architecture
-consisting of both volatile RAM and NVRAM. However, Echo is a two-level store
-where each update is buffered in volatile RAM until it is committed to NVRAM. In
-NVHT, on the other hand, all updates are directly written to NVRAM. Similar to
-Echo, the key data structure of NVHT is an NVRAM-aware hash table. However, NVHT
+\ac{KVS} for \ac{NVRAM}. Similar to Echo, NVHT relies on a hybrid memory architecture
+consisting of both volatile \ac{RAM} and \ac{NVRAM}. However, Echo is a two-level store
+where each update is buffered in volatile \ac{RAM} until it is committed to \ac{NVRAM}. In
+NVHT, on the other hand, all updates are directly written to \ac{NVRAM}. Similar to
+Echo, the key data structure of NVHT is an \ac{NVRAM}-aware hash table. However, NVHT
 does not use multiversioning to control concurrent operations. Instead, it
 applies half-coarse synchronization by locking individual partitions of the hash
 table upon access.
 
-Despite NVHT having shown good performance against prominent KVS, there are some
+Despite NVHT having shown good performance against prominent \ac{KVS}, there are some
 problems with its design. First, accessing an item in the hash map locks an
 entire partition. The authors point out that this design decision can increase
 lock contention, thus reducing concurrency. More importantly, NVHT does not
-address the issues of ordering and deferred write-back on NVRAM. Instead, the
+address the issues of ordering and deferred write-back on \ac{NVRAM}. Instead, the
 authors merely devise a kind of commit record whose presence or absence denotes
 whether the preceding item should be taken into account. However, without
 enforcing an ordering on store operations, the commit record could be durable
@@ -94,12 +96,12 @@ be flushed. Omitting these precautions could lead to inconsistent data.
 
 \subsubsection{MetraDB}
 
-In \cite{marmol2016nonvolatile} KVS are proposed as a middleware for NVRAM. As
+In \cite{marmol2016nonvolatile} \ac{KVS} are proposed as a middleware for \ac{NVRAM}. As
 an example the authors, present MetraDB, a solution for distributed storage
-based on NVRAM. Like NVHT, MetraDB is a single-level store which means that
-changes are written to NVRAM immediately. Since MetraDB is required to support
-overlapping namespaces, the KVS consists of multiple hash tables referred to as
-containers. While this seems to complicate memory allocation schemes for NVRAM,
+based on \ac{NVRAM}. Like NVHT, MetraDB is a single-level store which means that
+changes are written to \ac{NVRAM} immediately. Since MetraDB is required to support
+overlapping namespaces, the \ac{KVS} consists of multiple hash tables referred to as
+containers. While this seems to complicate memory allocation schemes for \ac{NVRAM},
 the authors assert that the size of hash tables is fixed. There are two kinds of
 transaction is MetraDB: transactions on containers and on metadata. Since
 containers are designed for single-threaded access, transactions on containers
@@ -109,19 +111,19 @@ containers. The authors point out that these operations are infrequent and,
 therefore, need not be very efficient. For this reason, transactions on meta
 data are protected by a global lock on the collection of containers. Recovery is
 based on redo logging, since undo logging would require additional writes to
-NVRAM during a transactions. With redo logging, log entries only need to be
+\ac{NVRAM} during a transactions. With redo logging, log entries only need to be
 flushed on commit which can be optimized, for example with non-temporal stores.
 In an evaluation, MetraDB has shown superior performance when compared to
 several lookup data structures contained in Intel's NVML. Given that NVML
-provides general-purpose NVRAM facilities, as opposed to MetraDB's use-case
+provides general-purpose \ac{NVRAM} facilities, as opposed to MetraDB's use-case
 optimizations, the comparison is not always fair. Still, the evaluation exposes
-scalability issues related to the operating system rather than the KVS itself.
-Upon finding scalability to falter when increasing the number of CPU cores, the
+scalability issues related to the operating system rather than the \ac{KVS} itself.
+Upon finding scalability to falter when increasing the number of \ac{CPU} cores, the
 authors link the issue with kernel locking on memory-mapped files.
 
-When compared to Echo or NVHT, MetraDB is a very application-specific KVS.
+When compared to Echo or NVHT, MetraDB is a very application-specific \ac{KVS}.
 Especially, its use of containers, which can only be accessed by one thread at a
-time, conveys little guidance for the design of a KVS with concurrent
+time, conveys little guidance for the design of a \ac{KVS} with concurrent
 transactions. Apart from a few isolated cases, single-threading and very coarse
 locking may not be the most promising approaches to achieving high transaction
 throughput.

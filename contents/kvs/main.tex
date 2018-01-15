@@ -1,21 +1,23 @@
 \chapter{Key-Value Stores}
 \label{ch:kvs}
 
-A prominent use case for NVRAM are main-memory databases. Even though main
-memory and processor caches have become more affordable, MMDB still suffer from
-recovery on slower disk drives \cite{oukid2015instant, schwalb2016hyrise}. NVRAM
-on the other hand, provides an opportunity to eliminate recovery altogether. An
-important class of databases often implemented as MMDB is KVS. Due to their
-simplicity and low overhead, KVS have been adopted both in big-data computing
-and database research \cite{decandia2007dynamo, lakshman2010cassandra,
-wang2015hydradb}. In recent works, KVS were used to explore database design for
-NVRAM \cite{bailey2013exploring, zhou2016nvht, wu2016nvmcached}.
+A prominent use case for \ac{NVRAM} are main-memory databases. Even though main
+memory and processor caches have become more affordable, \ac{MMDB} still suffer
+from recovery on slower disk drives \cite{oukid2015instant, schwalb2016hyrise}.
+\ac{NVRAM} on the other hand, provides an opportunity to eliminate recovery
+altogether. An important class of databases often implemented as \ac{MMDB} is
+\ac{KVS}. Due to their simplicity and low overhead, \ac{KVS} have been adopted
+both in big-data computing and database research \cite{decandia2007dynamo,
+lakshman2010cassandra, wang2015hydradb}. In recent works, \ac{KVS} were used to
+explore database design for \ac{NVRAM} \cite{bailey2013exploring, zhou2016nvht,
+wu2016nvmcached}.
 
-This chapter provides a domain analysis of KVS. First, a brief overview of KVS
-is given. The aim of this work is to exploit NVRAM for a KVS with fast
-conflict-free concurrent transactions. Therefore, a substantial part of the
-remaining chapter is dedicated to transactions and concurrency control. The
-chapter is concluded with an examination of existing KVS for NVRAM.
+This chapter provides a domain analysis of \ac{KVS}. First, a brief overview of
+\ac{KVS} is given. The aim of this work is to exploit \ac{NVRAM} for a \ac{KVS}
+with fast conflict-free concurrent transactions. Therefore, a substantial part
+of the remaining chapter is dedicated to transactions and concurrency control.
+The chapter is concluded with an examination of existing \ac{KVS} for
+\ac{NVRAM}.
 
 \section{Overview}
 \label{ch:kvs-overview}
@@ -36,16 +38,16 @@ chapter is concluded with an examination of existing KVS for NVRAM.
 \section{Summary}
 \label{ch:kvs-summary}
 
-KVS are a vital database technology in modern information processing. While KVS
-are especially relevant in distributed systems, this work concentrates on
-single-node KVS for convenience. As in MMDB, KVS can achieve maximum performance
-when combining in-memory operation and concurrency. In order to preserve
-consistency the presence of concurrent transactions, a dedicated concurrency
-control is required. A modern control scheme which is also used in KVS is MVCC.
-However, many MVCC protocols, such as the popular SI, are not serializing and
-are therefore prone to inconsistencies. On the other hand, alternatives which
-guarantee serializability tend to be error-prone and expensive. Despite having
-shown promising results, all existing KVS for NVRAM still only implement SI or
-locking. This circumstance gives rise to the question whether NVRAM can provide
-enough leverage to make serializable transactions affordable without resorting
-to locking.
+\ac{KVS} are a vital database technology in modern information processing. While
+\ac{KVS} are especially relevant in distributed systems, this work concentrates
+on single-node \ac{KVS} for convenience. As in \ac{MMDB}, \ac{KVS} can achieve
+maximum performance when combining in-memory operation and concurrency. In order
+to preserve consistency the presence of concurrent transactions, a dedicated
+concurrency control is required. A modern control scheme which is also used in
+\ac{KVS} is \ac{MVCC}. However, many \ac{MVCC} protocols, such as the popular
+\ac{SI}, are not serializing and are therefore prone to inconsistencies. On the
+other hand, alternatives which guarantee serializability tend to be error-prone
+and expensive. Despite having shown promising results, all existing \ac{KVS} for
+\ac{NVRAM} still only implement \ac{SI} or locking. This circumstance gives rise
+to the question whether \ac{NVRAM} can provide enough leverage to make
+serializable transactions affordable without resorting to locking.
