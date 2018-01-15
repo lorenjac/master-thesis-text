@@ -41,9 +41,9 @@ committing them. By keeping updates from NVRAM until commit, persistence
 guarantees need to be enforced less often and degradation effects such as
 wearing are reduced. Also, updates are buffered locally in each thread which
 avoids contention on shared data. In order to ensure isolation between
-concurrent transactions, Echo employs classic snapshot isolation. As a result,
-some non-serializable schedules of transactions are permitted. Contrary to many
-other works, Echo resolves write-write conflicts using the original
+concurrent transactions, Echo employs classic SI. As a result, some
+non-serializable schedules of transactions are permitted. Contrary to many other
+works, Echo resolves write-write conflicts using the original
 first-committer-wins strategy. This eliminates the need to acquire exclusive
 ownership when updating an item but leads to late conflict detection with larger
 rollbacks. The core data structure beneath Echo is a hash table which maps keys

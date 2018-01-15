@@ -196,7 +196,7 @@ item.
 
 \subsection{Snapshot Isolation}
 
-The most widely used MVCC protocol to date is snapshot isolation
+The most widely used MVCC protocol to date is SI
 \cite{larson2011high, neumann2015fast}. Originally, SI was developed as a
 response to the insufficient definition of serializability in the SQL standard
 \cite{berenson1995critique}. Since then, it has been deployed in numerous
@@ -249,10 +249,9 @@ Under SI reads can always be satisfied, provided the requested item exists. Note
 that even in the face of concurrent updates, a transaction under SI always sees
 the same items. This precludes inconsistent reads, read skew, and phantoms. In
 addition, SI does not allow dirty reads, since snapshots only contain committed
-data. However, snapshot isolation does not prevent all possible anomalies and is
-therefore not serializable \cite{berenson1995critique, fekete2004read}. In
-particular, these conflicts are write skew and non-serializable read-only
-transactions.
+data. However, SI does not prevent all possible anomalies and is therefore not
+serializable \cite{berenson1995critique, fekete2004read}. In particular, these
+conflicts are write skew and non-serializable read-only transactions.
 
 \paragraph{Write Skew}
 

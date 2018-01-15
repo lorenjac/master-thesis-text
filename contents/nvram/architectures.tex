@@ -1,5 +1,5 @@
 There are numerous examples for applications of NVRAM. While earlier works often
-considered NVRAM as a means to improve fault tolerance, recent research suggests
+considered NVRAM as a way to improve fault tolerance, recent research suggests
 a broader range of applications. This development is especially driven by
 recent advances in the manufacture of standalone NVRAM.
 
@@ -19,8 +19,8 @@ area.
 A significant amount of research on NVRAM is dedicated to mitigating the IO
 bottleneck imposed by traditional disk storage. One way to do so is to defer
 disk IO via durable disk caches \cite{chen1996rio, wu1994envy}. When an object
-on disk is requested it is moved to the disk cache. Once an object is cached, it
-may be read or modified without accessing the underlying disk. Write-back is
+on disk is requested, it is moved to the disk cache. Once an object is cached,
+it may be read or modified without accessing the underlying disk. Write-back is
 only required when there is not enough space for an incoming cache item. In
 doing so, the number of data accesses involving disk IO can be greatly reduced.
 Many operating systems including Linux or FreeBSD mimic this concept through the
