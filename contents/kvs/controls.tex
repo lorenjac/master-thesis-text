@@ -141,8 +141,8 @@ benchmark TATP which assumes 80 \% of all transactions to be read-only
 \cite{larson2011high}. Another useful side effect of multiversioning is that it
 encodes an implicit logging infrastructure which can be used for recovery
 purposes \cite{condit2009better, venkataraman2011consistent}. \ac{MVCC} is
-similar to \ac{RCU} \cite{mckenney1998read} but differs in that it can manage
-more than two versions of an item at a time.
+similar to \ac{RCU} \cite{mckenney1998read} but differs in that it is more
+general and can manage more than two versions at a time.
 
 While read operations benefit from \ac{COW}, updates can be expensive.
 Updating a version incorporates additional overhead for allocating a new version
