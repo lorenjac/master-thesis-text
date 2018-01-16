@@ -1,7 +1,7 @@
 Posting updates to \ac{NVRAM} is different from traditional non-volatile storage
-media. With \ac{NVRAM}, write-back is not directly observable by software and the
-underlying memory subsystem is unaware of transactional semantics. As a result,
-updates may be reordered or get stuck in store buffers and caches, thus
+media. With \ac{NVRAM}, write-back is not directly observable by software and
+the underlying memory subsystem is unaware of transactional semantics. As a
+result, updates may be reordered or get stuck in store buffers and caches, thus
 threatening consistency across crashes.
 
 As pointed out in Chapter \ref{ch:nvram-consistency}, programmers need to
@@ -13,8 +13,8 @@ caches. To prevent this, cache line flushes or non-temporal stores could be
 used. Even when reaching a memory controller, stores are once again buffered to
 speed up subsequent reads to that item. While earlier works anticipated
 designated flush instructions for controller buffers, both researchers and
-hardware vendors have agreed on the platform feature \ac{ADR}. When power fails, it
-receives a signal and utilizes the remaining electrical energy to flush all
+hardware vendors have agreed on the platform feature \ac{ADR}. When power fails,
+it receives a signal and utilizes the remaining electrical energy to flush all
 memory controller buffers.
 
 With the exception of \ac{ADR}, all of these methods can significantly increase
@@ -23,7 +23,8 @@ Deferred write-backs for example are useful to decrease access times for
 recently written data. Flushing store buffers, however, also affects data that
 are not involved in transactions. In addition, enforcing strict program order
 usually results in pipeline stalls. Since there are no other options at the
-moment, programmers have to meticulously manage and optimize updates to \ac{NVRAM}.
+moment, programmers have to meticulously manage and optimize updates to
+\ac{NVRAM}.
 
 Summing up, preserving consistency across crashes is necessary but also
 introduces adverse effects on performance. In accordance with recent research,
@@ -38,6 +39,6 @@ this work requires the following features
 
 Both memory order enforcement and fine-grained cache flushes are provided by
 many instruction sets including \code{x86\_64}, SPARC, and IBM POWER and zSeries
-\cite{mckenney2007memory}. \ac{ADR}, on the other hand, is a new platform feature
-that is already supported on some systems. Therefore, no changes to existing
-hardware are needed.
+\cite{mckenney2007memory}. \ac{ADR}, on the other hand, is a new platform
+feature that is already supported on some systems. Therefore, no changes to
+existing hardware are needed.

@@ -63,21 +63,19 @@ systems either do not support serializable transactions or rely on suboptimal
 mechanisms to do so.
 
 Nevertheless, serializability is important to guarantee data integrity and
-should not be traded in favor of performance. Upcoming \ac{NVRAM} technologies pose
-an opportunity to satisfy both demands. This thesis aims to provide affordable
-serializable transactions by leveraging the latency savings of \ac{NVRAM} over
-disks.
-
-% The goal is to achieve serializability with performance en par with non-serializing\ac{DRAM}-based key-value stores.
+should not be traded in favor of performance. Upcoming \ac{NVRAM} technologies
+pose an opportunity to satisfy both demands. This thesis aims to provide
+affordable serializable transactions by leveraging the latency savings of
+\ac{NVRAM} over disks.
 
 % Task
 
 The task is to design and implement an in-memory key-value store that exploits
 the benefits of upcoming non-volatile \ac{RAM} to enable efficient serializable
-transactions. For this purpose, an \ac{NVRAM}-aware multiversion concurrency control
-protocol is implemented. In order to validate the approach and determine the
-overhead of serializability, benchmarks are used to compare the key-value store
-against non-serializable solutions.
+transactions. For this purpose, an \ac{NVRAM}-aware multiversion concurrency
+control protocol is implemented. In order to validate the approach and determine
+the overhead of serializability, benchmarks are used to compare the key-value
+store against non-serializable solutions.
 
 % Overview
 
