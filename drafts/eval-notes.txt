@@ -1,0 +1,62 @@
+# Evaluation - Notes
+
+**INTRO**
+
+* Chapter \ref{ch:concept} presents the concept of enabling fast serializable database transactions through the use of byte-addressable non-volatile memory.
+* Based on the prototypical implementation outlined in the previous chapter, this chapter attempts to determine the effectiveness of the approach taken.
+
+**WHAT I WANT TO SHOW**
+
+* Many databases and KVS do not support or enable serializability by default for performance reasons.
+* As a result, some forms of overlapping data accesses from concurrent transactions can lead to inconsistent data.
+* If NVRAM can be leveraged to sufficiently reduce serialization overhead, serializability could be adopted as the default isolation level in systems featuring NVRAM.
+* Therefore, the aim of this work is to determine whether the approach of enabling fast serializable transactions through NVRAM is worth pursuing.
+* The approach could be considered practical if transaction throughput with serializability approaches that of systems without serializable transactions.
+* For that purpose, this evaluation investigates whether transaction throughput with serializability comes sufficiently close to non-serializable systems.
+* The evaluation comprises a performance comparison between the implemented prototype and the NVRAM-aware KVS Echo. The central metric in this comparison is transaction throughput.
+* However, there a couple of challenges which have to be discussed first.
+
+**CHALLENGES**
+
+* NVRAM is not yet commercially available
+	* must use DRAM is emulate NVRAM
+		* latencies
+			* a) simulate latencies
+			* b) don't (assume better tech in the future)
+		* memory access
+			* make sure OS/CPU does not interfere
+			* page caches + swapping cause trouble
+			* even RAM disk regions can be swapped
+			* => a) DAX-compatible file system
+			* => b) use tmpfs and disable swapping (VFS overhead possible)
+* comparing databases is notoriously difficult
+	* different feature sets
+	* different technologies
+		* recovery
+		* synchronization
+		* application-specific optimizations
+* concrete technological differences
+	* Echo uses
+		* general-purpose memory allocator for DRAM (tcmalloc)
+		* custom NVRAM programming model (incl. flushing)
+		* ported existing data structures to support NVRAM
+		* isolation: snapshot isolation
+	* while Midas uses
+		* defacto-standard NVRAM middleware pmdk
+		* NVRAM-specific allocator (pmdk)
+		* state-of-the-art NVRAM programming model (pmdk)
+		* custom data structures designed for NVRAM
+		* isolation: serializability
+	* but
+		* both are designed for NVRAM
+		* both use MVCC
+
+**HOW I DID IT**
+
+What is important?
+
+The evaluation is based on synthetic benchmarks. While real-life workloads would be more appropriate, they are hard to come by. Therefore, even renowned benchmarks such as TPC or TATP rely on synthetic workloads. However, both benchmark suites are driven by the SQL query language which neither Echo nor Midas support. Subsequently, a custom benchmark is used to analyze the performance of both KVS.
+
+The central metric of this evaluation is transaction throughput. If
+
+**WHAT I HAVE FOUND**

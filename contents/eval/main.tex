@@ -1,3 +1,42 @@
 \chapter{Evaluation}
 \label{ch:eval}
 
+The previous chapter elaborates on a prototypical implementation of the concept
+introduced in Chapter \ref{ch:concept}. The goal is to enable fast serializable
+database transactions through the use of novel byte-addressable non-volatile
+memory. Based on the prototype, this chapter attempts to determine the
+effectiveness of that concept.
+
+It has been shown, that MMDB can benefit from NVRAM \cite{oukid2017data,
+andrei2017sap}. However, recent database research still trades serializable
+transactions for performance \cite{bailey2013exploring}. If NVRAM can be
+leveraged to reduce or compensate serialization overhead, then serializability
+could be adopted as the default isolation level in systems featuring NVRAM.
+Therefore, the aim of this work is to determine whether the approach of enabling
+fast serializable transactions through NVRAM is worth pursuing.
+
+An important measure in this matter is transaction throughput, as it is known to
+decrease with higher isolation levels. For that purpose, it is investigated
+whether transaction throughput with serializability comes sufficiently close to
+non-serializable systems and scales accordingly. While this statement may be too
+vague for production it is sufficient for an initial work in this area.
+
+The evaluation is based on a performance and scalability comparison between the
+implemented prototype, labeled as Midas, and the NVRAM-aware KVS Echo from
+Chapter \ref{ch:kvs}. It consists of two benchmarks: a baseline benchmark and a
+transaction throughput benchmark. The throughput benchmark is used to compare
+the transaction throughput of both stores and how well it scales with additional
+processors. The baseline benchmark captures average operation latencies for each
+store, which are helpful to accomodate for differences in the throughput
+benchmark.
+
+% At first, however, there a couple of challenges to discuss.
+
+% \section{Challenges}
+
+\todo[inline]{Optional: Discuss challenges regarding database benchmarks}
+
+\section{Baseline}
+\section{Transaction Throughput}
+
+% \section{Summary}
