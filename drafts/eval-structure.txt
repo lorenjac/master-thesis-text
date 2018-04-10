@@ -4,6 +4,10 @@
 
 para: Hardware Architecture
 
+## Challenges
+
+## System Configuration
+
 ## Baseline
 
 <Intro>

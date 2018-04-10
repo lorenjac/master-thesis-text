@@ -1,0 +1,13 @@
+# Evaluation
+
+## Challenges
+
+Evaluating the performance of databases is a challenging task, for which there are several reasons. At first, DBMS often are complex software systems with very distinct technologies and feature sets. One DBMS might support several isolation schemes while another may provide more sophisticated recovery mechanisms instead. In general, different DBMS are likely to be optimized for different tasks and workloads. Another reason for the intricacy of databases benchmarking lies in identifying meaningful use cases and acquiring the respective input data.
+As for DBMS, these aspects apply for KVS as well.
+
+In the case of Midas, the evaluation is facing several challenges:
+
+* benchmarks cannot be conducted on actual NVRAM
+* established benchmarks such as TPC or TATP cannot be used
+
+First, benchmarks cannot be conducted on actual NVRAM as DIMM modules for current technologies are not yet commercially available. This is an issue because even current NVRAM technologies are reported to be up to 10\% slower than DRAM when writing. As a result, such latencies would have to be simulated, for example, by introducing delays in software.
