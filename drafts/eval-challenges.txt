@@ -2,12 +2,11 @@
 
 ## Challenges
 
-Evaluating the performance of databases is a challenging task, for which there are several reasons. At first, DBMS often are complex software systems with very distinct technologies and feature sets. One DBMS might support several isolation schemes while another may provide more sophisticated recovery mechanisms instead. In general, different DBMS are likely to be optimized for different tasks and workloads. Another reason for the intricacy of databases benchmarking lies in identifying meaningful use cases and acquiring the respective input data.
-As for DBMS, these aspects apply for KVS as well.
+Evaluating database systems or database concepts in general is a complicated topic and there are even additional issues in this particular instance. Essentially though, the evaluation of Midas is facing two major challenges:
 
-In the case of Midas, the evaluation is facing several challenges:
+1. Established database benchmark software cannot be used
+2. NVRAM is not part of the system configuration
 
-* benchmarks cannot be conducted on actual NVRAM
-* established benchmarks such as TPC or TATP cannot be used
+In general, database systems are very complex software systems with a wide range of mutually differing feature sets, technologies, and optimization goals. As a result, it is very hard to identify use cases or workloads that are meaningful for all systems under evaluation. Ultimately, it is difficult to compare the performance of these systems against each other. Therefore, vendors usually rely on established benchmark software such as TPC or TATP as a reference. However, these systems require all their test candidates to provide a query language front end which is used to run their benchmark routines. Since KVS usually do not support query languages, these benchmark suites cannot be used in this instance. As a result, custom benchmarks routines must be developed as is done in \cite{bailey2013exploring, zhou2016nvht}.
 
-First, benchmarks cannot be conducted on actual NVRAM as DIMM modules for current technologies are not yet commercially available. This is an issue because even current NVRAM technologies are reported to be up to 10\% slower than DRAM when writing. As a result, such latencies would have to be simulated, for example, by introducing delays in software.
+Novel NVRAM technologies such as PCM or 3DXPoint are not yet commercially available as DIMMs. Therefore, the evaluation has to be carried out on volatile DRAM which does not account for the greater access latencies of NVRAM. In order to obtain meaningful results, it is possible use a custom BIOS as in \cite{dulloor2014system, oukid2015instant} or reprogram the DIMM microcode as in \cite{schwalb2016hyrise}. Some authors, however, have decided not to emulate latencies \cite{bailey2013exploring}. Arguments include that any emulated latency would be inherently inaccurate as final NVRAM parameters are yet unknown. Further, they argue that it is safe to assume that the current performance degradation of up to 10 \% can be eliminated as techologies advance.

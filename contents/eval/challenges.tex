@@ -1,0 +1,33 @@
+Evaluating database systems or database concepts in general is a complicated
+topic and there are even additional issues in this particular instance.
+Essentially though, the evaluation of Midas is facing two major challenges:
+
+\begin{enumerate}
+    \item Established database benchmark software cannot be used
+    \item NVRAM is not part of the system configuration
+\end{enumerate}
+
+In general, database systems are very complex software systems with a wide range
+of mutually differing feature sets, technologies, and optimization goals. As a
+result, it is very hard to identify use cases or workloads that are meaningful
+for all systems under evaluation. Ultimately, it is difficult to compare the
+performance of these systems against each other. Therefore, vendors usually rely
+on established benchmark software such as TPC \cite{schwalb2016hyrise} or TATP
+\cite{oukid2015instant} as a reference. However, these systems require all their
+test candidates to provide a query language front end which is used to run their
+benchmark routines. Since neither KVS in this evaluation supports a query
+language, none of these benchmark suites can be used. As a result, custom
+benchmarks routines must be developed as is done in similar works
+\cite{bailey2013exploring, zhou2016nvht}.
+
+Novel NVRAM technologies such as PCM or 3DXPoint are not yet commercially
+available as DIMMs. Therefore, the evaluation has to be carried out on volatile
+DRAM which does not account for the greater access latencies of NVRAM. In order
+to still obtain meaningful results, it is possible to enforce custom latencies
+by modifying the system BIOS as in \cite{dulloor2014system, oukid2015instant} or
+by reprogramming the DIMM microcode \cite{schwalb2016hyrise}. Some authors,
+however, have decided not to emulate latencies \cite{bailey2013exploring,
+zhou2016nvht}. Arguments include that any emulated latency would be inherently
+inaccurate as final NVRAM parameters are yet unknown. Further, they argue that
+it is safe to assume that the current latency gap of up to 10\% can be
+eliminated as techologies advance.
