@@ -28,10 +28,10 @@ OLTP
 
 Scenario | #Entries in KVS | Transaction Length
 -- | :--: | :--:
-S1 | 1K   | 2 - 64
-S2 | 1K   | 128 - 512
-S3 | 100K | 2 - 64
-S4 | 100K | 128 - 512
+S1 | 1K   | 2 - 32
+S2 | 1K   | 64 - 256
+S3 | 100K | 2 - 32
+S4 | 100K | 64 - 256
 
 txlen_short_min = 2 (simplest transaction: X++, read + write)
 txlen_short_max = ? (update a few items based on a small aggregation)
