@@ -1,0 +1,35 @@
+\subsubsection{Procedure}
+
+\begin{enumerate}
+    \item populate store with dummy data
+    \item repeatedly perform a given operation (get, put) on an existing random key in the store
+    \item measure latency of each single operation (make sure compiler does not reorder)
+    \item aggregate samples and determine min, max, average latency
+\end{enumerate}
+
+\paragraph{Dummy Data}
+
+\begin{itemize}
+    \item random-generated list of key-value pairs
+    \item stored on disk for reuse
+    \item key size: 128 bytes (imagine SHA-256 hashes, also used in \cite{bailey2013exploring})
+    \item value size: 1024 bytes (used in \cite{bailey2013exploring})
+\end{itemize}
+
+Apart from the size of individual pairs, the number of pairs plays an important
+role. Since many hash map implementations use chaining to resolve hash
+collisions for  differing keys, larger tables tend to have larger chains which
+take longer to traverse.
+
+\begin{itemize}
+    \item \emph{small} database: 1K key-value pairs
+    \item \emph{large} database: 100K key-value pairs
+\end{itemize}
+
+\subsubsection{Results}
+
+\todo[inline]{create plot}
+
+\subsubsection{Discussion}
+
+\todo[inline]{not much to discuss here as results were rather boring}
