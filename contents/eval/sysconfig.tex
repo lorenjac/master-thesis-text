@@ -1,10 +1,18 @@
-\begin{itemize}
-    \item 4 x Intel Xeon CPU E7 4830 @ 2.13GHz
-    \item each CPU has 8 cores with two-way SMT (total 64 hardware threads)
-    \item 256GB DDR3 @ 1066MHz
-    \item 7.7 TB HDD
-    \item 127GB non-swappable tmpfs partition
-    \item persistence is achieved via storing database as a file in tmpfs (for both KVS)
-    \item tmpfs files are mapped into memory
-    \item in accordance with \cite{bailey2013exploring, zhou2016nvht} this work refrains from emulating access latencies of NVRAM for the reasons given in Chapter \ref{ch:eval-challenges}.
-\end{itemize}
+% \begin{itemize}
+%     \item 4 x Intel Xeon CPU E7 4830 @ 2.13GHz (Westmere EX)
+%     \item each CPU has 8 cores with two-way SMT (total 64 hardware threads)
+%     \item 256GB DDR3 @ 1066MHz
+%     \item 7.7 TB HDD
+%     \item 127GB non-swappable tmpfs partition
+%     \item persistence is achieved via storing database as a file in tmpfs (for both KVS)
+%     \item tmpfs files are mapped into memory
+%     \item in accordance with \cite{bailey2013exploring, zhou2016nvht} this work refrains from emulating access latencies of NVRAM for the reasons given in Chapter \ref{ch:eval-challenges}.
+% \end{itemize}
+
+The benchmarks are conducted on a platform of four Intel Xeon E7-4830 processors with a total of 32 cores running at 2.13GHz. The system has 256GB of DDR3 RAM running at 1066Mhz. For persistent storage the system relies on mechanical hard drives. The operating system is a CentOS 7 based on Linux 3.
+
+Since NVRAM is not available, all benchmarks are carried out on volatile DRAM. In order to emulate persistency, each KVS stores its contents in a memory-mapped file. To satisfy the consistency requirements shown in Chapter \ref{ch:nvram-consistency}, it is important to prevent potential buffering of data in kernel page caches. This is achieved by using a 127GB instance of \emph{tmpfs} as RAM disk. However, even with this setup, memory pages may still be swapped at will by the OS. In order to prevent this, swapping is disabled. As a result, the hard disk is never used and no write operation within the mapped region is deferred.
+
+\todo[inline]{Does the reader understand why swapping must be disabled?}
+
+Promising NVRAM technologies such as PCM do incur higher latencies that DRAM. In accordance with \cite{bailey2013exploring, zhou2016nvht}, this work refrains from emulating access latencies for the same reasons given in Chapter \ref{ch:eval-challenges}.
