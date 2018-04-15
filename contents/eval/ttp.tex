@@ -75,12 +75,12 @@ engines. Each workload consists of 1000 transactions.
 
 Resulting from the dimensions shown above, four unique scenarios  were derived:
 
-\begin{enumerate}
-    \item small database, short transactions
-    \item small database, long transactions
-    \item large database, short transactions
-    \item large database, long transactions
-\end{enumerate}
+\begin{itemize}
+    \item S1: small database, short transactions
+    \item S2: small database, long transactions
+    \item S3: large database, short transactions
+    \item S4: large database, long transactions
+\end{itemize}
 
 These scenarios are supposed to simulate both low and high contention in
 different forms. In a database that is small compared to the number of
@@ -126,22 +126,38 @@ A single run of the benchmark works as follows. At first, the respective KVS is 
 
 \subsubsection{Results \& Discussion}
 
-\begin{figure}
-\begin{minipage}[l]{0.50\textwidth}
-        \includegraphics[width=\textwidth]{figures/bench/spd-ss}
-        \caption{Transaction throughput speedup for scenario A}
-        % \label{fig:concept-two-level-store}
-\end{minipage}
-\begin{minipage}[l]{0.50\textwidth}
-    % \begin{figure}
-        \includegraphics[width=\textwidth]{figures/bench/spd-sl}
-        \caption{Transaction throughput speedup for scenario B}
-        % \label{fig:concept-two-level-store}
-    % \end{figure}
-\end{minipage}
-% \end{figure}
+\todo[inline]{Integrate raw ttp and parallel efficiency}
 
-% \begin{figure}
+In this subsection the results of the benchmark are shown and discussed. The benchmark captures two metrics: transaction throughput and the transaction abort rate. In order to express the scalability of both KVS, throughput is expressed in terms of speedup factor. This also helps comparing the performance of both stores even if absolute throughput differs significantly. The abort rate is given by the ratio of the number of committed transactions and the number of scheduled transactions. When interpreting throughputs or speedup factors, it is important to take the abort rate into account because higher abort rates can lead to higher transaction throughputs. The reason for this circumstance is that commits are very expensive and the resulting time saving of an abort has a stronger influence on throughput than reducing the number of committed transactions. This is also a direct consequence of the two-level store architecture and the additional measures to preserve consistency in NVRAM.
+
+\paragraph{Legend}
+
+The following analysis compares benchmark results of Echo (green), Midas (blue) and an optimized variant of Midas (red). In the current implementation of Midas, the index is based on a naive hash table implementation for NVRAM. In order to protect critical sections in the hash table, a simple global locking mechanism is used. This approach forms a major bottleneck which can be addressed with a designated but often complicated concurrent design as in \cite{}. However, this is an implementation detail, albeit crucial. In order to show the potential of Midas' design, a second variant of Midas without index locking was examined. This is possible because during the benchmark not the index but only histories are modified. This is a side effect of omitting insert and delete operations for simplicity.
+
+%==============================================================================
+% [1 = SS]
+%==============================================================================
+
+
+
+\begin{figure}[h!]
+\begin{minipage}[l]{0.50\textwidth}
+    \includegraphics[width=\textwidth]{figures/bench/spd-ss}
+    \caption{Transaction throughput speedup for scenario S1.}
+    \label{fig:concept-two-level-store}
+\end{minipage}
+\begin{minipage}[l]{0.50\textwidth}
+    \includegraphics[width=\textwidth]{figures/bench/ar-ss}
+    \caption{Abort rate for scenario S1.}
+    \label{fig:concept-two-level-store}
+\end{minipage}
+\end{figure}
+
+%==============================================================================
+% [2 = SL]
+%==============================================================================
+
+\begin{figure}
 \begin{minipage}[l]{0.50\textwidth}
         \includegraphics[width=\textwidth]{figures/bench/spd-ls}
         \caption{Transaction throughput speedup for scenario C}
@@ -157,7 +173,7 @@ A single run of the benchmark works as follows. At first, the respective KVS is 
 \end{figure}
 
 %==============================================================================
-%==============================================================================
+% [3 = LS]
 %==============================================================================
 
 \begin{figure}
@@ -191,7 +207,7 @@ A single run of the benchmark works as follows. At first, the respective KVS is 
 \end{figure}
 
 %==============================================================================
-%==============================================================================
+% [4 = LL]
 %==============================================================================
 
 \begin{figure}
@@ -223,3 +239,5 @@ A single run of the benchmark works as follows. At first, the respective KVS is 
         % \label{fig:concept-two-level-store}
 \end{minipage}
 \end{figure}
+
+\todo[inline]{Werden Captions mit Punkt beendet???}
