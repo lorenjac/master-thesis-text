@@ -96,21 +96,35 @@ more likely to collide and abort.
 
 \subsubsection{Procedure}
 
-\begin{enumerate}
-    \item populate store with dummy data (use same data from baseline benchmark)
-    \item load 1 out of 4 pre-generated workloads (set of 1000 transactions with varying length working on varying data)
-    \item distribute workload on pre-defined number of cores (1000 / num\_threads + amortization of remainder)
-    \item fork threads with partial workloads
-    \item each thread runs its transactions on the dummy data (repeats up to 3 times on failure, does not count tx if 4 attempts failed)
-    \item measure time between fork and join (because timers on different cores are not synchronous)
-    \item determine transaction throughput = num\_committed\_transactions / total\_time
-    \item repeat this process 10 times for each workload (each workload is tied to a certain database size)
-    \item after ten times: compute tx throughput, throughput speed up, parallel efficiency, and abort rate
-\end{enumerate}
+The benchmark is performed separately for each KVS. The general procedure is to
+execute each workload with a different number of cores. Since the underlying
+machine has 32 physical cores, the experiment is performed with 1, 2, 4, 8, 16,
+and 32 cores. During each run, several statistics such as the total time taken
+and the number of aborts are captured. In order to reduce the influence of
+outliers, each run, i.e. a combination of workload and core count, is performed
+10 times. As a result, for each store there is a total of 24 configurations
+which amounts to a total of 480 runs including repetitions.
 
-\subsubsection{Results}
+A single run of the benchmark works as follows. At first, the respective KVS is initialized with dummy data and the workload decomposed so that it fits the number of cores of the current configuration. Then, for each core, a thread is created and pinned to that core. Each thread executes an equal share of the entire workload. The total time taken to execute the entire workload is measured by taking the difference of timestamps from before spawning the workers and after all workers have terminated. The general procedure of the experiment is depicted in Figure~\ref{fig:eval-host}. The procedure performed by a single worker thread is shown in Figure~\ref{fig:eval-worker}.
 
-\todo[inline]{The plots are already there (see below)}
+\todo[inline]{Mention retry policy?}
+
+\begin{figure}[h!]
+\begin{minipage}[l]{0.50\textwidth}
+    % \includegraphics[width=0.85\textwidth]{figures/bench/host}
+    \includegraphics[width=0.75\textwidth]{figures/bench/host}
+    \caption{Logical flow of the benchmark application.}
+    \label{fig:eval-host}
+\end{minipage}
+\begin{minipage}[l]{0.50\textwidth}
+    % \includegraphics[width=\textwidth]{figures/bench/worker}
+    \includegraphics[width=0.89\textwidth]{figures/bench/worker}
+    \caption{Logical flow of a single worker thread.}
+    \label{fig:eval-worker}
+\end{minipage}
+\end{figure}
+
+\subsubsection{Results \& Discussion}
 
 \begin{figure}
 \begin{minipage}[l]{0.50\textwidth}
@@ -209,7 +223,3 @@ more likely to collide and abort.
         % \label{fig:concept-two-level-store}
 \end{minipage}
 \end{figure}
-
-\subsubsection{Discussion}
-
-\todo[inline]{discuss results}

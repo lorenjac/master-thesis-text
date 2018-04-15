@@ -40,4 +40,8 @@ These scenarios are supposed to simulate both low and high contention in differe
 
 ### Procedure
 
+The benchmark is performed separately for each KVS. The general procedure is to execute each workload with a different number of cores. Since the underlying machine has 32 physical cores, the experiment is performed with 1, 2, 4, 8, 16, and 32 cores. During each run, several statistics such as the total time taken and the number of aborts are captured. In order to reduce the influence of outliers, each run, i.e. a combination of workload and core count, is performed 10 times. As a result, for each store there is a total of 24 configurations which amounts to a total of 480 runs including repetitions.
+
+A single run of the benchmark consists of the following steps:
+
 ### Results

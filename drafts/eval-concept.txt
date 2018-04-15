@@ -1,0 +1,89 @@
+# Evaluation
+
+## Benchmarks
+
+* Baseline (average operation latency)
+* Scalability (average transaction throughput)
+
+## Notes
+
+* persistence must be enabled manually
+	* PMDK: export PMEM_IS_PMEM_FORCE
+	* Echo: #define FLUSH_IT
+* differences
+	* consistency
+		* Echo: custom
+		* Midas: PMDK (full-fledged vendor library with mem tx)
+	* isolation
+		* Echo: SI
+		* Midas: SSI
+	* memory management
+		* Echo: malloc + tcmalloc (efficient general-purpose)
+		* Midas: PMDK (malloc + pmalloc (designed for NVM))
+
+## Baseline
+
+* determine average operation latency for better interpretation of scalability performance
+* scenarios
+	* empty store
+		* key-size: 128 Byte (as in bailey2013exploring)
+		* val-size: 1024 Byte (as in bailey2013exploring)
+	* populated store
+		* key-size: see above
+		* val-size: see above
+
+## Scalability
+
+* determine average transaction throughput to show whether SSI becomes affordable on NVM
+
+### Scenarios
+
+* **data sets**
+	* pairs
+		* key-size: 128 Byte (as in bailey2013exploring)
+		* val-size: 1024 Byte (as in bailey2013exploring)
+	* size
+		* small (?)
+		* medium (?)
+		* large (?)
+	* count
+		* 3 for each each size
+* **transactions**
+	* type
+		* read-only (RO)
+			* op probs
+				* read: 1.0
+				* _   : 0.0
+			* prob
+				* 10% (selten)
+				* 25% (gelegentlich)
+				* 50% (häufig)
+		* normal
+			* op probs
+				* OLTP
+					* get: 84%
+					* ins:  8%
+					* upd:  5%
+					* del:  3%
+				* OLAP
+					* get: 94%
+					* ins:  2%
+					* upd:  3%
+					* del:  1%
+			* prob
+				* 1 - P(RO)
+	* length
+		* [1..   8] (kurz)
+		* [9..  64] (mittel)
+		* [65..512] (lang)
+		* Note: consider normal distribution around 64 _/`\_
+
+### Execution
+
+* run each worker (runs several transactions) pinned on a separate core
+* each worker performs N operations
+	* alternative: run for time T (do not count ops/commits after T is exceeded)
+* count completed transactions (#commits)
+* count conflicts
+* count errors
+* measure time
