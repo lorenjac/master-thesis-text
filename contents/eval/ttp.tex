@@ -128,7 +128,7 @@ A single run of the benchmark works as follows. At first, the respective KVS is 
 
 \todo[inline]{Integrate raw ttp and parallel efficiency}
 
-In this subsection the results of the benchmark are shown and discussed. The benchmark captures two metrics: transaction throughput and the transaction abort rate. In order to express the scalability of both KVS, throughput is expressed in terms of speedup factor. This also helps comparing the performance of both stores even if absolute throughput differs significantly. The abort rate is given by the ratio of the number of committed transactions and the number of scheduled transactions. When interpreting throughputs or speedup factors, it is important to take the abort rate into account because higher abort rates can lead to higher transaction throughputs. The reason for this circumstance is that commits are very expensive and the resulting time saving of an abort has a stronger influence on throughput than reducing the number of committed transactions. This is also a direct consequence of the two-level store architecture and the additional measures to preserve consistency in NVRAM.
+In this subsection the results of the benchmark are shown and discussed. The benchmark captures two metrics: transaction throughput and the transaction abort rate. In order to express the scalability of both KVS, throughput is expressed in terms of speedup factor. This also helps comparing the performance of both stores even if absolute throughput differs significantly. The abort rate is given by the ratio of the number of aborted transactions and the number of scheduled transactions. When interpreting throughputs and speedup factors, it is important to take the abort rate into account because higher abort rates can lead to higher transaction throughputs. The reason for this circumstance is that commits are very expensive and the resulting time saving of an abort has a stronger influence on throughput than reducing the number of committed transactions. This is also a direct consequence of the two-level store architecture and the additional measures to preserve consistency in NVRAM.
 
 \paragraph{Legend}
 
@@ -138,18 +138,30 @@ The following analysis compares benchmark results of Echo (green), Midas (blue) 
 % [1 = SS]
 %==============================================================================
 
+\paragraph{Scenario S1}
 
+This scenario simulates high contention through a small database. The plot in Figure \ref{fig:ttp-s1} shows that both variants of Midas have a much better transaction throughput than Echo. However, when considering the speedup factors in Figure \ref{fig:spd-s1}, all stores fail to improve beyond a core count of eight. This can also be seen in terms of parallel efficiency in Figure \ref{fig:eff-s1}. The reason is that the database has very few items which increases both synchronization overhead and the number of data conflicts. The latter is reflected in an increased abort rate as shown in Figure \ref{fig:ar-s1}. As expected, both variants of Midas have much higher abort rates, due to stricter conflict detection. While Midas$^{*}$ makes better use of additional cores, it also produces higher abort rates. This confirms the implicit serializing nature of the global lock in the original implementation of Midas.
 
 \begin{figure}[h!]
+% \begin{minipage}[l]{0.50\textwidth}
+%     \includegraphics[width=\textwidth]{figures/bench/ttp-ss}
+%     \caption{Transaction throughput for scenario S1.}
+%     \label{fig:ttp-s1}
+% \end{minipage}
 \begin{minipage}[l]{0.50\textwidth}
     \includegraphics[width=\textwidth]{figures/bench/spd-ss}
     \caption{Transaction throughput speedup for scenario S1.}
-    \label{fig:concept-two-level-store}
+    \label{fig:spd-s1}
+\end{minipage}
+\begin{minipage}[l]{0.50\textwidth}
+    \includegraphics[width=\textwidth]{figures/bench/eff-ss}
+    \caption{Parallel efficiency for scenario S1.}
+    \label{fig:eff-s1}
 \end{minipage}
 \begin{minipage}[l]{0.50\textwidth}
     \includegraphics[width=\textwidth]{figures/bench/ar-ss}
     \caption{Abort rate for scenario S1.}
-    \label{fig:concept-two-level-store}
+    \label{fig:ar-s1}
 \end{minipage}
 \end{figure}
 
@@ -157,18 +169,30 @@ The following analysis compares benchmark results of Echo (green), Midas (blue) 
 % [2 = SL]
 %==============================================================================
 
-\begin{figure}
+\paragraph{Scenario S2}
+
+This scenario simulates a small database accessed by long transactions. It can be seen as the worst-case scenario for concurrency controls with strong isolation levels. As expected, transaction throughput of Midas suffers greatly from the high contention as depicted in Figure \ref{fig:ttp-s2}. The reason is that many threads spend a lot of time waiting at few critical sections and still many conflicts do occur. As a result, speedup factor and parallel efficiency are plummeting for all KVS (see Figures \ref{fig:spd-s2}, \ref{fig:eff-s2}). Still, Midas performs significantly worse, which can be attributed to the higher number of aborts due to serializability (see Figure \ref{fig:ar-s2}).
+
+\begin{figure}[h!]
+% \begin{minipage}[l]{0.50\textwidth}
+%     \includegraphics[width=\textwidth]{figures/bench/ttp-sl}
+%     \caption{Transaction throughput for scenario S2.}
+%     \label{fig:ttp-s2}
+% \end{minipage}
 \begin{minipage}[l]{0.50\textwidth}
-        \includegraphics[width=\textwidth]{figures/bench/spd-ls}
-        \caption{Transaction throughput speedup for scenario C}
-        % \label{fig:concept-two-level-store}
-    % \end{figure}
+    \includegraphics[width=\textwidth]{figures/bench/spd-sl}
+    \caption{Transaction throughput speedup for scenario S2.}
+    \label{fig:spd-s2}
 \end{minipage}
 \begin{minipage}[l]{0.50\textwidth}
-    % \begin{figure}
-        \includegraphics[width=\textwidth]{figures/bench/spd-ll}
-        \caption{Transaction throughput speedup for scenario D}
-        % \label{fig:concept-two-level-store}
+    \includegraphics[width=\textwidth]{figures/bench/eff-sl}
+    \caption{Parallel efficiency for scenario S2.}
+    \label{fig:eff-s2}
+\end{minipage}
+\begin{minipage}[l]{0.50\textwidth}
+    \includegraphics[width=\textwidth]{figures/bench/ar-sl}
+    \caption{Abort rate for scenario S2.}
+    \label{fig:ar-s2}
 \end{minipage}
 \end{figure}
 
@@ -176,33 +200,32 @@ The following analysis compares benchmark results of Echo (green), Midas (blue) 
 % [3 = LS]
 %==============================================================================
 
-\begin{figure}
-\begin{minipage}[l]{0.50\textwidth}
-        \includegraphics[width=\textwidth]{figures/bench/eff-ss}
-        \caption{Parallel efficiency for scenario A}
-        % \label{fig:concept-two-level-store}
-\end{minipage}
-\begin{minipage}[l]{0.50\textwidth}
-    % \begin{figure}
-        \includegraphics[width=\textwidth]{figures/bench/eff-sl}
-        \caption{Parallel efficiency for scenario B}
-        % \label{fig:concept-two-level-store}
-    % \end{figure}
-\end{minipage}
-% \end{figure}
+\todo[inline]{Are we talking about threads or cores? (most likely cores -> change captions in figures)}
 
-% \begin{figure}
+\paragraph{Scenario S3}
+
+This scenario simulates low contention through a large database and short transactions. In this case, conflicts are rare which results in negligible abort rates for all KVS, even with serializability (see Figure \ref{fig:ar-s3}). A side effect is that throughput values are not distorted by time savings from aborted transactions. While the original implementation of Midas fails to improve throughput with additional cores, the optimized variant shows that the overall concept of Midas works very well in low-contention scenarios (see \ref{fig:spd-s3} and \ref{fig:eff-s3}). In particular, Midas$^{*}$ manages to improve throughput up until 16 cores. Echo, on the other hand, scales worse as speedup plummets for more than 8 cores. In terms of absolute throughput depicted in Figure \ref{fig:ttp-s3}, Midas$^{*}$ manages to surpass Echo by a large margin. This is a significant result, because non-serializable SI was adopted for low-contention, read-mostly environments, in the first place. However, it must be noted, that other factors may play a role in this. For instance, Echo and Midas use different backends to handle potential NVRAM. Also, the optimized variant of Midas does not synchronize access to its index, which is a very optimistic approximation of a non-blocking concurrent implementation.
+
+\begin{figure}[h!]
+% \begin{minipage}[l]{0.50\textwidth}
+%     \includegraphics[width=\textwidth]{figures/bench/ttp-ls}
+%     \caption{Transaction throughput for scenario S3.}
+%     \label{fig:ttp-s3}
+% \end{minipage}
 \begin{minipage}[l]{0.50\textwidth}
-        \includegraphics[width=\textwidth]{figures/bench/eff-ls}
-        \caption{Parallel efficiency for scenario C}
-        % \label{fig:concept-two-level-store}
-    % \end{figure}
+    \includegraphics[width=\textwidth]{figures/bench/spd-ls}
+    \caption{Transaction throughput speedup for scenario S3.}
+    \label{fig:spd-s3}
 \end{minipage}
 \begin{minipage}[l]{0.50\textwidth}
-    % \begin{figure}
-        \includegraphics[width=\textwidth]{figures/bench/eff-ll}
-        \caption{Parallel efficiency for scenario D}
-        % \label{fig:concept-two-level-store}
+    \includegraphics[width=\textwidth]{figures/bench/eff-ls}
+    \caption{Parallel efficiency for scenario S3.}
+    \label{fig:eff-s3}
+\end{minipage}
+\begin{minipage}[l]{0.50\textwidth}
+    \includegraphics[width=\textwidth]{figures/bench/ar-ls}
+    \caption{Abort rate for scenario S3.}
+    \label{fig:ar-s3}
 \end{minipage}
 \end{figure}
 
@@ -210,33 +233,26 @@ The following analysis compares benchmark results of Echo (green), Midas (blue) 
 % [4 = LL]
 %==============================================================================
 
-\begin{figure}
+\begin{figure}[h!]
+% \begin{minipage}[l]{0.50\textwidth}
+%     \includegraphics[width=\textwidth]{figures/bench/ttp-ll}
+%     \caption{Transaction throughput for scenario S4.}
+%     \label{fig:ttp-s4}
+% \end{minipage}
 \begin{minipage}[l]{0.50\textwidth}
-        \includegraphics[width=\textwidth]{figures/bench/ar-ss}
-        \caption{Abort rates for scenario A}
-        % \label{fig:concept-two-level-store}
+    \includegraphics[width=\textwidth]{figures/bench/spd-ll}
+    \caption{Transaction throughput speedup for scenario S4.}
+    \label{fig:spd-s4}
 \end{minipage}
 \begin{minipage}[l]{0.50\textwidth}
-    % \begin{figure}
-        \includegraphics[width=\textwidth]{figures/bench/ar-sl}
-        \caption{Abort rates for scenario B}
-        % \label{fig:concept-two-level-store}
-    % \end{figure}
-\end{minipage}
-% \end{figure}
-
-% \begin{figure}
-\begin{minipage}[l]{0.50\textwidth}
-        \includegraphics[width=\textwidth]{figures/bench/ar-ls}
-        \caption{Abort rates for scenario C}
-        % \label{fig:concept-two-level-store}
-    % \end{figure}
+    \includegraphics[width=\textwidth]{figures/bench/eff-ll}
+    \caption{Parallel efficiency for scenario S4.}
+    \label{fig:eff-s4}
 \end{minipage}
 \begin{minipage}[l]{0.50\textwidth}
-    % \begin{figure}
-        \includegraphics[width=\textwidth]{figures/bench/ar-ll}
-        \caption{Abort rates for scenario D}
-        % \label{fig:concept-two-level-store}
+    \includegraphics[width=\textwidth]{figures/bench/ar-ll}
+    \caption{Abort rate for scenario S4.}
+    \label{fig:ar-s4}
 \end{minipage}
 \end{figure}
 
