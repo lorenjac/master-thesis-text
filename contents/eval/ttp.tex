@@ -235,6 +235,10 @@ This scenario simulates low contention through a large database and short transa
 % [4 = LL]
 %==============================================================================
 
+\paragraph{Scenario S4}
+
+The last scenario simulates medium contention through a large database but long transactions. As before, it can be seen in Figures \ref{fig:ttp-s4} through \ref{fig:ar-s4}, that the first version of Midas fails to leverage additional processors while abort rates increase. The optimized version performs much better in terms of total throughput and speedup but also encounters even more aborts. In fact, Figure \ref{fig:ar-s4} shows that, longer transactions alone can cause abort rates to scale in the number of cores for both variants of Midas. Also, starting beyond 16 cores, synchronization overhead in Midas$^{*}$ can no longer be compensated by time savings from aborted transactions (see Figure \ref{fig:ttp-s4}, and \ref{fig:spd-s4}). Echo, on the other hand, has way less aborts but cannot leverage more than eight cores efficiently. At the bottom line, even though Midas$^{*}$ has higher abort rates, it performs and scales better in terms of transaction throughput than Echo.
+
 \begin{figure}[h!]
 \begin{minipage}[l]{0.50\textwidth}
     \includegraphics[width=\textwidth]{figures/bench/ttp-ll}
