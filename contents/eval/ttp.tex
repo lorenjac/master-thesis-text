@@ -312,7 +312,7 @@ aborts. In fact, Figure \ref{fig:ar-s4} shows that, longer transactions alone
 can cause abort rates to scale in the number of cores for both variants of
 Midas. Also, starting beyond 16 cores, synchronization overhead in Midas$^{*}$
 can no longer be compensated by time savings from aborted transactions (see
-Figure \ref{fig:ttp-s4}, and \ref{fig:spd-s4}). Echo, on the other hand, has
+Figure \ref{fig:ttp-s4} and \ref{fig:spd-s4}). Echo, on the other hand, has
 significantly fewer aborts but cannot leverage more than eight cores
 efficiently. At the bottom line, even though Midas$^{*}$ has higher abort rates,
 it performs and scales better in terms of transaction throughput than Echo.
