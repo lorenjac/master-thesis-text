@@ -1,17 +1,32 @@
-% * short recap
-% * result
-%     * M has better ttp in one scenario (S3) but also does not scale there (promising result, esp. low-contention is where MVCC/SI is preferred)
-%         * in other scenarios M performs much worse than echo
-%         * performs esp. bad in very high contention scenarios (with up to 99 percent abort rates)
-%         * inappropriate data structure
-%         * M* attempts to approximate perf. of lock-free hash table
-%     * M* has significantly higher throughput and scales well up until 16 cores, while maintaining comparable abort rates
-%         * may be too optimistic because concurrent data structures are generally slower than their non-synchronized counterparts
-%         * M with a concurrent data strucure may perform worse but still better than echo (in the middle)
-%     * E generally has much lower abort rates but only provides snapshot isolation
-%         * moreover it fails to leverage the advantage and hardly scales beyond 8 cores
-%         * possible reasons include: excessive synchronization and inefficient NVRAM consistency code
-% * summary
-%     * experiment shows that serializability may become affordable with NVRAM
-%         * except in very high contention scenarios, Midas can provide better throughput and scale better than echo
-%         * especially in low-contention scenarios (which is where MVCC/SI are best at) and even with high sync overhead Midas can perform better than its non-serializable counterpart echo
+This chapter is dedicated to determine whether MMDB can leverage NVRAM to make
+the isolation level of serializability affordable. For that purpose, the
+serializable KVS from Chapter \ref{ch:impl}, Midas, and the non-serializable KVS
+Echo are compared in terms of transaction throughput and scalability.
+
+In three out of four scenarios, the original implementation of Midas performs
+significantly worse than Echo. Especially in high-contention scenarios, it shows
+much higher abort rates, lower throughput, and insignificant speedup. However,
+in a low contention scenario (S3) Midas achieves higher absolute throughput.
+This is a very promising result, as it shows that even with serializability MVCC
+could continue to excel in low-contention scenarios. However, despite negligible
+abort rates, which are on par with Echo, Midas shows poor scalability. This is
+due to the non-concurrent hash table implementation which requires a global lock
+for synchronization.
+
+Since the index is not part of the synchronization concept, Midas$^{*}$ attempts
+to approximate the performance of a lock-free concurrent hash table. Midas$^{*}$
+has significantly higher throughput and scales well up until 16 cores, while
+maintaining comparable abort rates. However, this result may be too optimistic
+because concurrent data structures are often slower than their non-synchronized
+counterparts. Midas with a concurrent index strucure may perform worse but still
+better than Echo.
+
+Echo has much lower abort rates in all scenarios, but only provides snapshot
+isolation. Moreover, it fails to leverage the advantage and hardly scales beyond
+8 cores. Possible reasons for that include excessive synchronization and
+inefficient NVRAM consistency procedures.
+
+The benchmark shows that serializability may become affordable with NVRAM after
+all. Except in very high contention scenarios, Midas$^{*}$ can provide better
+throughput and scale better than Echo. Moreover, if contention is low, even
+Midas can perform better than its non-serializable counterpart Echo.
