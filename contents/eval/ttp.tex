@@ -4,11 +4,7 @@ throughput resulting from the increased number of aborted transactions.
 Therefore, in this experiment, transaction throughput is used to determine the
 performance impact of serializability in NVRAM-based key-value stores.
 
-\subsubsection{Setup}
-
-\todo[inline]{Make this a subsection (convert important paragraphs to subsubsections)}
-
-\todo[inline]{Fix data IS vs data ARE inconsistency}
+\subsection{Setup}
 
 In order to perform this experiment, one not only needs data to work on but also
 a set of concrete transactions and the operations they are composed of, i.e. a
@@ -19,7 +15,7 @@ generated data are stored on disk prior to the experiment. Hence, the only
 non-deterministic behaviour is induced by multi-threading, the operating system,
 and the underlying hardware.
 
-\paragraph{Data}
+\subsubsection{Data}
 
 The data used in the experiment comprise two distinct sets of randomly generated
 key-value pairs. The first data set contains 1K pairs, whereas the second holds
@@ -34,7 +30,7 @@ key-value pairs.
 % set with 1K entries and another with 100K entries. When the experiment starts,
 % each individual KVS will be populated with these key-value pairs.
 
-\paragraph{Workloads}
+\subsubsection{Workloads}
 
 All transactions that are to be executed during the experiment are encoded as a
 workload. A workload specifies for each transaction its operations and the
@@ -83,7 +79,7 @@ are selected randomly during the workload generation. All pseudo-random numbers
 were generated using uniform distributions based on seperate mersenne twister
 engines. Each workload consists of 1000 transactions.
 
-\paragraph{Scenarios}
+\subsubsection{Scenarios}
 
 Resulting from the dimensions shown above, four unique scenarios  were derived:
 
@@ -106,7 +102,7 @@ larger databases, short transactions are less likely to access the same data
 which reduces contention. However, as transactions become longer, they become
 more likely to collide and abort.
 
-\subsubsection{Procedure}
+\subsection{Procedure}
 
 The benchmark is performed separately for each KVS. The general procedure is to
 execute each workload with a different number of cores. Since the underlying
@@ -125,18 +121,20 @@ entire workload. The total time taken to execute the entire workload is measured
 by taking the difference of timestamps from before spawning the workers and
 after all workers have terminated. The general procedure of the experiment is
 depicted in Figure~\ref{fig:eval-host}. The procedure performed by a single
-worker thread is shown in Figure~\ref{fig:eval-worker}.
+worker thread is shown in Figure~\ref{fig:eval-worker}. When a transaction
+fails, it is retried up to three times. If all retries fail, the transaction is
+canceled and the program proceeds to the next transaction in the workload.
 
-\todo[inline]{Mention retry policy?}
-
-\begin{figure}[h!]
-\begin{minipage}[l]{0.50\textwidth}
+% \begin{figure}[h!]
+\begin{figure}[h]
+    \centering
+\begin{minipage}[l]{0.45\textwidth}
     % \includegraphics[width=0.85\textwidth]{figures/bench/host}
     \includegraphics[width=0.75\textwidth]{figures/bench/host}
-    \caption{Logical flow of the benchmark application.}
+    \caption{Logical flow of the\\benchmark application.}
     \label{fig:eval-host}
 \end{minipage}
-\begin{minipage}[l]{0.50\textwidth}
+\begin{minipage}[l]{0.45\textwidth}
     % \includegraphics[width=\textwidth]{figures/bench/worker}
     \includegraphics[width=0.89\textwidth]{figures/bench/worker}
     \caption{Logical flow of a single worker thread.}
@@ -144,9 +142,7 @@ worker thread is shown in Figure~\ref{fig:eval-worker}.
 \end{minipage}
 \end{figure}
 
-\subsubsection{Results \& Discussion}
-
-\todo[inline]{Integrate raw ttp and parallel efficiency}
+\subsection{Results \& Discussion}
 
 In this subsection the results of the benchmark are shown and discussed. The
 benchmark captures two metrics: transaction throughput and the transaction abort
@@ -351,3 +347,4 @@ it performs and scales better in terms of transaction throughput than Echo.
 \end{figure}
 
 \todo[inline]{Werden Captions mit Punkt beendet???}
+\todo[inline]{Fix data IS vs data ARE inconsistency}
