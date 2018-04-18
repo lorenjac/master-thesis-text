@@ -15,27 +15,38 @@ overhead, then serializability could be adopted as the default isolation level.
 Therefore, the aim of this chapter is to determine whether the approach of this
 work is worth pursuing.
 
-An important measure in this matter is transaction throughput, as it is known to
-degrade due to higher abort rates in stronger isolation levels. For that purpose,
+An important measure in this context is transaction throughput, as it is known
+to degrade with stronger isolation levels due to higher abort rates. Therefore,
 it is investigated whether transaction throughput with serializability can be as
-high as in non-serializable systems and scale accordingly.
+high as in non-serializable systems and scale accordingly. For this purpose, the
+implemented prototype, henceforth labeled as \emph{Midas}\footnotemark, and the
+NVRAM-based KVS, \emph{Echo} from Chapter \ref{ch:kvs-nvram}, are compared in a
+dedicated transaction throughput benchmark.
 
-The evaluation is based on a performance comparison between the implemented
-prototype, labeled as \emph{Midas}\footnote{The name is taken from Greek
-mythology. According to the legend, King Midas was given the ability to turn
-everything he touches into gold. This resembles the idea of making information
-non-volatile as in NVRAM.}, and the NVRAM-based in-memory KVS \emph{Echo}
-introduced in Chapter \ref{ch:kvs-nvram}. There are two benchmarks: a baseline
-benchmark and a transaction throughput benchmark. The throughput benchmark is
-used to compare the transaction throughput of both stores and how well it scales
-with additional processors. The baseline benchmark captures average latencies of
-single operations for each store, which are helpful to accomodate for
-differences in the throughput benchmark.
+% The evaluation is based on a comparison of transaction throughput between the
+% implemented prototype, labeled as \emph{Midas}, and the NVRAM-based in-memory
+% KVS \emph{Echo} introduced in Chapter \ref{ch:kvs-nvram}.
 
-At first, however, there a couple of challenges to discuss. Next, the system
-configuration used for the evaluation is described. Subsequently, both baseline
-and transaction throughput benchmarks are evaluated. The chapter concludes with
-a brief summary.
+% There are two benchmarks: a baseline
+% benchmark and a transaction throughput benchmark. The throughput benchmark is
+% used to compare the transaction throughput of both stores and how well it scales
+% with additional processors. The baseline benchmark captures average latencies of
+% single operations for each store, which are helpful to accomodate for
+% differences in the throughput benchmark.
+
+At first, however, there are a couple of challenges to discuss. Next, the system
+configuration used for the evaluation is described. Subsequently, the
+transaction throughput benchmark is conducted and evaluated. The chapter
+concludes with a brief summary.
+
+% At first, however, there a couple of challenges to discuss. Next, the system
+% configuration used for the evaluation is described. Subsequently, both baseline
+% and transaction throughput benchmarks are evaluated. The chapter concludes with
+% a brief summary.
+
+\footnotetext{The name is taken from Greek mythology. According to the legend,
+King Midas was given the ability to turn everything he touches into gold. This
+resembles the idea of making information non-volatile as in NVRAM.}
 
 \section{Challenges}
 \label{ch:eval-challenges}
@@ -45,9 +56,9 @@ a brief summary.
 \label{ch:eval-sysconfig}
 \input{contents/eval/sysconfig.tex}
 
-\section{Baseline}
-\label{ch:eval-baseline}
-\input{contents/eval/baseline.tex}
+% \section{Baseline}
+% \label{ch:eval-baseline}
+% \input{contents/eval/baseline.tex}
 
 \section{Transaction Throughput}
 \label{ch:eval-ttp}

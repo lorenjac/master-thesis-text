@@ -8,6 +8,8 @@ performance impact of serializability in NVRAM-based key-value stores.
 
 \todo[inline]{Make this a subsection (convert important paragraphs to subsubsections)}
 
+\todo[inline]{Fix data IS vs data ARE inconsistency}
+
 In order to perform this experiment, one not only needs data to work on but also
 a set of concrete transactions and the operations they are composed of, i.e. a
 workload. As with data, it is hard to acquire actual transaction traces and
@@ -19,10 +21,18 @@ and the underlying hardware.
 
 \paragraph{Data}
 
-For uniformity, this experiment uses the exact same sets of random key-value
-pairs that are used in Chapter \ref{ch:eval-baseline}. Thus, there is one data
-set with 1K entries and another with 100K entries. When the experiment starts,
-each individual KVS will be populated with these key-value pairs.
+The data used in the experiment comprise two distinct sets of randomly generated
+key-value pairs. The first data set contains 1K pairs, whereas the second holds
+100K entries. Lacking insights on meaningful layouts of key-value pairs, this
+evaluation relies on the same layout used in \cite{bailey2013exploring}.
+Accordingly, keys are 128-byte random strings and values are 1024-byte random
+strings. When the experiment starts, each individual KVS is populated with these
+key-value pairs.
+
+% For uniformity, this experiment uses the exact same sets of random key-value
+% pairs that are used in Chapter \ref{ch:eval-baseline}. Thus, there is one data
+% set with 1K entries and another with 100K entries. When the experiment starts,
+% each individual KVS will be populated with these key-value pairs.
 
 \paragraph{Workloads}
 
