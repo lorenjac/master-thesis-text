@@ -1,0 +1,57 @@
+\begin{lstlisting}
+#include "midas.hpp"
+
+int main()
+{
+    // Create persistent object pool
+    midas::pop_type pop;
+
+    // Initial size of the object pool (1GB)
+    const size_t pop_size = 1024ULL * 1024 * 1024;
+
+    // Initialize persistent object pool from file.
+    // If no such file exists then it is created.
+    // Otherwise, the durable data structures
+    // contained therein are recovered.
+    if (!midas::init(pop, "midas.dat", pop_size))
+        return EXIT_FAILURE;
+
+    // Create Midas key-value store based on object pool
+    midas::Store store(pop);
+
+    // Run example transactions
+    run_single_transaction(store);
+    run_concurrent_transactions(store);
+
+    return EXIT_SUCCESS;
+}
+\end{lstlisting}\label{lst:usage-example-lifetime}
+
+\begin{lstlisting}
+void run_single_transaction(midas::Store& store)
+{
+    // Begin a transaction
+    midas::Transaction::ptr tx = store.begin();
+
+    // Perform operations
+    std::string deb = store.get("debit", tx);
+    std::string sav = store.get("saving", tx);
+    if (getBalance(sav, deb) < 0.0)
+        store.put("debit", applyInterest(deb), tx);
+
+    // Try to commit transaction
+    if (!tx->commit())
+        // Error: transaction failed
+}
+\end{lstlisting}\label{lst:usage-single-transaction}
+
+\begin{lstlisting}
+void run_concurrent_transactions(midas::Store& store)
+{
+    std::thread thread_1([&](){ run_single_transaction(store); });
+    std::thread thread_2([&](){ run_single_transaction(store); });
+
+    thread_1.join();
+    thread_2.join();
+}
+\end{lstlisting}\label{lst:usage-concurrent-transactions}

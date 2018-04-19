@@ -1,0 +1,80 @@
+\todo[inline]{impl: describe architecture of the store (layers, components)}
+
+\subsection{NVRAM Management}
+\label{ch:impl-pmdk}
+
+As explained in Chapter \ref{ch:nvram} there are several challenges to the integration of NVRAM into current systems.
+
+\begin{itemize}
+    \item Accessing NVRAM
+    \item Programming against NVRAM
+    \begin{itemize}
+        \item Separation of volatile from non-volatile data
+        \item Recovery of non-volatile objects after restart
+        \item Ensuring consistency across restarts
+    \end{itemize}
+\end{itemize}
+
+PMDK (formerly known as NVML) addresses all these problems.
+
+\subsubsection{NVRAM Access}
+
+In PMDK, NVRAM is accessed via ordinary filesystems such as \code{ext4} or \code{tmpfs}. That way, NVRAM can be mapped into a process' address space via plain files. Using a novel kernel feature called \code{DAX} (for direct access) programs can bypass the operating systems page cache. As a result, true load and store semantics are feasible. Ideally, swapping is disabled for the respective memory region.
+
+\subsubsection{Programming Model}
+
+A persistent object pool holds all data that are meant to be durable. Memory inside the object pool is managed by a designated memory allocator. For each object which is meant to be durable, it allocates the required amount of memory and registers the resulting object in the object pool. This way, all objects can be recovered on restart.
+
+In order to separate volatile from non-volatile objects, there are templated wrapper classes to manage integral values and dynamically allocated objects:
+
+\begin{itemize}
+    \item \code{pmdk::p<T>} for durable integral values
+    \item \code{pmdk::persistent\_ptr<T>} for pointers to durable objects
+\end{itemize}
+
+A \code{persistent\_ptr} consists of a non-volatile unique object id and a virtual memory address within the object pool. The virtual address is volatile because it is not valid across restarts. Therefore, the object id is mapped to a relative memory address within the object pool. Using the object id, the virtual memory address of an object can be computed from its relative address to the pool base on every restart.
+
+\todo[inline]{consistency: transactions, trivially-default-constructible classes (objects are only nulled)}
+\todo[inline]{consistency: flushing custom or based on transaction state}
+\todo[inline]{consistency: ADR}
+
+% =============================================================================
+% =============================================================================
+% =============================================================================
+
+\subsection{Durable Data Structures}
+\label{ch:impl-data}
+
+\subsubsection{Linked List}
+
+\subsubsection{Hash Table}
+
+% * policy-based design for
+%     * hashing volatile and non-volatile keys
+%         * user does not know about a different represent. of obj. in pmem
+%         * volatile keys must have equal hashes with non-volatile counterparts
+%         * for safety many hash functions are not equal across restarts
+%             * => cannot find pairs after restart
+%             * => a) use fixed hash function (impl. from JDK)
+%             * => b) rehash entire table (expensive!)
+%     * memory management (initial size, load factor, growth factor)
+% * conflict handling
+%     * chaining (pairs of colliding keys are inserted in a list (aka bucket))
+%     * use linked list for buckets
+%     * => table is array of buckets
+
+% =============================================================================
+% =============================================================================
+% =============================================================================
+
+\subsection{Serializable MVCC}
+\label{ch:impl-mvcc}
+
+\subsubsection{Transactions}
+
+\subsubsection{Versioning}
+\paragraph{Versions}
+\paragraph{Histories}
+\paragraph{Visibility}
+
+\subsubsection{Conflicts}
