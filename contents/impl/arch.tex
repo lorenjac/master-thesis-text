@@ -11,32 +11,110 @@ As explained in Chapter \ref{ch:nvram} there are several challenges to the integ
     \begin{itemize}
         \item Separation of volatile from non-volatile data
         \item Recovery of non-volatile objects after restart
-        \item Ensuring consistency across restarts
+        \item Preserving consistency across restarts
     \end{itemize}
 \end{itemize}
 
-PMDK (formerly known as NVML) addresses all these problems.
+In the past, several approaches have been discussed to address these challenges.
+Recent research shows rising interest in PMDK (formerly known as NVML) which
+appears to be the first practical holistic approach to managing NVRAM.
+Therefore, this work uses PMDK to implement NVRAM management.
 
 \subsubsection{NVRAM Access}
 
-In PMDK, NVRAM is accessed via ordinary filesystems such as \code{ext4} or \code{tmpfs}. That way, NVRAM can be mapped into a process' address space via plain files. Using a novel kernel feature called \code{DAX} (for direct access) programs can bypass the operating systems page cache. As a result, true load and store semantics are feasible. Ideally, swapping is disabled for the respective memory region.
+In PMDK, NVRAM is accessed via ordinary filesystems such as \code{ext4} or
+\code{tmpfs}. That way, NVRAM can be mapped into a process' address space via
+plain files. Using a novel kernel feature called \code{DAX} (for direct access)
+programs can bypass the operating systems page cache. As a result, true load and
+store semantics are feasible. Ideally, swapping is disabled for the respective
+memory region.
 
 \subsubsection{Programming Model}
 
-A persistent object pool holds all data that are meant to be durable. Memory inside the object pool is managed by a designated memory allocator. For each object which is meant to be durable, it allocates the required amount of memory and registers the resulting object in the object pool. This way, all objects can be recovered on restart.
+Apart from its core, the essential part of PMDK used in this work is called
+\code{pmemobj}. With it, a persistent object pool holds all data that are meant
+to be durable. Memory inside the object pool is managed by a designated memory
+allocator. For each object which is meant to be durable, it allocates the
+required amount of memory and registers the resulting object in the object pool.
+This way, all objects can be recovered on restart. From a programmer
+perspective, objects are managed in a graph rooted in the object pool. Using
+this graph, which is recovered after restart, the programmer can access all
+previously durable objects.
 
-In order to separate volatile from non-volatile objects, there are templated wrapper classes to manage integral values and dynamically allocated objects:
+\paragraph{Durable Data}
+
+In order to separate volatile from non-volatile objects, there are templated
+wrapper classes to manage integral values and dynamically allocated objects:
 
 \begin{itemize}
     \item \code{pmdk::p<T>} for durable integral values
     \item \code{pmdk::persistent\_ptr<T>} for pointers to durable objects
 \end{itemize}
 
-A \code{persistent\_ptr} consists of a non-volatile unique object id and a virtual memory address within the object pool. The virtual address is volatile because it is not valid across restarts. Therefore, the object id is mapped to a relative memory address within the object pool. Using the object id, the virtual memory address of an object can be computed from its relative address to the pool base on every restart.
+\paragraph{Durable Objects \& Pointers}
 
-\todo[inline]{consistency: transactions, trivially-default-constructible classes (objects are only nulled)}
-\todo[inline]{consistency: flushing custom or based on transaction state}
-\todo[inline]{consistency: ADR}
+A \code{persistent\_ptr} consists of a non-volatile unique object id and a
+virtual memory address within the object pool. The virtual address is volatile
+because it is not valid across restarts. Therefore, the object id is mapped to a
+relative memory address within the object pool. Using the object id, the virtual
+memory address of an object can be computed from its relative address to the
+pool base on every restart. This is necessary, because in most operating systems
+virtual address space layout is different for each session. When creating an
+object, the function \code{pmdk::make\_persistent<T>()} is used. The lifetime of
+a durable object spans across scopes and restarts. In order to deallocate an
+object, the function \code{pmdk::delete\_persistent<T>()} must be used.
+
+\paragraph{Preserving Consistency}
+
+In order to ensure consistency across crashes in NVRAM, stores must be flushed
+immediately. In PMDK, this can be done explicitly for selected memory regions or
+implicitly by using a so-called transaction. A transaction receives the current
+object pool and a functor. Each persistent property or pointer that is modified
+by the functor, registers itself with the transaction. When the transaction
+commits, all registered objects are made durable in NVRAM. A transaction commits
+when its functor completes without errors. In the example below a durable object
+of type \code{T} is created inside a pool which has a graph root of type
+\code{Root}. Assume the global variable \code{objCount} is supposed to reflect
+the correct number of durable objects. For that purpose, both creating of
+objects and incrementing the counter are consolidated in a transaction to form a
+single memory update.
+
+\begin{lstlisting}
+#include "libpmemobj++/persistent_ptr.hpp"
+#include "libpmemobj++/transaction.hpp"
+#include "libpmemobj++/pool.hpp"
+namespace pmdk = pmem::obj;
+
+pmdk::p<size_t> objCount = 0;
+
+template <class T, class Root>
+pmdk::persistent_ptr<T> create(pmdk::pool<Root> pop)
+{
+    pmdk::persistent_ptr<T> obj = nullptr;
+
+    // Consolidate all updates to non-volatile memory in a transaction
+    pmdk::transaction::exec_tx(pop, [&, this](){
+         obj = pmdk::make_persistent<T>();
+         objCount = objCount + 1;
+    });
+
+    // At this point, all changes to NVM are either completely durable or absent
+    return obj;
+}
+\end{lstlisting}\label{lst:pmdk-tx}
+
+Even though object creation is always transactional in PMDK, initialization is
+not. Instead, the memory of an object is only nulled. As a result, each class
+intended for durability must be \emph{trivially-default-constructible}, which
+means that a compiler-generated default constructor must be sufficient to
+initialize an instance of the class. If a default constructor is not enough,
+then the programmer has to provide and use custom initialization methods.
+
+Internally, PMDK uses largely the same mechanism for consistency as described in
+Chapter \ref{ch:nvram-consistency}. That means, modified data are flushed from
+memory order buffers and caches. In some situations, non-temporal writes are
+used which make use of write combine buffers. When it comes to flushing
+write-pending queues inside the memory controller, PMDK relies on ADR.
 
 % =============================================================================
 % =============================================================================
