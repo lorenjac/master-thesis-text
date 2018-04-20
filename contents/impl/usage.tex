@@ -1,3 +1,4 @@
+\begin{figure}
 \begin{lstlisting}
 #include "midas.hpp"
 
@@ -14,7 +15,7 @@ int main()
     // Otherwise, the durable data structures
     // contained therein are recovered.
     if (!midas::init(pop, "midas.dat", pop_size))
-        return EXIT_FAILURE;
+    return EXIT_FAILURE;
 
     // Create Midas key-value store based on object pool
     midas::Store store(pop);
@@ -25,8 +26,12 @@ int main()
 
     return EXIT_SUCCESS;
 }
-\end{lstlisting}\label{lst:usage-example-lifetime}
+\end{lstlisting}
+\caption{}
+\label{lst:usage-example-lifetime}
+\end{figure}
 
+\begin{figure}
 \begin{lstlisting}
 void run_single_transaction(midas::Store& store)
 {
@@ -43,8 +48,12 @@ void run_single_transaction(midas::Store& store)
     if (!tx->commit())
         // Error: transaction failed
 }
-\end{lstlisting}\label{lst:usage-single-transaction}
+\end{lstlisting}
+\caption{}
+\label{lst:usage-single-transaction}
+\end{figure}
 
+\begin{figure}
 \begin{lstlisting}
 void run_concurrent_transactions(midas::Store& store)
 {
@@ -54,4 +63,7 @@ void run_concurrent_transactions(midas::Store& store)
     thread_1.join();
     thread_2.join();
 }
-\end{lstlisting}\label{lst:usage-concurrent-transactions}
+\end{lstlisting}
+\caption{}
+\label{lst:usage-concurrent-transactions}
+\end{figure}

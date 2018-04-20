@@ -74,11 +74,12 @@ by the functor, registers itself with the transaction. When the transaction
 commits, all registered objects are made durable in NVRAM. A transaction commits
 when its functor completes without errors. In the example below a durable object
 of type \code{T} is created inside a pool which has a graph root of type
-\code{Root}. Assume the global variable \code{objCount} is supposed to reflect
-the correct number of durable objects. For that purpose, both creating of
-objects and incrementing the counter are consolidated in a transaction to form a
-single memory update.
+\code{Root} (see Listing \ref{lst:pmdk-tx}). Assume the global variable
+\code{objCount} is supposed to reflect the correct number of durable objects.
+For that purpose, both creating of objects and incrementing the counter are
+consolidated in a transaction to form a single memory update.
 
+\begin{figure}[h]
 \begin{lstlisting}
 #include "libpmemobj++/persistent_ptr.hpp"
 #include "libpmemobj++/transaction.hpp"
@@ -92,7 +93,7 @@ pmdk::persistent_ptr<T> create(pmdk::pool<Root> pop)
 {
     pmdk::persistent_ptr<T> obj = nullptr;
 
-    // Consolidate all updates to non-volatile memory in a transaction
+    // Consolidate updates in transaction
     pmdk::transaction::exec_tx(pop, [&, this](){
          obj = pmdk::make_persistent<T>();
          objCount = objCount + 1;
@@ -101,7 +102,10 @@ pmdk::persistent_ptr<T> create(pmdk::pool<Root> pop)
     // At this point, all changes to NVM are either completely durable or absent
     return obj;
 }
-\end{lstlisting}\label{lst:pmdk-tx}
+\end{lstlisting}
+\caption{Consistent updates to NVM using PMDK transactions.}
+\label{lst:pmdk-tx}
+\end{figure}
 
 Even though object creation is always transactional in PMDK, initialization is
 not. Instead, the memory of an object is only nulled. As a result, each class
