@@ -1,9 +1,14 @@
-\todo[inline]{impl: describe architecture of the store (layers, components)}
+This section presents the software architecture of Midas. After a brief
+overview, focus is shifted toward NVRAM management, durable data structures, and
+serializable MVCC.
+
+\todo[inline]{impl-arch: describe architecture of the store (layers, components)}
 
 \subsection{NVRAM Management}
 \label{ch:impl-pmdk}
 
-As explained in Chapter \ref{ch:nvram} there are several challenges to the integration of NVRAM into current systems.
+As explained in Chapter \ref{ch:nvram} there are several challenges to the
+integration of NVRAM into current systems. Among these are the following:
 
 \begin{itemize}
     \item Accessing NVRAM
