@@ -175,7 +175,7 @@ contained therein.
 
 The index is used to lookup version histories, thus it is implemented as a hash
 table. Histories, on the other hand, are implemented as linked lists because
-they are accessed in linear order. Lacking general purpose container libraries
+they are accessed in linear order. Lacking general-purpose container libraries
 for NVRAM, both non-volatile data structures are developed from scratch.
 
 \paragraph{Doubly-Linked List}
@@ -223,7 +223,41 @@ and \code{push\_front\_from()}.
 
 \paragraph{Hash Table}
 
+The hash table is implemented as a template class called \code{NVHashmap}.
+Essentially, the table consists of a single persistent array that is reallocated
+as needed. Each cell in the index is called slot or bucket. As with
+\code{NVList}, the API of \code{NVHashmap} is closely aligned to the C++
+standard library. Also, the class employs a policy-based template design which
+allows changing its behaviour through template parameters.
+
 \todo[inline]{impl: hash table class diagram}
+
+There are three important aspects to the design of hash tables: the hash
+function itself, collision handling, and growth policy. The hash function used
+in Midas is a variant of the hash function used in the string library of Java
+\cite{javadoc2018hashcode}, which is a polynomial of prime powers and character
+bytes as coefficients. The final access index is computed modulo of the current
+table size.
+
+When disjoint keys result in equal hashes a collision occurs. In the case of
+Midas, collisions are handled by \emph{chaining}. With chaining, each slot in
+the table is a linked list and keys are always stored in pairs with their mapped
+value. When hashing a key, the corresponding bucket is searched for a pair with
+a matching key. If no such pair is found, then the given pair can be inserted.
+As a result, each bucket only contains pairs with conflicting key hashes. Both
+the collision lists and the pairs are durable.
+
+Because searching long buckets increases access time, the table is expanded
+regularly. More precisely, expansion occurs when the maximum load factor is
+exceeded. The load factor is defined as the ratio of the number of pairs and the
+number of buckets. The maximum load factor is set to $0.75$. In order to
+amortize the cost of reallocations, the table is doubled on each expansion.
+After an expansion, all pairs are rehashed into the new table. This is where the
+zero-copy list node migration of \code{NVList} is used. Parameters such as the
+maximum load factor or the growth factor can be adjusted using the policy-based
+template design.
+
+\todo[inline]{impl: elaborate on volatile/non-volatile key dissonance (optional)}
 
 % * policy-based design for
 %     * hashing volatile and non-volatile keys
@@ -233,11 +267,6 @@ and \code{push\_front\_from()}.
 %             * => cannot find pairs after restart
 %             * => a) use fixed hash function (impl. from JDK)
 %             * => b) rehash entire table (expensive!)
-%     * memory management (initial size, load factor, growth factor)
-% * conflict handling
-%     * chaining (pairs of colliding keys are inserted in a list (aka bucket))
-%     * use linked list for buckets
-%     * => table is array of buckets
 
 % =============================================================================
 % =============================================================================
