@@ -1,11 +1,18 @@
 This section presents the software architecture of Midas. After a brief
-overview, focus is shifted toward NVRAM management, durable data structures, and
+overview, focus is set on NVRAM management, durable data structures, and
 serializable MVCC.
 
 \todo[inline]{impl-arch: describe architecture of the store (layers, components)}
 
+\begin{figure}[h!]
+    \centering
+    \includegraphics[scale=0.75]{figures/impl/arch.pdf}
+    \caption{System architecture layers of Midas.}
+    \label{fig:impl-arch}
+\end{figure}
+
 \subsection{NVRAM Management}
-\label{ch:impl-pmdk}
+\label{ch:impl-nvram}
 
 As explained in Chapter \ref{ch:nvram} there are several challenges to the
 integration of NVRAM into current systems. Among these are the following:
@@ -21,18 +28,18 @@ integration of NVRAM into current systems. Among these are the following:
 \end{itemize}
 
 In the past, several approaches have been discussed to address these challenges.
-Recent research shows rising interest in PMDK (formerly known as NVML) which
-appears to be the first practical holistic approach to managing NVRAM.
-Therefore, this work uses PMDK to implement NVRAM management.
+Recent research, however, shows rising interest in PMDK (formerly known as
+NVML). PMDK is a set of both C and C++ libraries and appears to be the first
+practical holistic approach to managing NVRAM. Therefore, this work uses PMDK to
+implement NVRAM management.
 
 \subsubsection{NVRAM Access}
 
 In PMDK, NVRAM is accessed via ordinary filesystems such as \code{ext4} or
 \code{tmpfs}. That way, NVRAM can be mapped into a process' address space via
-plain files. Using a novel kernel feature called \code{DAX} (for direct access)
-programs can bypass the operating systems page cache. As a result, true load and
-store semantics are feasible. Ideally, swapping is disabled for the respective
-memory region.
+plain files. Using a kernel feature called \emph{Direct Access} (also DAX)
+filesystems can bypass the operating system's page cache. This enables true load and store semantics. In addition, swapping is disabled for the
+respective memory region.
 
 \subsubsection{Programming Model}
 
@@ -84,7 +91,7 @@ of type \code{T} is created inside a pool which has a graph root of type
 For that purpose, both creating of objects and incrementing the counter are
 consolidated in a transaction to form a single memory update.
 
-\begin{figure}[h]
+\begin{figure}[h!]
 \begin{lstlisting}
 #include "libpmemobj++/persistent_ptr.hpp"
 #include "libpmemobj++/transaction.hpp"
@@ -114,10 +121,10 @@ pmdk::persistent_ptr<T> create(pmdk::pool<Root> pop)
 
 Even though object creation is always transactional in PMDK, initialization is
 not. Instead, the memory of an object is only nulled. As a result, each class
-intended for durability must be \emph{trivially-default-constructible}, which
+intended for durability must be \emph{trivially default constructible}, which
 means that a compiler-generated default constructor must be sufficient to
-initialize an instance of the class. If a default constructor is not enough,
-then the programmer has to provide and use custom initialization methods.
+initialize an instance of the class. Otherwise, the programmer has to use custom
+initialization procedures.
 
 Internally, PMDK uses largely the same mechanism for consistency as described in
 Chapter \ref{ch:nvram-consistency}. That means, modified data are flushed from
@@ -129,12 +136,94 @@ write-pending queues inside the memory controller, PMDK relies on ADR.
 % =============================================================================
 % =============================================================================
 
-\subsection{Durable Data Structures}
+\subsection{Data Structures}
 \label{ch:impl-data}
 
-\subsubsection{Linked List}
+The implementation of Midas relies on several classic data structures, such as
+arrays, lists, and hash maps. Since Midas consists of two separate volatility
+domains, each domain requires its own dedicated data structures. This section
+outlines the types of data structures employed in Midas. Selected use cases are
+given in the next section (see Chapter~\ref{ch:impl-mvcc}).
 
-\subsubsection{Hash Table}
+\subsubsection{Volatile Data Structures}
+
+In terms of data structures, the volatile part of Midas consists of a
+transaction table and transaction control blocks. These data structures are
+mostly composed of standard library containers, since modifications need not be
+durable.
+
+The transaction table should provide fast
+lookup capabilities and is therefore implemented as a hash table. However, it is
+also a shared resource that must be synchronized. In order to prevent a
+bottleneck, the concurrent hash table implementation \emph{libcuckoo} is used
+\cite{fan2013memc3, li2014algorithmic, libcuckoo2018home}.
+
+Transaction control blocks, on the other hand, only share atomic timestamps
+while the remaining read and write sets are thread local. Read sets are plain
+vectors of versions accessed for reading. In contrast, write sets are
+implemented as hash maps because a transaction might update an item multiple
+times and looking up a previously written item is faster than repeatedly
+performing a linear search on its history.
+
+\subsubsection{Non-Volatile Data Structures}
+
+In the non-volatile domain of Midas, data structures must be NVRAM-aware. That
+means, that data structures must be recoverable from a durable state when Midas
+starts and also ensure that updates to NVRAM do not inflict inconsistencies.
+Durable data structures in Midas are the index and the version histories
+contained therein.
+
+The index is used to lookup version histories, thus it is implemented as a hash
+table. Histories, on the other hand, are implemented as linked lists because
+they are accessed in linear order. Lacking general purpose container libraries
+for NVRAM, both non-volatile data structures are developed from scratch.
+
+\paragraph{Doubly-Linked List}
+
+The doubly-linked list is implemented in the template class \code{NVList}. Its
+attributes consist of a pointer to first element, a pointer to the last element,
+and an element counter. All these attributes must be durable in order to recover
+the list after a restart. Therefore, they are declared as persistent pointers or
+properties in terms of PMDK. The API of \code{NVList} is closely related to the
+C++ standard library containers. It also provides iterator facilities for
+traversal.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[scale=0.66]{figures/impl/list.pdf}
+    \caption{Class diagram for the class \code{NVList}}
+    \label{fig:impl-list}
+\end{figure}
+
+An important aspect of implementing durable data structures is to preserve
+consistency. This is done by consolidating related allocations and operations on
+durable objects in a transaction as shown in Chapter \ref{ch:impl-nvram}.
+
+\begin{figure}[h!]
+\begin{lstlisting}
+void push_back(const elem_type& elem)
+{
+    pmdk::transaction::exec_tx(pool, [&,this](){
+        auto new_node = pmdk::make_persistent<node>();
+        new_node->mValue = elem;
+        append(new_node);
+        mSize = mSize + 1;
+    });
+}
+\end{lstlisting}
+\caption{Implementation of \code{push\_back()} as an example for transactional updates to NVRAM}
+\label{lst:impl-list-tx}
+\end{figure}
+
+An additional feature of \code{NVList} is a zero-copy mechanism for migrating
+individual list nodes between different lists. This is useful when nodes from a
+single list must be scattered to several other lists as is done when rehashing a
+hash table. The feature is provided by the functions \code{push\_back\_from()}
+and \code{push\_front\_from()}.
+
+\paragraph{Hash Table}
+
+\todo[inline]{impl: hash table class diagram}
 
 % * policy-based design for
 %     * hashing volatile and non-volatile keys
