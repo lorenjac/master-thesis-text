@@ -230,7 +230,12 @@ as needed. Each cell in the index is called slot or bucket. As with
 standard library. Also, the class employs a policy-based template design which
 allows changing its behaviour through template parameters.
 
-\todo[inline]{impl: hash table class diagram}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[scale=0.66]{figures/impl/map.pdf}
+    \caption{Class diagram for the class \code{NVHashmap}}
+    \label{fig:impl-map}
+\end{figure}
 
 There are three important aspects to the design of hash tables: the hash
 function itself, collision handling, and growth policy. The hash function used
@@ -251,7 +256,7 @@ Because searching long buckets increases access time, the table is expanded
 regularly. More precisely, expansion occurs when the maximum load factor is
 exceeded. The load factor is defined as the ratio of the number of pairs and the
 number of buckets. The maximum load factor is set to $0.75$. In order to
-amortize the cost of reallocations, the table is doubled on each expansion.
+amortize the cost of reallocations, the table size is doubled on each expansion.
 After an expansion, all pairs are rehashed into the new table. This is where the
 zero-copy list node migration of \code{NVList} is used. Parameters such as the
 maximum load factor or the growth factor can be adjusted using the policy-based
