@@ -1,9 +1,20 @@
-\begin{figure}[h!]
-\begin{lstlisting}
+In order to get an understanding of how Midas can be used, this section presents
+a selected set of usage examples. The first example deals with how an instance
+of Midas is created or recovered, respectively. The remaining examples showcase
+the transaction API of Midas.
+
+Before Midas can be instantiated, an underlying persistent object pool must be
+created or recovered from the file system. Details on object pools are given in
+the next section. Once the object pool is initialized, Midas can be instantiated
+and transactions can be performed. The example is given in
+Listing~\ref{lst:usage-init}.
+
+\begin{lstlisting}[caption={Midas Bootstrapping.},captionpos=b, label=lst:usage-init]
 #include "midas.hpp"
 
-int main()
-{
+/* declarations for this example */
+
+int main() {
     // Create persistent object pool
     midas::pop_type pop;
 
@@ -11,11 +22,8 @@ int main()
     const size_t pop_size = 1024ULL * 1024 * 1024;
 
     // Initialize persistent object pool from file.
-    // If no such file exists then it is created.
-    // Otherwise, the durable data structures
-    // contained therein are recovered.
-    if (!midas::init(pop, "midas.dat", pop_size))
-    return EXIT_FAILURE;
+    if (!midas::init(pop, "midas.db", pop_size))
+        return EXIT_FAILURE;
 
     // Create Midas key-value store based on object pool
     midas::Store store(pop);
@@ -27,43 +35,51 @@ int main()
     return EXIT_SUCCESS;
 }
 \end{lstlisting}
-\caption{}
-\label{lst:usage-example-lifetime}
-\end{figure}
 
-\begin{figure}[h!]
-\begin{lstlisting}
-void run_single_transaction(midas::Store& store)
-{
-    // Begin a transaction
+Midas uses an ordinary transaction API. In order to execute a transaction, it
+must first be started with a call to \code{Store::begin()} which yields a handle
+to the new transaction. Using the transaction handle, the store can be modified
+in the context of the associated transaction. The available modifiers are
+\code{Store::put()}, \code{Store::get()}, and \code{Store::drop()}. As a
+compromise between usability and flexibility, the store supports strings as keys
+and values, exclusively. Unless a transaction is aborted prematurely, it must
+be concluded with a call to \code{Store::commit()}. The resulting return code
+denotes whether the transaction committed successfully or failed. The following
+example shows a transaction checking the balance of an account and applying an
+interest fee if the balance is negative (see Listing~\ref{lst:usage-single-tx}).
+
+\begin{lstlisting}[caption={A single transaction on account data.},captionpos=b, label=lst:usage-single-tx]
+void run_single_transaction(midas::Store& store) {
     midas::Transaction::ptr tx = store.begin();
 
-    // Perform operations
     std::string deb = store.get("debit", tx);
     std::string sav = store.get("saving", tx);
-    if (getBalance(sav, deb) < 0.0)
-        store.put("debit", applyInterest(deb), tx);
+    if (get_balance(sav, deb) < 0.0)
+        store.put("debit", apply_interest(deb), tx);
 
-    // Try to commit transaction
-    if (!tx->commit())
+    if (!store->commit(tx))
         // Error: transaction failed
 }
 \end{lstlisting}
-\caption{}
-\label{lst:usage-single-transaction}
-\end{figure}
 
-\begin{figure}[h!]
-\begin{lstlisting}
-void run_concurrent_transactions(midas::Store& store)
-{
-    std::thread thread_1([&](){ run_single_transaction(store); });
-    std::thread thread_2([&](){ run_single_transaction(store); });
+Running transactions in concurrent threads requires no additional setup other
+than creating the respective threads to begin with. Each thread only needs a
+reference to the Midas store. While the store is a global resource, each
+transaction buffers its updates in its private memory region. The last example
+starts 10 threads which all execute the accounting transaction from
+Listing~\ref{lst:usage-single-tx}. Because this transaction may modify a value
+that is read by all concurrent transactions, many transactions are bound to fail
+due to read-write conflicts. The example is shown in
+Listing~\ref{lst:usage-concurrent-tx}.
 
-    thread_1.join();
-    thread_2.join();
+\begin{lstlisting}[caption={Several concurrent accounting transactions on the same store.},captionpos=b, label=lst:usage-concurrent-tx]
+void run_concurrent_transactions(midas::Store& store) {
+    std::vector<std::thread> threads;
+    for (unsigned i=0; i<10; ++i)
+        threads.push_back(
+            std::thread([&](){ run_single_transaction(store); }));
+
+    for (auto& t : threads)
+        t.join();
 }
 \end{lstlisting}
-\caption{}
-\label{lst:usage-concurrent-transactions}
-\end{figure}
