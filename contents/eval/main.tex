@@ -4,16 +4,17 @@
 The previous chapter elaborates on a prototypical implementation of the concept
 introduced in Chapter \ref{ch:concept}. Its goal is to enable fast serializable
 database transactions through the use of novel byte-addressable non-volatile
-memory. Based on the implemented prototype, this chapter attempts to determine
-the effectiveness of its concept.
+memory. Based on the implemented prototype, this chapter determines the
+effectiveness of its concept.
 
-It has been shown, that MMDB can benefit from NVRAM \cite{bailey2013exploring,
+It has been shown that MMDB can benefit from NVRAM \cite{bailey2013exploring,
 schwalb2016hyrise, oukid2017data, andrei2017sap}. However, serializable
 transactions are still traded in favor of performance, by default. If the
 performance gain from NVRAM can be leveraged to compensate for serialization
 overhead, then serializability could be adopted as the default isolation level.
-Therefore, the aim of this chapter is to determine whether the approach of this
-work is worth pursuing.
+
+% Therefore, the aim of this chapter is to determine whether the approach of this
+% work is worth pursuing.
 
 An important measure in this context is transaction throughput, as it is known
 to degrade with stronger isolation levels due to higher abort rates. Therefore,

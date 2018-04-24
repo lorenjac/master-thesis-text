@@ -6,16 +6,19 @@ performance impact of serializability in NVRAM-based key-value stores.
 
 \subsection{Setup}
 
-In order to perform this experiment, one not only needs data to work on but also
-a set of concrete transactions and the operations they are composed of, i.e. a
-workload. As with data, it is hard to acquire actual transaction traces and
-determine their relevance. For that reason, the experiment setup relies heavily
-on randomly generated data. However, each random choice is reproducible as the
-generated data are stored on disk prior to the experiment. Hence, the only
-non-deterministic behaviour is induced by multi-threading, the operating system,
-and the underlying hardware.
+In order to perform the experiment, there are two prerequisites to satisfy. At
+first, data are required to populate each KVS. Second, workloads of concrete
+transactions are needed to operate on the populated stores. Key-value pairs may
+not be too hard to come by but in this case synthetic data are fine as well.
+Workloads are more complicated because it is hard to acquire transaction traces
+and determine their relevance. For that reason, the experiment is synthetic and
+relies exclusively on randomly generated data and workloads. All pseudo-random
+numbers were generated using uniform distributions. However, each random choice
+is reproducible as the generated data are stored on disk prior to the
+experiment. Hence, the only non-deterministic behaviour is induced by
+multi-threading, the operating system, and the underlying hardware.
 
-\subsubsection{Data}
+\subsubsection{Key-Value Data}
 
 The data used in the experiment comprise two distinct sets of randomly generated
 key-value pairs. The first data set contains 1K pairs, whereas the second holds
@@ -25,11 +28,6 @@ Accordingly, keys are 128-byte random strings and values are 1024-byte random
 strings. When the experiment starts, each individual KVS is populated with these
 key-value pairs.
 
-% For uniformity, this experiment uses the exact same sets of random key-value
-% pairs that are used in Chapter \ref{ch:eval-baseline}. Thus, there is one data
-% set with 1K entries and another with 100K entries. When the experiment starts,
-% each individual KVS will be populated with these key-value pairs.
-
 \subsubsection{Workloads}
 
 All transactions that are to be executed during the experiment are encoded as a
@@ -38,10 +36,18 @@ respective key-value pairs to operate on. When generating a workload, there are
 three important dimensions:
 
 \begin{itemize}
-    \item length of transactions
     \item number of transactions
-    \item relative distribution of operations
+    \item length of transactions
+    \item type of operations
 \end{itemize}
+
+\paragraph{Workload Size}
+
+In this experiment, each workload consists of 1000 transactions. If longer
+execution times are required, e.g. to obtain more stable measurements, workload
+size could be increased at will.
+
+\paragraph{Transaction Length}
 
 The length of a transaction is the number of operations enclosed in that
 transaction. Intuitively, the length of transactions should vary. Unfortunately,
@@ -52,7 +58,9 @@ be found. As a result, the following ranges are deemed meaningful:
     \centering
     \begin{tabular}{|l|l|l|}
         \hline
-        \textbf{Name} & \textbf{Min. No. Ops} & \textbf{Max. No. Ops} \\
+        % \textbf{Name} & \textbf{Min. No. Ops} & \textbf{Max. No. Ops} \\
+        \textbf{Name} & \textbf{min\{\#operations\}} & \textbf{max\{\#operations\}} \\
+        \hline
         \hline
         Short         & 2  & 32  \\
         Long          & 64 & 256 \\
@@ -63,8 +71,10 @@ be found. As a result, the following ranges are deemed meaningful:
 \end{figure}
 
 Short transactions can be small updates like incrementing a numeric value,
-optionally based a small aggregation. Long transaction on the other hand, can be
-larger aggregations such as computing a sum over many items.
+optionally based a small aggregation. Long transactions on the other hand, can
+be larger aggregations such as computing a sum over many items.
+
+\paragraph{Transactional Operations}
 
 When specifying the operations of a transaction, it must be decided whether an
 operation reads or updates an item. Insert and delete operations are omitted as
@@ -73,36 +83,68 @@ transaction might fail because an expected pair has not been inserted yet. Such
 an incident reduces transaction throughput without an actual conflict which
 could distort results. The remaining two operations are selected based on the
 empirical analysis in \cite{andrei2017sap}. According to the source, read
-operations amount of 84\% of all operations. The remaining 16\% are sumsumed as
-updates for this experiment. Each operation acts on keys from the dummy set that
-are selected randomly during the workload generation. All pseudo-random numbers
-were generated using uniform distributions based on seperate mersenne twister
-engines. Each workload consists of 1000 transactions.
+operations amount to 84\% of all operations. The remaining 16\% are subsumed as
+updates for this experiment. Each operation is programmed to act on a random key from the data set associated with the workload. Therefore, workloads are bound to the data set used during generation.
 
-\subsubsection{Scenarios}
+\subsubsection{Scenarios and Expectations}
 
 Resulting from the dimensions shown above, four unique scenarios  were derived:
 
-\begin{itemize}
-    \item S1: small database, short transactions
-    \item S2: small database, long transactions
-    \item S3: large database, short transactions
-    \item S4: large database, long transactions
-\end{itemize}
+% \begin{figure}[!h]
+%     \centering
+%     \begin{tabular}{|l|l|l|}
+%         \hline
+%         \textbf{Name} & \textbf{\#Pairs} & \textbf{\#Operations} \\
+%         \hline
+%         \hline
+%         S1            & 1K               &  2 -  32  \\
+%         S2            & 1K               & 64 - 256  \\
+%         S3            & 100K             &  2 -  32  \\
+%         S4            & 100K             & 64 - 256  \\
+%         \hline
+%     \end{tabular}
+%     \caption{Scenarios are combinations of database size and transaction length.}
+%     \label{tab:eval-scenarios}
+% \end{figure}
+
+\begin{figure}[!h]
+    \centering
+    \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{Name} & \textbf{Database Size} & \textbf{Transaction Length} \\
+        \hline
+        \hline
+        S1            & Small (1K)             & Short (2-32)  \\
+        S2            & Small (1K)             & Long (64-256) \\
+        S3            & Large (100K)           & Short (2-32)  \\
+        S4            & Large (100K)           & Long (64 256) \\
+        \hline
+    \end{tabular}
+    \caption{Scenarios are combinations of database size and transaction length.}
+    \label{tab:eval-scenarios}
+\end{figure}
+
+% \setlength{\extrarowheight}{0.5cm}
+% % \begin{tabular}{|x{0.5cm}|x{0.5cm}|x{0.5cm}|}\hline
+% \begin{tabular}{|x{2.5cm}|x{1.5cm}|x{1.5cm}|}\hline
+% \diag{.1em}{2.5cm}{$\#pairs$}{$\#ops$} & 2-32 & 64-256\\ \hline
+% 1K & S1 & S2\\ \hline
+% 100K & S3 & S4\\ \hline
+% \end{tabular}
 
 These scenarios are supposed to simulate both low and high contention in
 different forms. In a database that is small compared to the number of
 concurrent transactions, it is very likely that multiple transactions operate on
 the same data which can cause conflicts. Likewise, longer transactions cause
 contention as they are more likely to access data of other transactions. That
-said, scenario 1 and especially scenario 2 simulate high contention which is the
+said, scenario S1 and especially S2 simulate high contention which is the
 worst-case for any concurrency control. The reason is that contention often
 causes conflicts which lead to aborts and reduced transaction throughput. With
 larger databases, short transactions are less likely to access the same data
 which reduces contention. However, as transactions become longer, they become
 more likely to collide and abort.
 
-\subsection{Procedure}
+\subsection{Methodology}
 
 The benchmark is performed separately for each KVS. The general procedure is to
 execute each workload with a different number of cores. Since the underlying
@@ -125,24 +167,21 @@ worker thread is shown in Figure~\ref{fig:eval-worker}. When a transaction
 fails, it is retried up to three times. If all retries fail, the transaction is
 canceled and the program proceeds to the next transaction in the workload.
 
-% \begin{figure}[h!]
 \begin{figure}[h]
     \centering
 \begin{minipage}[l]{0.45\textwidth}
-    % \includegraphics[width=0.85\textwidth]{figures/bench/host}
     \includegraphics[width=0.75\textwidth]{figures/bench/host}
     \caption{Logical flow of the\\benchmark application.}
     \label{fig:eval-host}
 \end{minipage}
 \begin{minipage}[l]{0.45\textwidth}
-    % \includegraphics[width=\textwidth]{figures/bench/worker}
     \includegraphics[width=0.89\textwidth]{figures/bench/worker}
     \caption{Logical flow of a single worker thread.}
     \label{fig:eval-worker}
 \end{minipage}
 \end{figure}
 
-\subsection{Results \& Discussion}
+\subsection{Results and Discussion}
 
 In this subsection the results of the benchmark are shown and discussed. The
 benchmark captures two metrics: transaction throughput and the transaction abort
@@ -161,16 +200,16 @@ architecture and the additional measures to preserve consistency in NVRAM.
 \paragraph{Legend}
 
 The following analysis compares benchmark results of Echo (green), Midas (blue)
-and an optimized variant of Midas (red). In the current implementation of Midas,
-the index is based on a naive hash table implementation for NVRAM. In order to
-protect critical sections in the hash table, a simple global locking mechanism
-is used. This approach forms a major bottleneck which can be addressed with a
-designated but often complicated concurrent design as in \cite{fan2013memc3}.
-However, this is an implementation detail, albeit crucial. In order to show the
-potential of Midas' design, a second variant of Midas without index locking was
-examined. This is possible because during the benchmark not the index but only
-histories are modified. This is a side effect of omitting insert and delete
-operations for simplicity.
+and its optimized variant, denoted as Midas$^{*}$ (red). In the current
+implementation of Midas, the index is based on a naive hash table implementation
+for NVRAM. In order to protect critical sections in the hash table, a simple
+global locking mechanism is used. This approach forms a major bottleneck which
+can be addressed with a designated but often complicated concurrent design as in
+\cite{fan2013memc3}. However, this is an implementation detail, albeit crucial.
+In order to show the potential of Midas' design, a second variant of Midas
+without index locking was examined. This is possible because during the
+benchmark not the index but only histories are modified. This is a side effect
+of omitting insert and delete operations for simplicity.
 
 %==============================================================================
 % [1 = SS]
@@ -178,8 +217,9 @@ operations for simplicity.
 
 \paragraph{Scenario S1}
 
-This scenario simulates high contention through a small database. The plot in
-Figure \ref{fig:ttp-s1} shows that both variants of Midas have a much better
+This scenario simulates high contention through a small database. The expected
+outcome here is that Echo performs better than Midas. The plot in Figure
+\ref{fig:ttp-s1} shows that both variants of Midas have a much better
 transaction throughput than Echo. However, when considering the speedup factors
 in Figure \ref{fig:spd-s1}, all stores fail to improve beyond a core count of
 eight. This can also be seen in terms of parallel efficiency in Figure
@@ -188,9 +228,9 @@ increases both synchronization overhead and the number of data conflicts. The
 latter is reflected in an increased abort rate as shown in Figure
 \ref{fig:ar-s1}. As expected, both variants of Midas have much higher abort
 rates, due to stricter conflict detection. While Midas$^{*}$ makes better use of
-additional cores, it also produces higher abort rates. This confirms the
-implicit serializing nature of the global lock in the original implementation of
-Midas.
+additional cores, it produces even higher abort rates than Midas. This confirms
+the implicit serializing nature of the global lock in the original
+implementation of Midas.
 
 \begin{figure}[h!]
 \begin{minipage}[l]{0.50\textwidth}
@@ -228,8 +268,9 @@ from the high contention as depicted in Figure \ref{fig:ttp-s2}. The reason is
 that many threads spend a lot of time waiting at few critical sections and still
 many conflicts do occur. As a result, speedup factor and parallel efficiency are
 plummeting for all KVS (see Figures \ref{fig:spd-s2}, \ref{fig:eff-s2}). Still,
-Midas performs significantly worse, which can be attributed to the higher number
-of aborts due to serializability (see Figure \ref{fig:ar-s2}).
+both Midas variants perform significantly worse than Echo, which can be
+attributed to the higher number of aborts due to serializability (see Figure
+\ref{fig:ar-s2}).
 
 \begin{figure}[h!]
 \begin{minipage}[l]{0.50\textwidth}
@@ -258,14 +299,14 @@ of aborts due to serializability (see Figure \ref{fig:ar-s2}).
 % [3 = LS]
 %==============================================================================
 
-\todo[inline]{Are we talking about threads or cores? (most likely cores -> change captions in figures)}
+\todo[inline]{Are we talking about threads or cores? (there is only 1 thread per core)}
 
 \paragraph{Scenario S3}
 
 This scenario simulates low contention through a large database and short
 transactions. In this case, conflicts are rare which results in negligible abort
 rates for all KVS, even with serializability (see Figure \ref{fig:ar-s3}). A
-side effect is that throughput values are not distorted by time savings from
+side effect is that throughput values cannot be distorted by time savings from
 aborted transactions. While the original implementation of Midas fails to
 improve throughput with additional cores, the optimized variant shows that the
 overall concept of Midas works very well in low-contention scenarios (see
@@ -274,11 +315,11 @@ improve throughput up until 16 cores. Echo, on the other hand, scales worse as
 speedup plummets for more than 8 cores. In terms of absolute throughput depicted
 in Figure \ref{fig:ttp-s3}, Midas$^{*}$ manages to surpass Echo by a large
 margin. This is a significant result, because non-serializable SI was adopted
-for low-contention, read-mostly environments, in the first place. However, it
-must be noted, that other factors may play a role in this. For instance, Echo
-and Midas use different backends to handle potential NVRAM. Also, the optimized
-variant of Midas does not synchronize access to its index, which is a very
-optimistic approximation of a non-blocking concurrent implementation.
+for low-contention environments, in the first place. However, it must be noted,
+that other factors may play a role. For instance, Echo and Midas use different
+backends to handle potential NVRAM. Also, the optimized variant of Midas does
+not synchronize access to its index, which is a very optimistic approximation of
+a non-blocking concurrent implementation.
 
 \begin{figure}[h!]
 \begin{minipage}[l]{0.50\textwidth}
@@ -345,6 +386,3 @@ it performs and scales better in terms of transaction throughput than Echo.
     \label{fig:ar-s4}
 \end{minipage}
 \end{figure}
-
-\todo[inline]{Werden Captions mit Punkt beendet???}
-\todo[inline]{Fix data IS vs data ARE inconsistency}
