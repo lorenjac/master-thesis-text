@@ -6,7 +6,7 @@ MVCC.
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[scale=0.75]{figures/impl/arch.pdf}
+    \includegraphics[scale=0.75]{figures/impl/arch2.pdf}
     \caption{System architecture layers of Midas.}
     \label{fig:impl-arch}
 \end{figure}
@@ -38,8 +38,9 @@ implement NVRAM management.
 In PMDK, NVRAM is accessed via ordinary filesystems such as \code{ext4} or
 \code{tmpfs}. That way, NVRAM can be mapped into a process' address space via
 plain files. Using a kernel feature called \emph{Direct Access} (also DAX)
-filesystems can bypass the operating system's page cache. This enables true load and store semantics. In addition, swapping is disabled for the
-respective memory region.
+filesystems can bypass the operating system's page cache. This enables true load
+and store semantics. In addition, swapping is disabled for the respective memory
+region.
 
 \subsubsection{Programming Model}
 
@@ -63,7 +64,7 @@ wrapper classes to manage integral values and dynamically allocated objects:
     \item \code{pmdk::persistent\_ptr<T>} for pointers to durable objects
 \end{itemize}
 
-\paragraph{Durable Objects \& Pointers}
+\paragraph{Durable Objects and Pointers}
 
 A \code{persistent\_ptr} consists of a non-volatile unique object id and a
 virtual memory address within the object pool. The virtual address is volatile
@@ -136,49 +137,38 @@ write-pending queues inside the memory controller, PMDK relies on ADR.
 % =============================================================================
 % =============================================================================
 
-\subsection{Data Structures}
+\subsection{Durable Data Structures}
 \label{ch:impl-data}
 
-The implementation of Midas relies on several classic data structures, such as
-arrays, lists, and hash maps. Since Midas consists of two separate volatility
-domains, each domain requires its own dedicated data structures. This section
-outlines the types of data structures employed in Midas. Selected use cases are
-given in the next section (see Chapter~\ref{ch:impl-mvcc}).
+% The implementation of Midas relies on several classic data structures, such as
+% arrays, lists, and hash maps. Since Midas is divided in two separate volatility
+% domains, each one requires its own dedicated data structures. While the volatile
+% part of Midas is composed of containers from the C++ standard library, the
+% non-volatile part is based on custom reimplanations for NVRAM. This section
+% outlines the design of durable data structures in Midas. The next section then
+% deals with special data structures related to MVCC.
 
-\subsubsection{Volatile Data Structures}
+The implementation of Midas relies on several fundamental data structures, such
+as arrays, lists, and hash maps. Since Midas is divided in two separate
+volatility domains, each one requires its own dedicated data structures. The
+volatile part of Midas is composed of containers from the C++ standard library.
+The non-volatile part, on the other hand, is based on custom container
+implementations using PMDK. This section outlines the design of durable data
+structures in Midas.
 
-In terms of data structures, the volatile part of Midas consists of a
-transaction table and transaction control blocks. These data structures are
-mostly composed of standard library containers, since modifications need not be
-durable.
+% In the non-volatile domain of Midas, data structures must be NVRAM-aware. That
+% means, that data structures must be recoverable from a durable state when Midas
+% starts and also ensure that updates to NVRAM do not cause inconsistencies.
 
-The transaction table should provide fast
-lookup capabilities and is therefore implemented as a hash table. However, it is
-also a shared resource that must be synchronized. In order to prevent a
-bottleneck, the concurrent hash table implementation \emph{libcuckoo} is used
-\cite{fan2013memc3, li2014algorithmic, libcuckoo2018home}.
-
-Transaction control blocks, on the other hand, only share atomic timestamps
-while the remaining read and write sets are thread local. Read sets are plain
-vectors of versions accessed for reading. In contrast, write sets are
-implemented as hash maps because a transaction might update an item multiple
-times and looking up a previously written item is faster than repeatedly
-performing a linear search on its history.
-
-\subsubsection{Non-Volatile Data Structures}
-
-In the non-volatile domain of Midas, data structures must be NVRAM-aware. That
-means, that data structures must be recoverable from a durable state when Midas
-starts and also ensure that updates to NVRAM do not inflict inconsistencies.
 Durable data structures in Midas are the index and the version histories
-contained therein.
+contained therein. The index is used to lookup version histories, thus it is
+implemented as a hash table. Histories, on the other hand, are implemented as
+linked lists because they are accessed in linear order. Lacking general-purpose
+container libraries based on PMDK, both non-volatile data structures are
+developed from scratch.
 
-The index is used to lookup version histories, thus it is implemented as a hash
-table. Histories, on the other hand, are implemented as linked lists because
-they are accessed in linear order. Lacking general-purpose container libraries
-for NVRAM, both non-volatile data structures are developed from scratch.
-
-\paragraph{Doubly-Linked List}
+% \paragraph{Doubly-Linked List}
+\subsubsection{Doubly-Linked List}
 
 The doubly-linked list is implemented in the template class \code{NVList}. Its
 attributes consist of a pointer to first element, a pointer to the last element,
@@ -221,7 +211,8 @@ single list must be scattered to several other lists as is done when rehashing a
 hash table. The feature is provided by the functions \code{push\_back\_from()}
 and \code{push\_front\_from()}.
 
-\paragraph{Hash Table}
+% \paragraph{Hash Table}
+\subsubsection{Hash Table}
 
 The hash table is implemented as a template class called \code{NVHashmap}.
 Essentially, the table consists of a single persistent array that is reallocated
@@ -281,6 +272,19 @@ template design.
 \label{ch:impl-mvcc}
 
 \subsubsection{Transactions}
+
+The transaction table should provide fast lookup capabilities and is therefore
+implemented as a hash table. However, it is also a shared resource that must be
+synchronized. In order to prevent a bottleneck, the concurrent hash table
+implementation \emph{libcuckoo} is used \cite{fan2013memc3, li2014algorithmic,
+libcuckoo2018home}.
+
+Transaction control blocks, on the other hand, only share atomic timestamps
+while the remaining read and write sets are thread local. Read sets are plain
+vectors of versions accessed for reading. In contrast, write sets are
+implemented as hash maps because a transaction might update an item multiple
+times and looking up a previously written item is faster than repeatedly
+performing a linear search on its history.
 
 \subsubsection{Versioning}
 \paragraph{Versions}

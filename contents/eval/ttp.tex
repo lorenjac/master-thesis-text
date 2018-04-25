@@ -114,10 +114,10 @@ Resulting from the dimensions shown above, four unique scenarios  were derived:
         \textbf{Name} & \textbf{Database Size} & \textbf{Transaction Length} \\
         \hline
         \hline
-        S1            & Small (1K)             & Short (2-32)  \\
-        S2            & Small (1K)             & Long (64-256) \\
-        S3            & Large (100K)           & Short (2-32)  \\
-        S4            & Large (100K)           & Long (64 256) \\
+        S1            & Small (1K)             & Short (2 - 32)  \\
+        S2            & Small (1K)             & Long (64 - 256) \\
+        S3            & Large (100K)           & Short (2 - 32)  \\
+        S4            & Large (100K)           & Long (64 - 256) \\
         \hline
     \end{tabular}
     \caption{Scenarios are combinations of database size and transaction length.}
@@ -166,6 +166,8 @@ depicted in Figure~\ref{fig:eval-host}. The procedure performed by a single
 worker thread is shown in Figure~\ref{fig:eval-worker}. When a transaction
 fails, it is retried up to three times. If all retries fail, the transaction is
 canceled and the program proceeds to the next transaction in the workload.
+
+% \vspace*{0.5cm}
 
 \begin{figure}[h]
     \centering
