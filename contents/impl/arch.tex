@@ -1,8 +1,18 @@
-This section presents the software architecture of Midas. After a brief
-overview, focus is set on NVRAM management, data structures, and serializable
-MVCC.
+% This section presents the software architecture of Midas. After a brief
+% overview, focus is set on NVRAM management, durable data structures, and
+% serializable MVCC.
 
-\todo[inline]{impl-arch: describe architecture of the store (layers, components)}
+This section presents the software architecture of Midas. After a brief
+overview, selected aspects of the implementation, such as durable memory management, are elaborated in more detail.
+
+Midas is implemented as a C++ library on top of PMDK. PMDK is a set of libraries
+for NVRAM management that acts as a middleware between programs using NVRAM and
+the underlying system. As depicted in Figure \ref{fig:impl-arch}, Midas consists
+of two components: the key-value store and a set of durable container structures
+based on PMDK. The latter are used to provide the same level of abstraction of
+conventional containers for NVRAM. The store component of Midas is largely
+congruent to Figure \ref{fig:concept-struct-complete} from Section
+\ref{ch:concept-kvs} and is described in more detail later in this chapter.
 
 \begin{figure}[h!]
     \centering
@@ -10,6 +20,14 @@ MVCC.
     \caption{System architecture layers of Midas.}
     \label{fig:impl-arch}
 \end{figure}
+
+\paragraph{Overview}
+
+Section \ref{ch:impl-nvram} introduces PMDK and shows how it can be used to
+access and manage NVRAM. Based on the progamming model provided by PMDK, Section
+\ref{ch:impl-data} presents the design of two containers classes that are used
+to handle data in NVRAM more efficiently. Finally, Section \ref{ch:impl-mvcc}
+provides details on transaction management and the serializable MVCC protocol.
 
 \subsection{NVRAM Management}
 \label{ch:impl-nvram}
