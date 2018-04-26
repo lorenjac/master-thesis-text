@@ -217,6 +217,8 @@ of omitting insert and delete operations for simplicity.
 % [1 = SS]
 %==============================================================================
 
+\clearpage
+
 \paragraph{Scenario S1}
 
 This scenario simulates high contention through a small database. The expected
@@ -269,8 +271,8 @@ isolation levels. As expected, transaction throughput of Midas suffers greatly
 from the high contention as depicted in Figure \ref{fig:ttp-s2}. The reason is
 that many threads spend a lot of time waiting at few critical sections and still
 many conflicts do occur. As a result, speedup factor and parallel efficiency are
-plummeting for all KVS (see Figures \ref{fig:spd-s2}, \ref{fig:eff-s2}). Still,
-both Midas variants perform significantly worse than Echo, which can be
+plummeting for all KVS (see Figures \ref{fig:spd-s2} and \ref{fig:eff-s2}).
+Still, both Midas variants perform significantly worse than Echo, which can be
 attributed to the higher number of aborts due to serializability (see Figure
 \ref{fig:ar-s2}).
 
@@ -311,17 +313,9 @@ rates for all KVS, even with serializability (see Figure \ref{fig:ar-s3}). A
 side effect is that throughput values cannot be distorted by time savings from
 aborted transactions. While the original implementation of Midas fails to
 improve throughput with additional cores, the optimized variant shows that the
-overall concept of Midas works very well in low-contention scenarios (see
+overall concept of Midas works very well in low-contention scenarios (see Figure
 \ref{fig:spd-s3} and \ref{fig:eff-s3}). In particular, Midas$^{*}$ manages to
-improve throughput up until 16 cores. Echo, on the other hand, scales worse as
-speedup plummets for more than 8 cores. In terms of absolute throughput depicted
-in Figure \ref{fig:ttp-s3}, Midas$^{*}$ manages to surpass Echo by a large
-margin. This is a significant result, because non-serializable SI was adopted
-for low-contention environments, in the first place. However, it must be noted,
-that other factors may play a role. For instance, Echo and Midas use different
-backends to handle potential NVRAM. Also, the optimized variant of Midas does
-not synchronize access to its index, which is a very optimistic approximation of
-a non-blocking concurrent implementation.
+improve throughput up until 16 cores.
 
 \begin{figure}[h!]
 \begin{minipage}[l]{0.50\textwidth}
@@ -346,6 +340,16 @@ a non-blocking concurrent implementation.
 \end{minipage}
 \end{figure}
 
+Echo, on the other hand, scales worse as speedup plummets for more than 8 cores.
+In terms of absolute throughput, depicted in Figure \ref{fig:ttp-s3},
+Midas$^{*}$ manages to surpass Echo by a large margin. This is a significant
+result, because non-serializable SI was adopted for low-contention environments,
+in the first place. However, it must be noted, that other factors may play a
+role. For instance, Echo and Midas use different backends to handle potential
+NVRAM. Also, the optimized variant of Midas does not synchronize access to its
+index, which is a very optimistic approximation of a non-blocking concurrent
+implementation.
+
 %==============================================================================
 % [4 = LL]
 %==============================================================================
@@ -359,12 +363,7 @@ processors while abort rates increase. The optimized version performs much
 better in terms of total throughput and speedup but also encounters even more
 aborts. In fact, Figure \ref{fig:ar-s4} shows that, longer transactions alone
 can cause abort rates to scale in the number of cores for both variants of
-Midas. Also, starting beyond 16 cores, synchronization overhead in Midas$^{*}$
-can no longer be compensated by time savings from aborted transactions (see
-Figure \ref{fig:ttp-s4} and \ref{fig:spd-s4}). Echo, on the other hand, has
-significantly fewer aborts but cannot leverage more than eight cores
-efficiently. At the bottom line, even though Midas$^{*}$ has higher abort rates,
-it performs and scales better in terms of transaction throughput than Echo.
+Midas.
 
 \begin{figure}[h!]
 \begin{minipage}[l]{0.50\textwidth}
@@ -388,3 +387,12 @@ it performs and scales better in terms of transaction throughput than Echo.
     \label{fig:ar-s4}
 \end{minipage}
 \end{figure}
+
+\clearpage
+
+Also, starting beyond 16 cores, synchronization overhead in Midas$^{*}$ can no
+longer be compensated by time savings from aborted transactions (see Figure
+\ref{fig:ttp-s4} and \ref{fig:spd-s4}). Echo, on the other hand, has
+significantly fewer aborts but cannot leverage more than eight cores
+efficiently. At the bottom line, even though Midas$^{*}$ has higher abort rates,
+it performs and scales better in terms of transaction throughput than Echo.
