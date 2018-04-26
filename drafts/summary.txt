@@ -1,0 +1,23 @@
+Recent advances in non-volatile memory research indicate that fast high-density NVRAM is available in the near future. Based on this prospect, later research found that novel NVRAM can signifantly increase transaction throughput in databases. Still, for performance reasons, many databases resort to relaxed isolation of concurrent transactions. Therefore, this thesis investigates if NVRAM provides sufficient leverage to make the isolation level of serializability affordable.
+
+For that purpose, Midas, an NVRAM-resident key-value store with serializable transactions was developed. The concurrency control  in Midas is based on an extended variant of the MVCC protocol Snapshot Isolation. Non-volatile memory is managed using PMDK, a state of the art library for programming against NVRAM.
+
+In order to evaluate if the concept of this work is worth pursuing, an experiment was conducted. In the experiment, Midas is compared to Echo, another NVRAM-resident KVS but with non-serializable transactions. Both KVS are compared in terms of transaction throughput and abort rate measured with four different synthetic workloads.
+
+---
+
+The evaluation of the experiment shows that in most cases Midas achieves lower throughput than Echo. 
+
+In some cases this amplified by time-savings from aborting expensive commits. However, in a low-contention scenario Midas has negligible abort rates and still performs better than Echo. This is a significant result because it shows that serializable SI can still perform well in situations where default SI is often preferred over locking. Unfortunately, a poor implementation of the Midas' index structure leads high synchronization overhead which keeps throughput from scaling with additional processors. Therefore, a variant of Midas was benchmarked
+
+
+* ergebnis zusammenfassen
+    * as expected, serializability reduces ttp drastically in high-contention scenarios
+    * however, with low-medium contention serializability did not perform much worse
+* future work
+    * additional experiments (vs. other serializable impl. or locking-based approaches)
+    * apply concept in full-grown MMDB, or even distributed databases
+    * garbage collection (always problematic when concurrent)
+    * more efficient data structures
+        * concurrent hash table for NVRAM
+        * concurrent histories
