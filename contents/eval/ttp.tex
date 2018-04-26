@@ -167,16 +167,16 @@ worker thread is shown in Figure~\ref{fig:eval-worker}. When a transaction
 fails, it is retried up to three times. If all retries fail, the transaction is
 canceled and the program proceeds to the next transaction in the workload.
 
-% \vspace*{0.5cm}
+\vspace*{1cm}
 
-\begin{figure}[h]
+\begin{figure}[h!]
     \centering
-\begin{minipage}[l]{0.45\textwidth}
+\begin{minipage}[c]{0.45\linewidth}
     \includegraphics[width=0.75\textwidth]{figures/bench/host}
     \caption{Logical flow of the\\benchmark application.}
     \label{fig:eval-host}
 \end{minipage}
-\begin{minipage}[l]{0.45\textwidth}
+\begin{minipage}[c]{0.45\linewidth}
     \includegraphics[width=0.89\textwidth]{figures/bench/worker}
     \caption{Logical flow of a single worker thread.}
     \label{fig:eval-worker}
