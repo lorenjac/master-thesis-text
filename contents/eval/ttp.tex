@@ -213,6 +213,13 @@ without index locking was examined. This is possible because during the
 benchmark not the index but only histories are modified. This is a side effect
 of omitting insert and delete operations for simplicity.
 
+\newcommand{\midasopt}{Midas$^{*}$\xspace}
+\newcommand{\midas}{Midas\xspace}
+\newcommand{\echo}{Echo\xspace}
+\newcommand{\ttp}{transaction throughput\xspace}
+\newcommand{\tput}{throughput\xspace}
+\newcommand{\eff}{parallel efficiency\xspace}
+
 %==============================================================================
 % [1 = SS]
 %==============================================================================
@@ -221,20 +228,35 @@ of omitting insert and delete operations for simplicity.
 
 \paragraph{Scenario S1}
 
-This scenario simulates high contention through a small database. The expected
-outcome here is that Echo performs better than Midas. The plot in Figure
-\ref{fig:ttp-s1} shows that both variants of Midas have a much better
-transaction throughput than Echo. However, when considering the speedup factors
-in Figure \ref{fig:spd-s1}, all stores fail to improve beyond a core count of
-eight. This can also be seen in terms of parallel efficiency in Figure
-\ref{fig:eff-s1}. The reason is that the database has very few items which
-increases both synchronization overhead and the number of data conflicts. The
-latter is reflected in an increased abort rate as shown in Figure
-\ref{fig:ar-s1}. As expected, both variants of Midas have much higher abort
-rates, due to stricter conflict detection. While Midas$^{*}$ makes better use of
-additional cores, it produces even higher abort rates than Midas. This confirms
-the implicit serializing nature of the global lock in the original
-implementation of Midas.
+% This scenario simulates high contention by means of a small database. The
+% expected outcome here is that Echo performs better than Midas. The plot in
+% Figure \ref{fig:ttp-s1} shows that both variants of Midas have a much better
+% transaction throughput than Echo. However, when considering the speedup factors
+% in Figure \ref{fig:spd-s1}, all stores fail to improve beyond a core count of
+% eight. This can also be seen in terms of parallel efficiency in Figure
+% \ref{fig:eff-s1}. The reason is that both databases has very few items which
+% increases both synchronization overhead and the number of data conflicts. The
+% latter is reflected in an increased abort rate as shown in Figure
+% \ref{fig:ar-s1}. As expected, both variants of Midas have much higher abort
+% rates, due to stricter conflict detection. While Midas$^{*}$ makes better use of
+% additional cores, it produces even higher abort rates than Midas. This confirms
+% the implicit serializing nature of the global lock in the original
+% implementation of Midas.
+
+This scenario simulates high contention by means of a small database. The
+expected outcome in this scenario is that \echo outperforms \midas because it
+detects fewer conflicts which are also less likely. At first, the plot of \ttp
+in Figure \ref{fig:ttp-s1} confirms that expectation. However, it also confirms
+that the index lock in \midas is a massive bottleneck as \midasopt achieves up
+to 50\% higher \tput than \echo. Concerning speedup factors, all stores fail to
+improve for more than eight cores (see Figure \ref{fig:spd-s1}). This is better
+reflected in terms of \eff as shown in Figure \ref{fig:eff-s1}. The reason is
+that there are very few key-value pairs which increases synchronization
+overhead. As expected, both variants of \midas exhibit much higher abort rates
+than \echo, due to stricter conflict detection (see Figure \ref{fig:ar-s1}).
+While \midasopt makes the best use of additional cores, it produces even higher
+abort rates than \midas. This reveals a serializing nature of the global lock in
+the original implementation of \midas.
 
 \begin{figure}[h!]
 \begin{minipage}[l]{0.50\textwidth}
