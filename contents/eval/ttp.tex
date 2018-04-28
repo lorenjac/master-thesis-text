@@ -15,7 +15,7 @@ and determine their relevance. For that reason, the experiment is synthetic and
 relies exclusively on randomly generated data and workloads. All pseudo-random
 numbers were generated using uniform distributions. However, each random choice
 is reproducible as the generated data are stored on disk prior to the
-experiment. Hence, the only non-deterministic behaviour is induced by
+experiment. Hence, the only non-deterministic behavior is induced by
 multi-threading, the operating system, and the underlying hardware.
 
 \subsubsection{Key-Value Data}
@@ -191,9 +191,9 @@ rate. In order to express the scalability of both KVS, throughput is expressed
 in terms of speedup factor. This also helps comparing the performance of both
 stores even if absolute throughput differs significantly. The abort rate is
 given by the ratio of the number of aborted transactions and the number of
-scheduled transactions. When interpreting throughputs and speedup factors, it is
+scheduled transactions. When interpreting throughput and speedup factors, it is
 important to take the abort rate into account because higher abort rates can
-lead to higher transaction throughputs. The reason for this circumstance is that
+lead to higher transaction throughput. The reason for this circumstance is that
 commits are very expensive and the resulting time saving of an abort has a
 stronger influence on throughput than reducing the number of committed
 transactions. This is also a direct consequence of the two-level store
@@ -373,7 +373,7 @@ accessed by long transactions. This scenario is similar to S3 but the longer
 transactions access the index more often and make aborts more likely, which is a
 disadvantage for \midas. This circumstance is confirmed in Figure
 \ref{fig:ttp-s4} as \echo achieves higher \ttp than \midas. Also, \echo scales
-better than \midas which is depicated in Figures \ref{fig:spd-s4} and
+better than \midas which is depicted in Figures \ref{fig:spd-s4} and
 \ref{fig:eff-s4}.
 
 \begin{figure}[h!]
@@ -409,7 +409,7 @@ most likely due to time savings from aborted transactions which are more
 numerous in S4. A troubling observation from Figure \ref{fig:ar-s4} is that,
 longer transactions alone can cause abort rates to scale in the number of cores
 for both variants of \midas. Independent of high abort rates, \ttp in \midasopt
-suddently declines rapidly at 32 cores. A possible explanation is that remaining
+suddenly declines rapidly at 32 cores. A possible explanation is that remaining
 synchronization points in \midasopt incur too much overhead to be compensated by
 time savings from aborted transactions. \echo, on the other hand, has
 significantly fewer aborts but cannot exploit the advantage as it fails to
