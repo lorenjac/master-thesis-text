@@ -228,28 +228,13 @@ of omitting insert and delete operations for simplicity.
 
 \paragraph{Scenario S1}
 
-% This scenario simulates high contention by means of a small database. The
-% expected outcome here is that Echo performs better than Midas. The plot in
-% Figure \ref{fig:ttp-s1} shows that both variants of Midas have a much better
-% transaction throughput than Echo. However, when considering the speedup factors
-% in Figure \ref{fig:spd-s1}, all stores fail to improve beyond a core count of
-% eight. This can also be seen in terms of parallel efficiency in Figure
-% \ref{fig:eff-s1}. The reason is that both databases has very few items which
-% increases both synchronization overhead and the number of data conflicts. The
-% latter is reflected in an increased abort rate as shown in Figure
-% \ref{fig:ar-s1}. As expected, both variants of Midas have much higher abort
-% rates, due to stricter conflict detection. While Midas$^{*}$ makes better use of
-% additional cores, it produces even higher abort rates than Midas. This confirms
-% the implicit serializing nature of the global lock in the original
-% implementation of Midas.
-
 This scenario simulates high contention by means of a small database but short
 transactions. The expected outcome in this scenario is that \echo performs
 better than \midas because it detects fewer conflicts which are also less
 likely. At first, the plot of \ttp in Figure \ref{fig:ttp-s1} confirms that
 expectation. However, it also confirms that the index lock in \midas is a
 massive bottleneck as \midasopt achieves up to 50\% higher \tput than \echo.
-Concerning speedup factors, all stores fail to improve for more than eight cores
+Concerning speedup factors, all stores fail to improve for more than 8 cores
 (see Figure \ref{fig:spd-s1}). This is better reflected in terms of \eff as
 shown in Figure \ref{fig:eff-s1}. The reason is that there are very few
 key-value pairs which increases synchronization overhead. As expected, both
@@ -287,17 +272,6 @@ implementation of \midas.
 %==============================================================================
 
 \paragraph{Scenario S2}
-
-% This scenario simulates very high contention by means of a small database and
-% long transactions. It can be seen as the worst-case scenario for concurrency
-% controls with strong isolation levels. Therefore, both versions of \midas are expected to be outperformed by \echo. As expected, \ttp of
-% \midas suffers greatly from the high contention as depicted in Figure
-% \ref{fig:ttp-s2}. The reason is that many threads spend a lot of time waiting at
-% few critical sections and still many conflicts do occur. As a result, speedup
-% factor and parallel efficiency are plummeting for all KVS (see Figures
-% \ref{fig:spd-s2} and \ref{fig:eff-s2}). Still, both Midas variants perform
-% significantly worse than Echo, which can be attributed to the higher number of
-% aborts due to serializability (see Figure \ref{fig:ar-s2}).
 
 This scenario simulates very high contention by means of a small database and
 long transactions. It can be seen as the worst-case scenario for concurrency
@@ -378,7 +352,7 @@ perform well for workloads where SI is known to excel at. After all, \midasopt
 manages to surpass \echo by a large margin. However, Figure \ref{fig:ar-s3}
 shows that this scenario appears to be well-natured for strong isolation as
 abort rates are consistently below 1\%. A side effect is that \ttp values cannot
-be distorted by time-savings from aborted transactions. Also, the unsynchronized
+be distorted by time savings from aborted transactions. Also, the unsynchronized
 index in \midasopt surely is too optimistic for an approximation of a concurrent
 index.
 
@@ -394,14 +368,13 @@ index.
 
 \paragraph{Scenario S4}
 
-The last scenario simulates medium contention through a large database but long
-transactions. As before, it can be seen in Figures \ref{fig:ttp-s4} through
-\ref{fig:ar-s4}, that the first version of Midas fails to leverage additional
-processors while abort rates increase. The optimized version performs much
-better in terms of total throughput and speedup but also encounters even more
-aborts. In fact, Figure \ref{fig:ar-s4} shows that, longer transactions alone
-can cause abort rates to scale in the number of cores for both variants of
-Midas.
+The last scenario simulates medium contention by means of a large database
+accessed by long transactions. This scenario is similar to S3 but the longer
+transactions access the index more often and make aborts more likely, which is a
+disadvantage for \midas. This circumstance is confirmed in Figure
+\ref{fig:ttp-s4} as \echo achieves higher \ttp than \midas. Also, \echo scales
+better than \midas which is depicated in Figures \ref{fig:spd-s4} and
+\ref{fig:eff-s4}.
 
 \begin{figure}[h!]
 \begin{minipage}[l]{0.50\textwidth}
@@ -428,9 +401,16 @@ Midas.
 
 \clearpage
 
-Also, starting beyond 16 cores, synchronization overhead in Midas$^{*}$ can no
-longer be compensated by time savings from aborted transactions (see Figure
-\ref{fig:ttp-s4} and \ref{fig:spd-s4}). Echo, on the other hand, has
-significantly fewer aborts but cannot leverage more than eight cores
-efficiently. At the bottom line, even though Midas$^{*}$ has higher abort rates,
-it performs and scales better in terms of transaction throughput than Echo.
+However, this is largely attributed to synchronization overhead in \midas, as
+\midasopt achieves up to 6 times higher \tput than \echo while it produces only
+slightly higher abort rates (see Figures \ref{fig:ttp-s4} and \ref{fig:ar-s4}).
+Note that \midasopt shows even better speedups than in scenario S3, but that is
+most likely due to time savings from aborted transactions which are more
+numerous in S4. A troubling observation from Figure \ref{fig:ar-s4} is that,
+longer transactions alone can cause abort rates to scale in the number of cores
+for both variants of \midas. Independent of high abort rates, \ttp in \midasopt
+suddently declines rapidly at 32 cores. A possible explanation is that remaining
+synchronization points in \midasopt incur too much overhead to be compensated by
+time savings from aborted transactions. \echo, on the other hand, has
+significantly fewer aborts but cannot exploit the advantage as it fails to
+leverage more than 8 cores efficiently.
