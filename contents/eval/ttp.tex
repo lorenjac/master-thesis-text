@@ -243,20 +243,21 @@ of omitting insert and delete operations for simplicity.
 % the implicit serializing nature of the global lock in the original
 % implementation of Midas.
 
-This scenario simulates high contention by means of a small database. The
-expected outcome in this scenario is that \echo performs better than \midas
-because it detects fewer conflicts which are also less likely. At first, the
-plot of \ttp in Figure \ref{fig:ttp-s1} confirms that expectation. However, it
-also confirms that the index lock in \midas is a massive bottleneck as \midasopt
-achieves up to 50\% higher \tput than \echo. Concerning speedup factors, all
-stores fail to improve for more than eight cores (see Figure \ref{fig:spd-s1}).
-This is better reflected in terms of \eff as shown in Figure \ref{fig:eff-s1}.
-The reason is that there are very few key-value pairs which increases
-synchronization overhead. As expected, both variants of \midas exhibit much
-higher abort rates than \echo, due to stricter conflict detection (see Figure
-\ref{fig:ar-s1}). While \midasopt makes the best use of additional cores, it
-produces even higher abort rates than \midas. This reveals a serializing nature
-of the global lock in the original implementation of \midas.
+This scenario simulates high contention by means of a small database but short
+transactions. The expected outcome in this scenario is that \echo performs
+better than \midas because it detects fewer conflicts which are also less
+likely. At first, the plot of \ttp in Figure \ref{fig:ttp-s1} confirms that
+expectation. However, it also confirms that the index lock in \midas is a
+massive bottleneck as \midasopt achieves up to 50\% higher \tput than \echo.
+Concerning speedup factors, all stores fail to improve for more than eight cores
+(see Figure \ref{fig:spd-s1}). This is better reflected in terms of \eff as
+shown in Figure \ref{fig:eff-s1}. The reason is that there are very few
+key-value pairs which increases synchronization overhead. As expected, both
+variants of \midas exhibit much higher abort rates than \echo, due to stricter
+conflict detection (see Figure \ref{fig:ar-s1}). While \midasopt makes the best
+use of additional cores, it produces a slightly higher abort rate than \midas.
+This reveals a serializing nature of the global lock in the original
+implementation of \midas.
 
 \begin{figure}[h!]
 \begin{minipage}[l]{0.50\textwidth}
@@ -302,16 +303,14 @@ This scenario simulates very high contention by means of a small database and
 long transactions. It can be seen as the worst-case scenario for concurrency
 controls with strong isolation levels. Therefore, both versions of \midas are
 expected to be outperformed by \echo. The plot in Figure \ref{fig:ttp-s2}
-confirms that, as \ttp for both \midas and \midasopt plummets towards zero.
-Likewise, speedup factor and \eff are at the bottom as well (see Figures
-\ref{fig:spd-s2} and \ref{fig:eff-s2}). Unlike in the previous scenario, this
-result is dominated by extreme abort rates approaching 100\% which can be seen
-in Figure \ref{fig:ar-s2}. Note that \midasopt, despite committing almost no
-transaction, still shows some \tput at 32 cores because it has less
-synchronization overhead than \midas and saved time by not committing. \echo, on
-the other hand, has much lower abort rates. This results in significantly better
-\ttp at first, but at 32 cores abort rates are too high for \echo to make much
-of a difference.
+confirms that, as \ttp for both \midas and \midasopt plummets towards zero. This
+is also reflected in speedup factors and \eff in Figures \ref{fig:spd-s2} and
+\ref{fig:eff-s2}. Unlike in the previous scenario, this result is dominated by
+extreme abort rates approaching 100\% which can be seen in Figure
+\ref{fig:ar-s2}. Note that \midasopt, despite committing almost no transactions,
+still shows some \tput at 32 cores because it has less synchronization overhead
+than \midas and saved time by not committing. \echo, on the other hand, has much
+lower abort rates. This results in significantly better \ttp at first, but, starting at 8 cores, \tput starts to decline rapidly as well.
 
 \begin{figure}[h!]
 \begin{minipage}[l]{0.50\textwidth}
@@ -340,19 +339,16 @@ of a difference.
 % [3 = LS]
 %==============================================================================
 
-\todo[inline]{Are we talking about threads or cores? (there is only 1 thread per core)}
-
 \paragraph{Scenario S3}
 
-This scenario simulates low contention through a large database and short
-transactions. In this case, conflicts are rare which results in negligible abort
-rates for all KVS, even with serializability (see Figure \ref{fig:ar-s3}). A
-side effect is that throughput values cannot be distorted by time savings from
-aborted transactions. While the original implementation of Midas fails to
-improve throughput with additional cores, the optimized variant shows that the
-overall concept of Midas works very well in low-contention scenarios (see Figure
-\ref{fig:spd-s3} and \ref{fig:eff-s3}). In particular, Midas$^{*}$ manages to
-improve throughput up until 16 cores.
+This scenario simulates low contention by means of a large database and short
+transactions. Based on the lower probability of conflicts, it is expected that
+\midas could be on a par with \echo. The plot in Figure \ref{fig:ttp-s3} shows
+that \ttp in both \midas and \midasopt is significantly higher than in \echo.
+While \midas is too limited by synchronization to benefit from additional cores,
+\echo and \midasopt achieve close-to-ideal speedup until 4 cores (see Figure
+\ref{fig:spd-s3} and \ref{fig:eff-s3}). Beyond that, \echo starts plunging at 8
+cores whereas \midasopt manages to improve until 16 cores, albeit slightly.
 
 \begin{figure}[h!]
 \begin{minipage}[l]{0.50\textwidth}
@@ -377,15 +373,20 @@ improve throughput up until 16 cores.
 \end{minipage}
 \end{figure}
 
-Echo, on the other hand, scales worse as speedup plummets for more than 8 cores.
-In terms of absolute throughput, depicted in Figure \ref{fig:ttp-s3},
-Midas$^{*}$ manages to surpass Echo by a large margin. This is a significant
-result, because non-serializable SI was adopted for low-contention environments,
-in the first place. However, it must be noted, that other factors may play a
-role. For instance, Echo and Midas use different backends to handle potential
-NVRAM. Also, the optimized variant of Midas does not synchronize access to its
-index, which is a very optimistic approximation of a non-blocking concurrent
-implementation.
+This is a significant result, because it shows that serializable MVCC can still
+perform well for workloads where SI is known to excel at. After all, \midasopt
+manages to surpass \echo by a large margin. However, Figure \ref{fig:ar-s3}
+shows that this scenario appears to be well-natured for strong isolation as
+abort rates are consistently below 1\%. A side effect is that \ttp values cannot
+be distorted by time-savings from aborted transactions. Also, the unsynchronized
+index in \midasopt surely is too optimistic for an approximation of a concurrent
+index.
+
+% However, it must be noted, that other factors may play a
+% role. For instance, \echo and \midas use different backends to handle potential
+% NVRAM. Also, the optimized variant of \midas does not synchronize access to its
+% index, which is a very optimistic approximation of a non-blocking concurrent
+% implementation.
 
 %==============================================================================
 % [4 = LL]
