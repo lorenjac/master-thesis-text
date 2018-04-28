@@ -1,32 +1,34 @@
-This chapter is dedicated to determine whether MMDB can leverage NVRAM to make
-the isolation level of serializability affordable. For that purpose, the
-serializable KVS from Chapter \ref{ch:impl}, Midas, and the non-serializable KVS
-Echo are compared in terms of transaction throughput and scalability.
+% This chapter is dedicated to determine whether MMDB can leverage NVRAM to make
+% the isolation level of serializability affordable. For that purpose, the
+% serializable KVS from Chapter \ref{ch:impl}, Midas, and the non-serializable KVS
+% Echo are compared in terms of transaction throughput and scalability.
 
-In three out of four scenarios, the original implementation of Midas performs
-significantly worse than Echo. Especially in high-contention scenarios, it shows
-much higher abort rates, lower throughput, and insignificant speedup. However,
-in a low contention scenario (S3) Midas achieves higher absolute throughput.
-This is a very promising result, as it shows that even with serializability MVCC
-could continue to excel in low-contention scenarios. However, despite negligible
-abort rates, which are on par with Echo, Midas shows poor scalability. This is
-due to the non-concurrent hash table implementation which requires a global lock
-for synchronization.
+In 3 out of 4 scenarios, the original implementation of \midas performs
+significantly worse than \echo. Especially in high-contention scenarios, it
+shows much higher abort rates, lower throughput, and insignificant speedup.
+However, at low contention, \midas consistently achieves higher throughput than
+\echo. This is a promising result as it shows that, even with serializability,
+MVCC can continue to excel in low-contention scenarios. However, despite
+negligible abort rates, which are on par with Echo, \midas shows poor
+scalability. This is due to the non-concurrent hash table implementation which
+requires a global lock for synchronization.
 
-Since the index is not part of the synchronization concept, Midas$^{*}$ attempts
-to approximate the performance of a lock-free concurrent hash table. Midas$^{*}$
-has significantly higher throughput and scales well up until 16 cores, while
-maintaining comparable abort rates. However, this result may be too optimistic
-because concurrent data structures are often slower than their non-synchronized
-counterparts. Midas with a concurrent index strucure may perform worse but still
-better than Echo.
+Since the concrete index implementation is not part of the synchronization
+concept, \midasopt is used to approximate the performance of a lock-free
+concurrent hash table. \midasopt has significantly higher throughput and scales
+well up until 16 cores, while maintaining comparable abort rates. However, this
+result may be too optimistic because concurrent data structures are often slower
+than their non-synchronized counterparts. Therefore, it is conceivable that
+\midas with a concurrent index may perform worse than \midasopt but still better
+than \echo.
 
-Echo has much lower abort rates in all scenarios, but only provides snapshot
+\echo has much lower abort rates in all scenarios, but only provides snapshot
 isolation. Moreover, it fails to leverage the advantage and hardly scales beyond
-8 cores. Possible reasons for that include excessive synchronization and
-inefficient NVRAM consistency procedures.
+8 cores. Possible reasons for that include inappropriate synchronization and
+inefficient NVRAM management.
 
-The benchmark shows that serializability may become affordable with NVRAM after
-all. Except in very high contention scenarios, Midas$^{*}$ can provide better
-throughput and scale better than Echo. Moreover, if contention is low, even
-Midas can perform better than its non-serializable counterpart Echo.
+In total, the benchmark shows that, in certain scenarios, serializability may
+become affordable with NVRAM after all. Except in very high contention
+scenarios, \midasopt can provide better throughput and scale better than \echo.
+Moreover, if contention is low, even \midas can perform better than its
+non-serializable counterpart \echo.
