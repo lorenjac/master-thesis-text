@@ -1,5 +1,5 @@
 Despite the conceivable advantages of \ac{NVRAM}, there are also challenges to
-be addressed. Although most issues are of practical nature there also are
+be addressed. Although most issues are of practical nature there are also
 conceptual concerns.
 
 \paragraph{Unintended Durability}
@@ -99,10 +99,10 @@ through an \ac{NVRAM}-aware \ac{API} instead of basic load and store statements.
 The difference is that the latter have no knowledge of non-volatile memory and
 its implications.
 
-\begin{figure}[!ht]
+\begin{figure}[h!]
     \centering
     \includegraphics[scale=0.75]{figures/nvml-arch.jpg}
-    \caption{System hierarchy indicating the position of NVML in red \cite{intel2014nvml}}
+    \caption{System hierarchy indicating the position of NVML \cite{intel2014nvml}.}
     \label{fig:nvml}
 \end{figure}
 
@@ -126,7 +126,7 @@ caches. This enables true store-load semantics for memory-mapped files. Other
 aspects include attempts to leverage the byte-addressable nature of \ac{NVRAM}
 and crash-related consistency issues.
 
-Unfortunately, as of this writing there is no evident consensus regarding the
+Unfortunately, as of this writing, there is no evident consensus regarding the
 programming model to use for \ac{NVRAM} \cite{boehm2016persistence}. Still,
 middlewares such as NVML appear to be gaining the upper hand
 \cite{oukid2017data, volos2017whisper, malinowski2017using, andrei2017sap}.
@@ -136,3 +136,5 @@ middlewares such as NVML appear to be gaining the upper hand
 A notorious problem with \ac{NVRAM} is consistency in case of crashes
 \cite{condit2009better, dulloor2014system, oukid2017data}. Due to the complex
 nature of this subject, further discussion is deferred to the next section.
+
+\todo[inline]{fix layout (unfitting page break, remove this paragraph?)}

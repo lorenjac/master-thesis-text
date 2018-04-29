@@ -9,7 +9,7 @@ out-of-order execution and deferred write-back.
 
 \paragraph{Out-Of-Order Execution}
 
-When executing a program, processors fetch instructions on a consecutive manner.
+When executing a program, processors fetch instructions in a consecutive manner.
 Some instructions may inflict minimal latency, while others such as load
 operations may delay further execution for hundreds of cycles. In an attempt to
 optimize instruction throughput, individual instructions may be reordered. While
@@ -34,14 +34,14 @@ x86 architectures. While this approach solves the initial problem, it has a
 notable drawback. Memory barriers defeat the purpose of out-of-order execution.
 As a result, \ac{CPU} pipelines are likely to stall, hence reducing resource
 utilization. Furthermore, store buffers are flushed leading to higher latencies
-when accessing data of deferred store operations. Therefore, barriers can have
+when accessing data of deferred store operations. Therefore, barriers can have a
 significant impact on runtime performance, unless used judiciously. With
 \emph{epoch barriers} a similar approach has been proposed to address both order
 and durability issues \cite{condit2009better}.
 
 \paragraph{Deferred Write-Back}
 
-In many modern processor architectures store operations may not  be immediately
+In many modern processor architectures store operations may not immediately
 lead to an update in main memory. This behaviour can be caused by intermediary
 buffers such as memory order buffers, caches, and memory controller buffers.
 While their individual purpose may vary, they all defer memory write-back
@@ -50,10 +50,10 @@ mentioned buffers are volatile and deferred stores may be lost when power fails
 \cite{condit2009better, oukid2017data}. In order to preserve consistency, it is
 necessary to force write-back in all of these cases.
 
-\begin{figure}[!ht]
+\begin{figure}[h!]
     \centering
     \includegraphics[scale=0.75]{figures/nvram-memory-subsystem.pdf}
-    \caption{Architecture of memory subsystem \cite{bhandari2012implications}}
+    \caption{Architecture of memory subsystem \cite{bhandari2012implications}.}
     \label{fig:memory-interface}
 \end{figure}
 
@@ -88,8 +88,8 @@ $t2$'s result will be durable while $t1$'s initial update is lost.
 \todo[inline]{Insert figure showing inconsistency due to crash}
 
 \begin{lstlisting}
-T1: r(A) w(A) c*   -- Cache ---------------------- (crash)
-T2: -------------- r(A) w(B) c -- Cache -- RAM --- (crash)
+T1: r(A) w(A) c*   -- Cache ------------------------ (crash)
+T2: -------------- r(A) w(B) c -- Cache -- NVRAM --- (crash)
 \end{lstlisting}
 
 An approach to prevent such inconsistencies is to disable caching for selected
@@ -97,12 +97,12 @@ memory regions but that could introduce considerable overhead for frequently
 used data. A more popular approach is to evict cache lines programmatically
 whenever necessary \cite{condit2009better, dulloor2014system, oukid2017data}. On
 x86 architectures this can be done with the \code{clflush} or \code{clflushopt}
-instructions. However, the problem with a simple cache line flush such as
-\code{clflush} is that making a cache line durable may not always mean that is
-should be evicted. In this regard, \code{clwb} compensates for this matter by
-retaining the designated cache line \cite{kolli2016high}. Unfortunately, at the
-time of this writing there is no evidence of a processor to implement this
-instruction.
+instructions. However, the problem with a cache line flush is that wanting to
+make a cache line durable does not always mean that is should be evicted.
+Therefore, there are proposals for instructions, such as \code{clwb}, that send
+a cache line to a memory controller without evicting it \cite{kolli2016high,
+oukid2017data}. Unfortunately, at the time of this writing, there is no evidence
+of a processor to implement this instruction.
 
 % memory controller queues
 

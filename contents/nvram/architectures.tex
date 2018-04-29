@@ -11,7 +11,7 @@ remain durable and can be used to recover and even complete unfinished
 operations such as making a transaction durable \cite{liskov1991replication,
 chen1996rio}. In the past, such solutions relied on battery-backed \ac{RAM}.
 This was subject to criticism as batteries only have a limited charge to ensure
-durability. Also batteries degrade over time and need to be maintained to
+durability. Also, batteries degrade over time and need to be maintained to
 prevent unexpected failure \cite{molina1992main}. Therefore, modern \ac{NVRAM}
 solutions which no longer require peripherals are a welcome improvement in this
 area.
@@ -46,7 +46,7 @@ parameters, new system architectures become feasible. In some cases, traditional
 storage may be eliminated altogether, making \ac{NVRAM} the primary storage
 medium. A prominent use case for this architecture are \ac{MMDB}. These
 databases reside entirely in main memory which drastically reduces latencies
-when accessing its data. However, they are also vulnerable to crashes, as main
+when accessing their data. However, they are also vulnerable to crashes, as main
 memory is still mostly volatile. In order to prevent data loss, \ac{MMDB} have
 to mirror the entire database to non-volatile memory. For that, they perform
 logging or checkpointing to synchronize individual or groups of changes to

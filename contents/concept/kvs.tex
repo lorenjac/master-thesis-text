@@ -39,13 +39,14 @@ volatile memory can be accessed with lower latencies, which is true for both
 read and write operations. In the end, buffering updates also aids recovery, as
 uncommitted data is guaranteed to be lost after a restart.
 
-% \begin{figure}[!ht]
-\begin{figure}
+\begin{figure}[h!]
     \centering
     \includegraphics[width=\textwidth]{figures/drafts/concept-sys-two-level-store.pdf}
     \caption{}
     \label{fig:concept-two-level-store}
 \end{figure}
+
+\todo[inline]{phasen einer transaktion? genauer ablauf}
 
 \subsection{Transactions}
 
@@ -87,7 +88,7 @@ logging.
 
 \paragraph{Atomicity}
 
-Atomicity means that a transactions either succeeds as a whole or it fails
+Atomicity means that a transaction either succeeds as a whole or it fails
 entirely. This means that any traces of a failed transaction must be either
 neutral or reverted. As with isolation, atomicity is achieved by the two-level
 store architecture and the concurrency control protocol. The former ensures that
@@ -103,7 +104,7 @@ torn writes do not harm the consistency of data. Possible solutions for this
 problem are recovery routines that locate and invalidate corrupted data or
 designated bitfields that are guaranteed to be set only after the entire payload
 has been written. The concrete recovery method to be used is
-implementation-defined.
+implementation-defined. For details, see Chapter \ref{ch:impl}.
 
 \paragraph{Durability \& Consistency}
 
@@ -138,7 +139,7 @@ Throughout its lifetime, a transaction usually transitions through several
 execution phases. Beginning with an \code{active} state once a transaction has
 started, it may transition to \code{try\_commit} upon commit and finally
 \code{committed} when it succeeds. Upon failure, a transaction could indicate a
-\code{failed} state. The concrete set of phases is left to the implementation.
+\code{failed} state. The concrete set of phases is left to the implementation (see Chapter \ref{ch:impl}).
 
 Change sets are required to buffer all modifications that a transaction carries
 out. When a transaction commits all modifications are propagated to durable
@@ -158,12 +159,11 @@ way to inspect other transactions to detect conflicts. Since transactions run on
 different threads or cores, respectively, the container is a globally shared
 lookup table. In order to protect critical sections when accessing the table
 locking or lock-free append-only approaches could be used. Completed
-transactions may not be automatically removed from the table but collected by
+transactions may not be automatically removed from the table but collected by a
 garbage collector. The transaction table is volatile by implication as it only
 contains transaction control blocks which are explicitly volatile.
 
-% \begin{figure}[!ht]
-\begin{figure}
+\begin{figure}[h!]
     \centering
     \includegraphics[width=\textwidth]{figures/drafts/concept-struct-volatile.pdf}
     \caption{}
@@ -204,27 +204,29 @@ Operations on the index include adding, retrieving, and removing a key-value
 pair. To prevent inconsistencies through race conditions, access must be
 mutually exclusive. While locking can quickly become a bottleneck in
 read-dominated scenarios, non-blocking data structures are generally slower and
-more complex. The actual hashing method is an implementation detail.
+more complex. The actual hashing method is an implementation detail (see Chapter \ref{ch:impl}).
 
 \paragraph{Histories}
 
 The index maps each key to a chain of versions of a data item. Before an
 operation on an item can begin, the \ac{MVCC} algorithm has to determine which
 version of the item is visible to the requesting transaction. As a result,
-histories may be iterated frequently. Also multiple transactions may access the
+histories may be iterated frequently. Also, multiple transactions may access the
 same history at a time, so there may be overlapping accesses. However,
-transactions never remove and only add new versions at the back of the history.
+transactions never remove and only append new versions to the history.
 Therefore, contention may be high but mostly read-only. In order to account for
 these characteristics, an array-like data structure may be the most appropriate
 choice as opposed to a list. Consecutive access in arrays is less likely to
-cause page faults and can benefit from hardware prefetching. Also arrays have
+cause page faults and can benefit from hardware prefetching. Also, arrays have
 simpler allocation patterns compared to lists. Problems arise with garbage
 collection which could perform random-access modifications to the history. Since
 garbage collection would break the scope of this work, it is assumed to be
-absent or as non-invasive as possible.
+absent or as non-invasive as possible. The concrete data structure used for
+histories is left to the implementation (see Chapter \ref{ch:impl}).
 
-% \begin{figure}[!ht]
-\begin{figure}
+\todo[inline]{arrays are not so optimal for histories (lists are better for concurrency)}
+
+\begin{figure}[h!]
     \centering
     \includegraphics[width=\textwidth]{figures/drafts/concept-struct-complete.pdf}
     \caption{}

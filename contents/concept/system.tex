@@ -16,7 +16,7 @@ system architecture of the intended \ac{KVS}.
 
 The \ac{KVS} is designed for a single-node architecture. Even though distributed
 databases are fairly common, there seems to be no apparent reason for them to
-reveal any more insight on leveraging \ac{NVRAM} for concurrency. Also
+reveal any more insight on leveraging \ac{NVRAM} for concurrency. Also,
 distributed systems involve much more complex mechanisms such as consensus among
 distributed transactions, all of which are beyond the scope of this work.
 However, future work should investigate whether the conclusions of this work
@@ -31,8 +31,7 @@ system. Processors usually coordinate their work by communicating via some form
 of chip interconnect. In order to preserve generality, this work makes no
 assumptions concerning the nature of such interconnect networks.
 
-% \begin{figure}[!ht]
-\begin{figure}
+\begin{figure}[h!]
     \centering
     \includegraphics[scale=0.5]{figures/drafts/concept-sys-cpu.pdf}
     \caption{}
@@ -70,8 +69,7 @@ restarts do not have to fetch data from slower storage devices. In return,
 candidate systems must provide sufficient \ac{NVRAM} capacity to hold the entire
 database.
 
-% \begin{figure}[!ht]
-\begin{figure}
+\begin{figure}[h!]
     \centering
     \includegraphics[scale=0.5]{figures/drafts/concept-sys-mem.pdf}
     \caption{}

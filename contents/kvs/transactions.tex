@@ -35,7 +35,7 @@ are several semantic models for nesting which further complicates its discussion
 found wide adoption with the prominent exception of transactional memory
 \cite{moss2006nested, moravan2006supporting, jacobi2012transactional} and a few
 databases \cite{olson1999berkeley}. Hence, unless stated otherwise, the term
-transaction always refers to flat transactions.
+transaction always refers to flat transactions in this thesis.
 
 Especially when discussing concurrent transactions, a meaningful notation is
 required to describe their interactions. For this purpose, the concept of a
@@ -78,6 +78,8 @@ the associated transaction, respectively (see Figure
     \caption{Interleaved notation of a write-write conflict.}
     \label{fig:schedule_interleaved}
 \end{figure}
+
+\todo[inline]{timeline?}
 
 For the better readability, this work chooses to list operations for each transaction invidually, while retaining their global chronological order as shown in Figure \ref{fig:schedule_projected}.
 
@@ -154,9 +156,10 @@ is often relaxed to a reasonable extent.
 
 The ACID criteria have become the prevalent reference for characterizing
 transactional systems. However, not all systems enforce the complete set of
-properties. Notable examples are transactional memory for conventional \ac{RAM} and
-some cache-like databases which do not support durability as they are volatile
-by design. A prominent example for relaxation that is also fundamental to this thesis is the isolation of concurrent transactions.
+properties. Notable exceptions are transactional memory for conventional
+\ac{RAM} and some cache-like databases. In these cases durability is not
+required as they are volatile by design. A prominent example for relaxation that
+is also fundamental to this thesis is the isolation of concurrent transactions.
 
 \paragraph{Serial Transactions}
 
@@ -292,6 +295,6 @@ conflicts shown above. For example, the most recently discovered anomalies,
 of read-write conflicts. In this sense, a transaction is serializable if and
 only if all possible conflicts are precluded. This characterization has several
 advantages. Most importantly, it is more plausible to discuss non-serializable
-schedules in terms of causes instead of effects. In addition, as opposed to
-anomalies the number of conflicts is smaller and also fixed. Therefore, this
-thesis primarily defines serializability in terms of conflicts.
+schedules in terms of causes instead of effects. As opposed to anomalies, the
+number of conflict scenarios is smaller and also fixed. Therefore, this thesis
+primarily defines serializability in terms of conflicts.

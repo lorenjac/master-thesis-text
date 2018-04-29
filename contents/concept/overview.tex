@@ -1,6 +1,6 @@
-This section provides an overview on the concept of this work. For this purpose,
-goals, assumptions, and design constraints are outlined. The section concludes
-with an outline of the desired \ac{API} and practical examples.
+This section provides an overview of the concept. For this purpose, goals,
+assumptions, and design constraints are outlined. The section concludes with an
+outline of the desired \ac{API} and practical examples.
 
 \subsubsection{Goal}
 
@@ -8,7 +8,7 @@ The intent of this thesis is to determine whether \ac{MMDB} could exploit
 \ac{NVRAM} to make transactions with strong consistency affordable. Given the
 overwhelming complexity of full-scale \ac{DBMS}, this work resorts to in-memory
 \ac{KVS}. \ac{NVRAM} significantly reduces the required recovery overhead. While
-others have used this circumstance to increase transaction throughput alone,
+others have used this condition to increase transaction throughput alone,
 this work chooses to leverage the headroom to compensate for the cost of
 serializability. The goal is to design a serializing in-memory \ac{KVS} for
 \ac{NVRAM} which performs on par with non-serializing \ac{KVS} based on volatile
@@ -64,9 +64,9 @@ may be enclosed within a transaction. Likewise, full ACID support is required to
 guarantee sound transactional semantics. In order to guarantee strong
 consistency and isolation in the presence of concurrent transactions,
 serializability is a central requirement. Note that, in contrast to some
-\ac{KVS} which are designed as caches the target \ac{KVS} in this work supports
-durability. Concerning the nature of key-value pairs, this work imposes no
-restrictions on their datatypes. Still, implementations are free to limit the
+\ac{KVS}, which are designed as caches, the target \ac{KVS} in this work
+supports durability. Concerning the nature of key-value pairs, this work imposes
+no restrictions on their datatypes. Still, implementations are free to limit the
 length of keys, for instance, if the underlying data structure requires it.
 
 \subsubsection{API}
@@ -83,18 +83,17 @@ the intended \ac{API}.
 
 \begin{figure}[!h]
     \centering
-    \begin{tabular}{|l|l|}
+    \begin{tabular}{|ll|l|}
         \hline
-        \textbf{Function}          & \textbf{Description} \\
+        \textbf{Function}          &  & \textbf{Description} \\
         \hline
-        kvstore()                  & Create a key-value store instance \\
-        begin() : tx               & Start a transaction \\
-        begin\_ro() : tx            & Start a read-only transaction \\
-        commit(tx) : bool          & Commit a transaction \\
-        abort(tx) : void           & Abort a transaction \\
-        get(key, tx) : value       & Retrieve value for a given key \\
-        put(key, value, tx) : void & Insert a key-value pair \\
-        remove(key, tx) : void     & Remove a key-value pair \\
+        kvstore()           & : void  & Create a key-value store instance \\
+        begin()             & : tx    & Start a transaction \\
+        commit(tx)          & : bool  & Commit a transaction \\
+        abort(tx)           & : void  & Abort a transaction \\
+        get(key, tx)        & : value & Retrieve value for a given key \\
+        put(key, value, tx) & : bool  & Insert a key-value pair \\
+        remove(key, tx)     & : bool  & Remove a key-value pair \\
         \hline
     \end{tabular}
     \caption{API of the intended key-value store.}

@@ -1,7 +1,7 @@
 \chapter{Non-Volatile RAM}
 \label{ch:nvram}
 
-Conventional non-volatile memories such as \ac{HDD} or \ac{SSD} provide large
+Conventional non-volatile memories such as \acp{HDD} or \acp{SSD} provide large
 capacities but are only block-oriented and incur substantial access latencies
 compared to \ac{RAM}. Therefore, \ac{IO}-bound applications tend to keep as much
 data in \ac{RAM} as possible but are eventually forced to access slower media
@@ -53,6 +53,6 @@ programming model for \ac{NVRAM}. In general, there is no way for software to
 determine whether a store has arrived in \ac{NVRAM} or not. Since \ac{CPU}s are
 unaware of any transactional semantics between stores, programmers need to
 manually ensure consistency for data in \ac{NVRAM}. Otherwise, a torn write from
-a crash may lead to irreversible data corruption. As the counter measures
-presented in this chapter must be applied judiciously as they may incur
-significant runtime penalties.
+a crash may lead to irreversible data corruption. The counter measures presented
+in this chapter must be applied judiciously as they may incur significant
+runtime penalties.

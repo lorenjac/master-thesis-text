@@ -20,16 +20,16 @@ increasing maximum performance, this work attempts to increase performance with
 maximum consistency.
 
 \ac{NVRAM} is especially significant for memory-resident databases as data no
-longer need to copied to a much slower storage device for recoverability. Also,
-restarts can be near-instantaneous as all data are already in memory and need
-not be fetched. Therefore, the proposed concept is exclusively targeted at
+longer need to be copied to a much slower storage device for recoverability.
+Also, restarts can be near-instantaneous as all data are already in memory and
+need not be fetched. Therefore, the proposed concept is exclusively targeted at
 \ac{MMDB}. Given the vast complexity of fully-featured in-memory \ac{DBMS}, it
 seems appropriate, for an initial study, to resort to much more manageable
 \ac{KVS}. Based on whether the approach turns out to work well for \ac{KVS}, it
 may still be applied on \ac{MMDB} in future work.
 
 This chapter presents the concept for an \ac{NVRAM}-aware \ac{KVS} with
-serializable transactions. After a a brief overview in the next section,
+serializable transactions. After a brief overview in the next section,
 follow-up sections outline the architecture, concurrency control, and
 consistency measures.
 

@@ -21,18 +21,11 @@ in \ac{KVS} are hash tables and search trees, in particular B-trees.
 Unlike traditional databases, \ac{KVS} do not impose data schemas. Consequently,
 arbitrary chunks of data can be stored as values which is especially useful in
 scenarios with no fixed data format or when enforcing one is not a priority.
-
-\begin{lstlisting}
-| user | Max                  |
-| auth | dxlf240r0g7jr4u8n2oe |
-| ...  | ...                  |
-\end{lstlisting}
-
 Furthermore, \ac{KVS} do not provide query languages such as SQL to store and
 retrieve data. Instead, \ac{KVS} are accessed programmatically through a concise
 set of operations which is why \ac{KVS} are also referred to as \emph{embedded}
 databases. Although their \ac{API} is not standardized, it can be essentially
-broken down to the following operations.
+broken down to the following operations:
 
 \begin{itemize}
     \item Open/Close
@@ -93,7 +86,7 @@ caches on top of existing file systems.
 
 \paragraph{Transactions}
 
-An essential feature of most databases is transactions. Transactions enable a
+An essential feature of most databases are transactions. Transactions enable a
 sequence of database operations to appear as a single atomic operation. If a
 single operation involved in a transaction fails, the entire transaction fails
 and its side effects are rolled back.
@@ -103,7 +96,7 @@ worrying about inconsistencies even in case of failure. Given the prevalence of
 transactions, most \ac{KVS} support them. Due to their importance for this work,
 transactions are covered in more detail in the next section.
 
-\todo[inline]{Which KVS do not support transactions?}
+\todo[inline]{Which KVS do not support transactions? -> memcached}
 
 \paragraph{In-Memory Operation}
 
@@ -111,7 +104,7 @@ The performance of a database is often denoted in terms of transaction
 throughput. One way to increase throughput is to mitigate data access latencies.
 Apart from faster storage, this can be done by placing the entire database in
 main memory which enables speedups by multiple orders of magnitude. This
-approach, which dates back to the mid 1980s has been adopted in many
+approach, which dates back to the mid 1980s, has been adopted in many
 high-performance databases such as the more recent HANA database
 \cite{molina1992main, faerber2012hana}. Likewise, most \ac{KVS} are explicitly
 designed for in-memory operation. Notable exceptions are the popular BerkeleyDB

@@ -41,13 +41,12 @@ Despite their prevalence, pessimistic concurrency controls have notable
 drawbacks. Locking-based concurrency controls are prone to \emph{deadlocks}
 \cite{bernstein1981concurrency, kung1981optimistic}. In order to prevent
 deadlocks, they must be detected and resolved which introduces runtime overhead.
-Unfortunately, there is no general-purpose locking protocol that precludes
-deadlocks \cite{kung1981optimistic}. Another problem is \emph{lock contention}
-which occurs when a large portion of concurrent threads in a system compete for
-a single shared resource \cite{berenson1995critique, sadoghi2014reducing}. Since
-only one transaction can manage to acquire ownership, all remaining transactions
-are left waiting for it to complete and contend again. As a result, only one
-transaction is executed at a time, thus defeating the purpose of concurrency.
+Another problem is \emph{lock contention} which occurs when a large portion of
+concurrent threads in a system compete for a single shared resource
+\cite{berenson1995critique, sadoghi2014reducing}. Since only one transaction can
+manage to acquire ownership, all remaining transactions are left waiting for it
+to complete and contend again. As a result, only one transaction is executed at
+a time, thus defeating the purpose of concurrency.
 
 \paragraph{Optimistic Concurrency Control}
 
@@ -81,8 +80,7 @@ usually requires certain metadata about the operations within a transaction. As
 a result, validation complexity scales in size of metadata required to
 determine conflict freedom. Another drawback is that aborting a conflicting
 transaction means that its entire progress is discarded. In this case, valuable
-computing resources have been wasted. This is especially true for update
-operations as they involve potentially expensive copy operations.
+computing resources are wasted.
 
 Despite some drawbacks, optimistic concurrency control has found wide adoption
 especially in domains where reads are dominant and conflicts are known to be
@@ -113,12 +111,8 @@ A \emph{version} is a snapshot of a particular data item within a database. In
 terms of \ac{KVS}, that would be a value. In traditional concurrency schemes,
 there is exactly one version of each item. These are also referred to as
 \emph{single-version concurrency controls}. If a transaction issues an update to
-a version, then it is performed in-place. In order to ensure isolation though, a
-transaction has to be protected against concurrent reading or writing. This is
-usually achieved by having each transaction acquire locks on its data which are
-only released once the transaction terminates. This approach is very effective
-in that it can provide the highest isolation level of serializability but it is
-prone to deadlocks and lock contention \cite{berenson1995critique}.
+a version, then it is performed in-place. In order to ensure isolation, a
+transaction has to be protected against concurrent reading or writing.
 
 In a \emph{multiversion concurrency control}, there can be multiple versions of
 data items. This fundamentally changes the nature of both read and write
@@ -139,7 +133,7 @@ writing. In fact, it has been shown that many workloads are dominated by queries
 \cite{krueger2011fast, andrei2017sap}. This is also reflected in the \ac{MMDB}
 benchmark TATP which assumes 80 \% of all transactions to be read-only
 \cite{larson2011high}. Another useful side effect of multiversioning is that it
-encodes an implicit logging infrastructure which can be used for recovery
+forms an implicit logging infrastructure which can be used for recovery
 purposes \cite{condit2009better, venkataraman2011consistent}. \ac{MVCC} is
 similar to \ac{RCU} \cite{mckenney1998read} but differs in that it is more
 general and can manage more than two versions at a time.
@@ -161,7 +155,7 @@ property. In general, visibility is defined as a predicate over timestamps of
 transactions and versions. The concrete definition of the predicate is subject
 to the respective \ac{MVCC} protocol.
 
-Now, when a transaction attempts to access an item, it would typically traverse
+When a transaction attempts to access an item, it would typically traverse
 the versions of that item and determine for each version whether it is visible
 to the transaction. Only if a version is visible to the issuing transaction, it
 can be selected for reading or writing. The implementation of visibility is of
@@ -287,7 +281,7 @@ In the field, write skew has been countered by inducing artificial write
 conflicts between transactions that are expected to exhibit write skew
 \cite{fekete2005making}.
 
-\paragraph{Non-Serializable Read-Only}
+\paragraph{Non-Serializable Read-Only Anomaly}
 
 Another anomaly was discovered almost 10 years after the introduction of
 \ac{SI}. It proved, contrary to common understanding, that even read-only
@@ -307,9 +301,9 @@ output of $t_{RO}$ ($x = 20$, $y = 0$), a serializable schedule would require
 $t_1$ to have been executed after both $t_2$ and $t_{RO}$. This however, is not
 possible since $t_1$ would have seen the update of $t_2$ and no penalty would
 have been applied as $20 - 10 \geq 0$. Likewise, in order for $t_1$ to yield
-$y = -11$, it would have had to be executed before $t_2$ (and $t_{RO}$) which
-however is not consistent with the output of $t_{RO}$. In fact, the output of
-$t_{RO}$ corresponds the the exact opposite serial ordering as do those of
+$y = -11$, it would have had to be executed before $t_2$ (and $t_{RO}$) which,
+however, is not consistent with the output of $t_{RO}$. In fact, the output of
+$t_{RO}$ corresponds the exact opposite serial ordering as do those of
 $t_1$ and $t_2$.
 
 \begin{figure}[h!]
@@ -322,6 +316,8 @@ $t_1$ and $t_2$.
     \caption{Transaction $t_{RO}$ is read-only but not serializable.}
     \label{fig:bad_read_only}
 \end{figure}
+
+\todo[inline]{make intermediate values more visible..}
 
 Both symptoms can be attributed to the fact, that \ac{SI} fails to observe
 read-write conflicts. When a transaction requests an item, it reads the latest
@@ -336,7 +332,7 @@ read-write conflicts.
 
 \subsection{Serializable MVCC}
 
-The previous section introduced the \ac{MVCC} protocol \ac{SI}. \ac{SI} provides
+The previous section describes the \ac{MVCC} protocol \ac{SI}. \ac{SI} provides
 affordable isolation but fails to preclude all non-serializable schedules such
 as write skew. Nevertheless, \ac{SI} is the most widely adopted \ac{MVCC}
 implementation \cite{larson2011high, bailey2013exploring, neumann2015fast}. In
@@ -345,10 +341,10 @@ policy is often motivated by significant performance benefits compared to
 strictly serializing concurrency control \cite{cahill2009serializable}. Others
 argue that \ac{SI} anomalies may be negligible as even renowned ACID-compliant
 benchmarks such as TPC-C do not expose them \cite{fekete2005making}. However,
-the need for data integrity should not be based on benchmarks failing to prove
+the need for data integrity should not depend on benchmarks failing to prove
 it. Therefore, there are efforts to overcome the weaknesses of \ac{SI} and
 provide strong consistency without falling back to pessimistic approaches. This
-section presents an overview on approaches to making serializing \ac{MVCC}
+section presents an overview of approaches to make serializing \ac{MVCC}
 affordable.
 
 The main reason for non-serializable schedules in \ac{SI} is that it cannot
@@ -399,7 +395,8 @@ validation does not scale, thus inhibiting transaction throughput. Therefore,
 many authors propose protocols featuring concurrent validation
 \cite{bailey2013exploring, ding2015centiman, faleiro2015rethinking,
 wang2017efficiently}. Parallel validation has already been proposed in the early
-days of \ac{MVCC} \cite{kung1981optimistic}, but received new interest lately.
+days of \ac{MVCC} \cite{kung1981optimistic}, but received renewed attention
+lately.
 
 Another point of contention is the assignment of timestamps. A typical \ac{SI}
 implementation requires multiple timestamps for both versions and transactions.

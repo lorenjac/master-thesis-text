@@ -28,13 +28,12 @@ moment, programmers have to meticulously manage and optimize updates to
 
 Summing up, preserving consistency across crashes is necessary but also
 introduces adverse effects on performance. In accordance with recent research,
-this work requires the following features
+this work requires the following features:
 
 \begin{itemize}
     \item means to enforce program order for memory accesses
-    % \item means to flush potential memory order buffers
     \item means to flush cashes or individual cache lines
-    \item \ac{ADR}
+    \item \acl{ADR}
 \end{itemize}
 
 Both memory order enforcement and fine-grained cache flushes are provided by
