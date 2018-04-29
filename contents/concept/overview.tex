@@ -105,7 +105,7 @@ This \ac{API} is sufficient to power a basic database with transactional
 semantics. Listing \ref{lst:api_ex} shows an example where a transaction checks
 whether the balance is negative and, if so, applies a penalty.
 
-\begin{lstlisting}
+\begin{lstlisting}[caption={}, captionpos=b, label=lst:api_ex]
 kvstore kvs;
 
 /* ... lots of transactions ... */
@@ -117,9 +117,9 @@ if (getBalance(sav, deb) < 0.0) {
 	kvs.put("debit", applyInterest(deb), tx);
 }
 tx->commit();
-\end{lstlisting}\label{lst:api_ex}
+\end{lstlisting}
 
-For an example with concurrent transactions, see Listing \ref{lst:api_ex2}.
-Here, two transactions are executed concurrently which leads to a data race.
+% For an example with concurrent transactions, see Listing \ref{lst:api_ex2}.
+% Here, two transactions are executed concurrently which leads to a data race.
 
 \todo[inline]{Insert listing/control flow for concurrent transactions}
