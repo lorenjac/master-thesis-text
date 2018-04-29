@@ -2,42 +2,30 @@
 \label{ch:summary}
 
 Recent advances in non-volatile memory research indicate that fast high-density
-NVRAM is available in the near future. Based on this prospect, later research
-found that novel NVRAM can significantly increase transaction throughput in
-main-memory databases. Still, for performance reasons, many databases resort to
-relaxed isolation of concurrent transactions. Therefore, this thesis
-investigates if NVRAM can provide sufficient leverage to make the isolation
-level of serializability affordable.
+NVRAM is available in the near future. Later research found that novel NVRAM can
+significantly increase transaction throughput in main-memory databases. Still,
+for performance reasons, many databases resort to relaxed isolation of
+concurrent transactions. Therefore, this thesis investigates if NVRAM can
+provide sufficient leverage to make the isolation level of serializability
+affordable.
 
-Due to the complexity of full-featured MMDB this work is focused on key-value
-stores. Based on recent research, a concept for an NVRAM-resident key-value
-store with serializable transactions was developed. In order to evaluate the
-concept, the prototype called \midas was implemented. For concurrency control,
-\midas relies on MVCC and implements a serializable variant of Snapshot
-Isolation. Access to non-volatile memory and durable data structures is managed
-using PMDK, a state of the art library for programming against NVRAM.
+Due to the complexity of full-featured MMDB this work is focused entirely on
+key-value stores. Based on recent research, a concept for an NVRAM-resident
+key-value store with serializable transactions was developed. Subsequently,
+\midas, a prototype of the concept was implemented. \midas relies on MVCC and
+implements a serializable variant of Snapshot Isolation. Access to potential
+NVRAM and durable data structures is managed through PMDK, a state of the art
+library for programming against NVRAM.
 
-\paragraph{Conclusions}
-
-In order to evaluate if the concept of this work is worth pursuing, an
-experiment was conducted. In the experiment, Midas is compared to Echo, another
-NVRAM-resident KVS but with non-serializable transactions. Both KVS are compared
-in terms of transaction throughput and abort rate which measured in four
-different synthetic workloads. The evaluation shows that \midas achieves lower
-\ttp than \echo in almost all scenarios with more multiple cores. An exception
-is the low contention scenario where \midas performs significantly better than
-\echo. This is important because MVCC protocols such as SI are often preferred
-for excelling in read-mostly workloads with little contention. Still, \echo
-scales better as it leverages up to 8 cores, while \midas fails to utilize
-additional processors. As a result, \ttp in \midas is stagnant or declining due
-to aborts. But in most cases, this not primarily related to abort rates.
-Instead, the reason is a poor index implementation in \midas which incurs
-excessive synchronization overhead. Therefore, \midasopt, an experimental
-version of \midas was benchmarked to approximate the performance of a
-highly-concurrent index structure. In all but the worst-case scenario, \midasopt
-surpasses \echo in \ttp and scales better at slightly higher abort rates. This
-outcome confirms that the underwhelming results of \midas are largely related to
-an implementation issue rather than its concept.
+In order to evaluate the concept, a synthetic benchmark over \ttp was developed.
+In the experiment, \midas is compared to \echo, another NVRAM-resident KVS but
+with non-serializable transactions. According to the results, \midas mostly
+performs much worse than \echo. Except at low contention, \midas has lower
+throughput, higher abort rates, and fails to utilize additional processors.
+However, it was found that the results can be largely attributed to an
+implementation flaw in \midas. A modified variant of \midas achieved higher
+\tput and better scalability than \echo at comparable abort rates. These are
+promising results and indicate that the concept of \midas may be worth pursuing.
 
 \paragraph{Future Work}
 
