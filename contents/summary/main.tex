@@ -4,41 +4,70 @@
 Recent advances in non-volatile memory research indicate that fast high-density
 NVRAM is available in the near future. Based on this prospect, later research
 found that novel NVRAM can significantly increase transaction throughput in
-databases. Still, for performance reasons, many databases resort to relaxed
-isolation of concurrent transactions. Therefore, this thesis investigates if
-NVRAM provides sufficient leverage to make the isolation level of
-serializability affordable.
+main-memory databases. Still, for performance reasons, many databases resort to
+relaxed isolation of concurrent transactions. Therefore, this thesis
+investigates if NVRAM can provide sufficient leverage to make the isolation
+level of serializability affordable.
 
-For that purpose, Midas, an NVRAM-resident key-value store with serializable
-transactions was developed. The concurrency control  in Midas is based on an
-extended variant of the MVCC protocol Snapshot Isolation. Non-volatile memory is
-managed using PMDK, a state of the art library for programming against NVRAM.
+Due to the complexity of full-featured MMDB this work is focused on key-value
+stores. Based on recent research, a concept for an NVRAM-resident key-value
+store with serializable transactions was developed. In order to evaluate the
+concept, the prototype called \midas was implemented. For concurrency control,
+\midas relies on MVCC and implements a serializable variant of Snapshot
+Isolation. Access to non-volatile memory and durable data structures is managed
+using PMDK, a state of the art library for programming against NVRAM.
+
+\paragraph{Conclusions}
 
 In order to evaluate if the concept of this work is worth pursuing, an
 experiment was conducted. In the experiment, Midas is compared to Echo, another
 NVRAM-resident KVS but with non-serializable transactions. Both KVS are compared
-in terms of transaction throughput and abort rate measured with four different
-synthetic workloads.
+in terms of transaction throughput and abort rate which measured in four
+different synthetic workloads. The evaluation shows that \midas achieves lower
+\ttp than \echo in almost all scenarios with more multiple cores. An exception
+is the low contention scenario where \midas performs significantly better than
+\echo. This is important because MVCC protocols such as SI are often preferred
+for excelling in read-mostly workloads with little contention. Still, \echo
+scales better as it leverages up to 8 cores, while \midas fails to utilize
+additional processors. As a result, \ttp in \midas is stagnant or declining due
+to aborts. But in most cases, this not primarily related to abort rates.
+Instead, the reason is a poor index implementation in \midas which incurs
+excessive synchronization overhead. Therefore, \midasopt, an experimental
+version of \midas was benchmarked to approximate the performance of a
+highly-concurrent index structure. In all but the worst-case scenario, \midasopt
+surpasses \echo in \ttp and scales better at slightly higher abort rates. This
+outcome confirms that the underwhelming results of \midas are largely related to
+an implementation issue rather than its concept.
 
-% * was habe ich gemacht (und warum)
-%     * in-memory KVS for NVRAM mit serialisierbaren Transaktionen entworfen
-%     * this was achieved with the pmdk library
-% * ergebnis zusammenfassen
-%     * as expected, serializability reduces ttp drastically in high-contention scenarios
-%     * however, with low-medium contention serializability did not perform much worse
-% * future work
-%     * additional experiments (vs. other serializable impl. or locking-based approaches)
-%     * apply concept in full-grown MMDB, or even distributed databases
-%     * garbage collection (always problematic when concurrent)
-%     * more efficient data structures
-%         * concurrent hash table for NVRAM
-%         * concurrent histories
+\paragraph{Future Work}
 
-% * as MMDB have become ever more common, the bottleneck shifted from IO to memory.
-%     * but recovery still uses IO -> bottleneck
-%
-% * novel NVRAM provides high capacities of fast byte-addressable non-volatile RAM
-% * this thesis investigates whether novel NVRAM can be leveraged to enable serializable...
-% * this makes sense because
-%     * it is shown in SOTA that most MMDB including KVS do not enable serializable isolation levels by default
-%     * it is shown in SOTA that NVRAM can significantly reduce recovery overhead and increase ttp hence
+There are some aspects of this work that should see further attention.
+
+\begin{itemize}
+    \item further experiments
+    \item distributed transactions
+    \item concurrent data structures for NVRAM
+    \item better garbage collection
+\end{itemize}
+
+First and foremost, additional experiments are needed to better evaluate the
+concept of powering serializability with NVRAM. For example, it should be
+investigated how \midas compares to other solutions, such as BerkeleyDB
+\cite{olson1999berkeley}, that support serializability but use disk storage for
+recovery. Ultimately, the concept of \midas could be evaluated for full-featured
+MMDB. Since many modern KVS and MMDB, such as DynamoDB \cite{decandia2007dynamo}
+or HANA \cite{lee2013sap}, are distributed systems, it would be interesting to
+see if the concept of \midas can be beneficial to distributed transactions.
+
+On the implementation side, there is also room for improvement. First, the
+durable data structures in \midas are not concurrent and require locking which
+introduces undesirable bottlenecks. Therefore, future work should consider the
+design or adaptation of highly-concurrent data structures for NVRAM. A
+possibility would be to port existing implementations, such as the concurrent
+hash table \emph{libcuckoo} \cite{li2014algorithmic}, to NVRAM.
+
+\midas is based on MVCC which requires garbage collection to release versions
+that are no longer reachable by any transaction. The current design of \midas
+only performs garbage collection on startup to reduce resource contention during
+runtime. Therefore, it could be investigated how online garbage collection
+can be integrated in serializable MVCC with reasonable overhead.

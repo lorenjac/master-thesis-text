@@ -6,6 +6,21 @@ In order to evaluate if the concept of this work is worth pursuing, an experimen
 
 ---
 
+* at first, eval shows that index implementation of Midas is inappropriate for a resource shared among many threads
+* critical design flaw, lock durations were assumed to be very short
+* as a result, performs worse in all but one scenario
+* with low contention Midas performs better than Echo but this also the best case scenario
+
+or
+
+* eval shows that Midas has lower throughput than echo in almost all multi-threaded scenarios
+* an exception is a low contention scenario where Midas performs significantly better
+* in all cases throughput in Midas does not scale with additional processors
+* however, in most cases this is not primarily related to higher abort rates [which can even increase throughput values]
+* instead the reason is a poor implementation of Midas' index which incurs excessive synchronization overhead
+* therefore, an experimental version of midas was benchmarked to approximate the performance of a non-blocking concurrent hash table
+* 
+
 The evaluation of the experiment shows that in most cases Midas achieves lower throughput than Echo. 
 
 In some cases this amplified by time-savings from aborting expensive commits. However, in a low-contention scenario Midas has negligible abort rates and still performs better than Echo. This is a significant result because it shows that serializable SI can still perform well in situations where default SI is often preferred over locking. Unfortunately, a poor implementation of the Midas' index structure leads high synchronization overhead which keeps throughput from scaling with additional processors. Therefore, a variant of Midas was benchmarked
