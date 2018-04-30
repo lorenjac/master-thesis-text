@@ -8,12 +8,13 @@ management, are elaborated in more detail.
 
 Midas is implemented as a C++ library on top of PMDK. PMDK is a set of libraries
 for NVRAM management that acts as a middleware between programs using NVRAM and
-the underlying system. As depicted in Figure \ref{fig:impl-arch}, Midas consists
-of two components: the key-value store and a set of durable container structures
-based on PMDK. The latter are used to provide the same level of abstraction of
-conventional containers for NVRAM. The store component of Midas is largely
-congruent to Figure \ref{fig:concept-struct-complete} from Section
-\ref{ch:concept-kvs} and is described in more detail later in this chapter.
+the underlying system \cite{rudoff2017persistent, pmdk2018home}. As depicted in
+Figure \ref{fig:impl-arch}, Midas consists of two components: the key-value
+store and a set of durable container structures based on PMDK. The latter are
+used to provide the same level of abstraction of conventional containers for
+NVRAM. The store component of Midas is largely congruent to Figure
+\ref{fig:concept-struct-complete} from Section \ref{ch:concept-kvs} and is
+described in more detail later in this chapter.
 
 \begin{figure}[h!]
     \centering
@@ -56,10 +57,10 @@ implement NVRAM management.
 
 In PMDK, NVRAM is accessed via ordinary file systems such as \code{ext4} or
 \code{tmpfs}. That way, NVRAM can be mapped into a process' address space via
-plain files. Using a kernel feature called \emph{Direct Access} (also DAX)
-file systems can bypass the operating system's page cache. This enables true load
-and store semantics. In addition, swapping is disabled for the respective memory
-region.
+plain files. Using a kernel feature called \emph{Direct Access} (also DAX) file
+systems can bypass the operating system's page cache \cite{oukid2017data,
+andrei2017sap, rudoff2017persistent}. This enables true load and store
+semantics. In addition, swapping is disabled for the respective memory region.
 
 \subsubsection{Programming Model}
 

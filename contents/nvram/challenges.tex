@@ -2,13 +2,15 @@ Despite the conceivable advantages of \ac{NVRAM}, there are also challenges to
 be addressed. Although most issues are of practical nature there are also
 conceptual concerns.
 
-\paragraph{Unintended Durability}
+\subsection{Unintended Durability}
 
 The key feature of \ac{NVRAM} is to retain its data across restarts. However,
 not all data are necessarily intended to be durable. Notable examples include
 transient, confidential, and corrupt data. The former comprises data which may
 not be valid after a system restart, as is the case with data related to machine
 or device state.
+
+\paragraph{Information Security}
 
 Other data such as passwords, encryption keys, or decrypted data may be
 confidential and should not be durable. It has been shown that even volatile
@@ -34,10 +36,12 @@ variations of the technique and obtain vital information
 % of this thesis and is therefore not addressed further. Also, since volatile \ac{RAM}
 % continues to be available, there is no need to use \ac{NVRAM} for sensitive data.
 
+\paragraph{Stray Writes}
+
 When an operating system or application behaves in an erratic fashion or
 crashes, it may produce corrupt data in memory. This is called a stray write. In
 this case, systems incorporating \ac{NVRAM} could face durable memory
-corruptions \cite{condit2009better, venkataraman2011consistent}. In contrast to
+corruptions \cite{condit2009better, venkataraman2011consistent, dulloor2014system}. In contrast to
 conventional non-volatile memory, \ac{NVRAM} is particularly vulnerable as it is
 directly accessible through the \ac{CPU}. However, it has been shown that,
 compared to disk storage, stray writes do not occur significantly more often in
@@ -54,7 +58,7 @@ work.
 % more often in \ac{NVRAM} \cite{chen1996rio}. That said, stray writes are not
 % considered an issue in this work.
 
-\paragraph{Memory Management}
+\subsection{Memory Management}
 
 \ac{NVRAM} is a new type of memory that can also be used as durable mass
 storage. In order to benefit from this new technology, both platforms and
@@ -63,20 +67,24 @@ issues to be addressed in this area.
 
 % Memory Interface
 
+\paragraph{System Integration}
+
 An important aspect in managing \ac{NVRAM} is the memory interface. Recent
 research suggests that \ac{NVRAM} will be attached to the system memory bus
 using the \ac{DIMM} format known from \ac{DRAM} \cite{volos2017whisper,
-oukid2017data, andrei2017sap, intel2017nvdimm}. A decisive advantage of this
-approach is much lower latencies compared to the alternative \ac{IO} bus.
-Another reason is that in a previous effort to produce \ac{NVRAM}, known as
-\ac{NVDIMM}, modules have also been integrated this way \cite{dulloor2014system,
-huang2014design}. Consequently, system designers can build on an existing
-software stack. Still, there are drawbacks to be considered. Clearly, the number
-of available \ac{DIMM} slots in a machine is limited, so \ac{NVRAM} may not
-scale well for mass storage. That situation is especially relevant in hybrid
-systems containing both \ac{RAM} and \ac{NVRAM}. Also, in hybrid systems both
-kinds of memory are likely to be attached to the same memory interface thus
-sharing its bandwidth.
+oukid2017data, andrei2017sap}. A decisive advantage of this
+approach is the much lower latency compared to the alternative \ac{IO} bus.
+Also, previous efforts to produce \ac{NVRAM}, such as DRAM-attached SSDs, have
+also been integrated as \acp{DIMM} (known as \ac{NVDIMM})
+\cite{dulloor2014system, huang2014design}. Consequently, system designers can
+build on an existing software stack. Still, there are drawbacks to be
+considered. Clearly, the number of available \ac{DIMM} slots in a machine is
+limited, so \ac{NVRAM} may not scale well for mass storage. That situation is
+especially relevant in hybrid systems containing both \ac{RAM} and \ac{NVRAM}.
+Also, in hybrid systems both kinds of memory are likely to be attached to the
+same memory interface thus sharing its bandwidth.
+
+\paragraph{Programming Model}
 
 With \ac{NVRAM} devices integrated into the system, programmers still need a way
 to access it. Several approaches have been proposed to this end
@@ -87,23 +95,26 @@ dulloor2014system, volos2017whisper}. A major challenge of working with
 \ac{NVRAM} is to provide consistency guarantees across possible system failures.
 Yet, systems are largely unaware of these circumstances. With raw device access
 which is already error-prone, the complex task of preserving consistency is
-handed to the programmer. Another challenge is that virtual memory mappings are
-volatile and may no longer be valid after a restart.
-
-Therefore, it has been proposed to rely on dedicated high-level programming
-primitives as in Mnemosyne, NV-Heaps, and NVML \cite{volos2011mnemosyne,
-coburn2011nv_heaps, intel2017nvml}. These systems provide interfaces for memory
-allocation and consistent updates based on transactions. An important
-distinction to the previous low-level approach is that memory is accessed
-through an \ac{NVRAM}-aware \ac{API} instead of basic load and store statements.
-The difference is that the latter have no knowledge of non-volatile memory and
-its implications.
+handed to the programmer. Another challenge is that, due to \ac{ASLR}, virtual
+memory mappings are volatile and are not valid across restarts. Therefore, it
+has been proposed to rely on dedicated high-level programming primitives as in
+Mnemosyne, NV-Heaps, and PMDK \cite{volos2011mnemosyne, coburn2011nv_heaps,
+rudoff2017persistent}. These systems provide interfaces for memory allocation
+and consistent updates based on transactions. An important distinction to the
+previous low-level approach is that memory is accessed through an
+\ac{NVRAM}-aware software interface. Unfortunately, as of this writing, there is
+no evident consensus regarding the programming model to use for \ac{NVRAM}
+\cite{boehm2016persistence}. Still, the middleware PMDK (formerly known as NVML)
+appears to be gaining the upper hand \cite{oukid2017data, volos2017whisper,
+malinowski2017using, andrei2017sap}. Figure \ref{fig:pmdk-sys} depicts how PMDK
+operates by mapping files into a process' address space to enable load-store
+semantics.
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[scale=0.75]{figures/nvml-arch.jpg}
-    \caption{System hierarchy indicating the position of NVML \cite{intel2014nvml}.}
-    \label{fig:nvml}
+    \includegraphics[scale=1]{figures/pmdk-sys-arch-extract.pdf}
+    \caption{System architecture with PMDK to manage NVRAM \cite{rudoff2017persistent}.}
+    \label{fig:pmdk-sys}
 \end{figure}
 
 Another discussed approach to manage \ac{NVRAM} is through designated file
@@ -124,17 +135,21 @@ Therefore, several \ac{NVRAM}-aware file systems have been proposed
 feature of these file systems is a zero-copy mechanism by circumventing page
 caches. This enables true store-load semantics for memory-mapped files. Other
 aspects include attempts to leverage the byte-addressable nature of \ac{NVRAM}
-and crash-related consistency issues.
+and crash-related consistency issues. Yet, there appears to be a growing consensus
+that instead of designing new file systems for \ac{NVRAM}, existing file systems
+should be outfitted to support \ac{NVRAM}. A prominent result is the adoption of
+\ac{DAX} in the Linux kernel \cite{oukid2017data, andrei2017sap,
+rudoff2017persistent}. \ac{DAX} is a mechanism to bypass the operating system's
+page cache and is used by PMDK \cite{rudoff2017persistent, pmdk2018home}.
 
-Unfortunately, as of this writing, there is no evident consensus regarding the
-programming model to use for \ac{NVRAM} \cite{boehm2016persistence}. Still,
-middlewares such as NVML appear to be gaining the upper hand
-\cite{oukid2017data, volos2017whisper, malinowski2017using, andrei2017sap}.
+% \paragraph{Consistency}
+%
+% A notorious problem with \ac{NVRAM} is consistency in case of crashes
+% \cite{condit2009better, dulloor2014system, oukid2017data}. Due to the complex
+% nature of this subject, further discussion is deferred to the next section.
+%
+% \todo[inline]{fix layout (unfitting page break, remove this paragraph?)}
 
-\paragraph{Consistency}
-
-A notorious problem with \ac{NVRAM} is consistency in case of crashes
-\cite{condit2009better, dulloor2014system, oukid2017data}. Due to the complex
-nature of this subject, further discussion is deferred to the next section.
-
-\todo[inline]{fix layout (unfitting page break, remove this paragraph?)}
+\subsection{Preserving Consistency}
+\label{ch:nvram-consistency}
+\input{contents/nvram/consistency.tex}

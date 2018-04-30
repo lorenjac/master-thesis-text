@@ -1,13 +1,14 @@
 As pointed out earlier, the consistency of data stored in \ac{NVRAM} is
-vulnerable to crashes or power failures. Since \ac{NVRAM} is directly attached
-to the processor memory interface, there is no need to use techniques such as
-\ac{DMA} to transfer a modified page to external storage. This also means that a
-memory operation solely relies on the \ac{CPU} which usually gives no
-confirmation when that operation completes. In this context, there are two major
-issues that threaten the consistency of data written to \ac{NVRAM}, namely
-out-of-order execution and deferred write-back.
+vulnerable to crashes or power failures \cite{condit2009better,
+dulloor2014system, oukid2017data}. Since \ac{NVRAM} is directly attached to the
+processor memory interface, there is no need to use techniques such as \ac{DMA}
+to transfer a modified page to external storage. This also means that a memory
+operation solely relies on the \ac{CPU} which usually gives no confirmation when
+that operation completes. In this context, there are two major issues that
+threaten the consistency of data written to \ac{NVRAM}, namely out-of-order
+execution and deferred write-back.
 
-\paragraph{Out-Of-Order Execution}
+\subsubsection{Out-Of-Order Execution}
 
 When executing a program, processors fetch instructions in a consecutive manner.
 Some instructions may inflict minimal latency, while others such as load
@@ -39,7 +40,7 @@ significant impact on runtime performance, unless used judiciously. With
 \emph{epoch barriers} a similar approach has been proposed to address both order
 and durability issues \cite{condit2009better}.
 
-\paragraph{Deferred Write-Back}
+\subsubsection{Deferred Write-Back}
 
 In many modern processor architectures store operations may not immediately
 lead to an update in main memory. This behavior can be caused by intermediary
@@ -57,12 +58,14 @@ necessary to force write-back in all of these cases.
     \label{fig:memory-interface}
 \end{figure}
 
-% memory order buffers
+% \ac{MOB}
+% \paragraph{Memory Order Buffers}
+\paragraph{\acp{MOB}}
 
 In conjunction with instruction scheduling and cache coherency protocols a
 memory order buffer may be present. It holds all loads and stores, with the
 exception of non-temporal operations. In order to prevent a deferred write-back
-through memory order buffers, their store buffers must be flushed. On x86
+through \acp{MOB}, their store buffers must be flushed. On x86
 architectures this can be achieved with a store fence operation such as
 \code{sfence}. As mentioned above, memory barriers carry a considerable
 overhead. However, if memory barriers are already used for enforcing program
@@ -70,10 +73,11 @@ order, then flushing store buffers is a desirable side effect and incurs no
 overhead.
 
 % caches
+\paragraph{Caches}
 
 Processor caches help avoid access latencies and reduce memory bus traffic for
 frequently used data. A possible exception are non-temporal stores and data
-chunks marked as uncacheable. Similar to memory order buffers, caches are
+chunks marked as uncacheable. Similar to \acp{MOB}, caches are
 volatile so an abrupt power failure may lead to lost updates. The issue with
 this is not that updates are lost but that it is unclear which updates are lost,
 if any. The reason for this circumstance is the cache eviction policy trying to
@@ -105,23 +109,36 @@ oukid2017data}. Unfortunately, at the time of this writing, there is no evidence
 of a processor to implement this instruction.
 
 % memory controller queues
+\paragraph{\acp{WPQ}}
 
-Once a cache line is flushed, it is propagated to the memory controller where it
-is buffered in a write-back queue before being written onto the device. Again,
-the problem is that such a buffer is usually volatile. This means that a power
-failure could lead to lost updates to \ac{NVRAM}. Even though residual power in
-\ac{DRAM} has been shown to be substantial, there is no reliable way to ensure a
-full buffer flush \cite{halderman2008lest}. This circumstance has given rise to
-many discussions in the past \cite{condit2009better, dulloor2014system,
-kolli2016high}. Some authors proposed a designated instruction for flushing
-write-back queues. An example is the meanwhile deprecated \code{pcommit},
-formerly known as \code{pm\_wbarrier} \cite{dulloor2014system, oukid2015instant,
+Once a cache line is flushed, it is propagated to a memory controller where it
+is buffered in a \ac{WPQ}. Again, the problem is that such a buffer is usually
+volatile. This means that a power failure could lead to lost updates to
+\ac{NVRAM}. Even though residual power in \ac{DRAM} has been shown to be
+substantial, there is no reliable way to ensure a full \ac{WPQ} flush
+\cite{halderman2008lest}. This circumstance has given rise to many discussions
+in the past \cite{condit2009better, dulloor2014system, kolli2016high}. Some
+authors proposed a designated instruction for flushing \acp{WPQ}. An example is
+the meanwhile deprecated \code{pcommit} instruction (formerly known as
+\code{pm\_wbarrier}) \cite{dulloor2014system, oukid2015instant,
 schwalb2015nvm_malloc, volos2017whisper}. Others have developed more general
 mechanisms for preserving consistency in \ac{NVRAM} that also address this issue
-\cite{condit2009better, pelley2014memory}. The current state of affairs is that
-platforms must provide a feature called \ac{ADR} \cite{volos2017whisper}. It
-works by exploiting the fact that even in case of a power failure there is
-sufficient power to flush the write buffers of all memory controllers. For this
-to work, the power supply unit has to detect a power failure and issue a signal
-to all memory controllers. As a result, neither programmers nor processors need
-to worry about memory controller queues and no overhead is incurred.
+\cite{condit2009better, pelley2014memory}. The dotted rectangle in Figure
+\ref{fig:wpq} indicates the domain in the memory subsystem that must be
+protected from power failures.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics{figures/adr-example.pdf}
+    \captionsetup{justification=centering}
+    \caption{The memory domain to be protected against power failures \cite{rudoff2017persistent}.}
+    \label{fig:wpq}
+\end{figure}
+
+The current state of affairs is that platforms must provide a feature called
+\ac{ADR} \cite{volos2017whisper, rudoff2017persistent}. It works by exploiting
+the fact that, even in case of a power failure, there is sufficient time and
+power to flush \acp{WPQ} in all memory controllers. When the system's power
+supply unit detects a power failure, it signals all memory controllers to flush
+their \acp{WPQ}. As a result, the programmer does not need to worry about
+\acp{WPQ} and no overhead is incurred.
