@@ -37,7 +37,7 @@ broken down to the following operations:
 \paragraph{Applications}
 
 Traditional \ac{DBMS} are often based on complex architectures featuring query
-front ends and sophisticated storage mechanisms. While this works well in many
+frontends and sophisticated storage mechanisms. While this works well in many
 cases, it severely limits the performance in situations where a simpler storage
 paradigm (e.g. key-value pairs) is sufficient. As a consequence, high access
 latencies and convoluted, error-prone concurrency schemes inhibit the

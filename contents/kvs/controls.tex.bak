@@ -141,7 +141,7 @@ general and can manage more than two versions at a time.
 While read operations benefit from \ac{COW}, updates can be expensive.
 Updating a version incorporates additional overhead for allocating a new version
 and copying the original version before modifying it. In the case of \ac{KVS},
-however, copies may not be necessary if entire values are updated.
+however, copyies may not be necessary if entire values are updated.
 
 \subsubsection{Visibility}
 
@@ -205,7 +205,7 @@ concept of \ac{SI} and its properties.
 The core principle of \ac{SI} is that a transaction $t$ only sees a private
 snapshot of the database as of when $t$ started. In this sense, the notion of a
 snapshot comprises the set of the latest versions that have been committed
-before $t$ was invoked. The key to this behavior is the definition of the
+before $t$ was invoked. The key to this behaviour is the definition of the
 visibility property.
 
 \subsubsection{Visibility}
@@ -287,8 +287,8 @@ Another anomaly was discovered almost 10 years after the introduction of
 \ac{SI}. It proved, contrary to common understanding, that even read-only
 transactions may not always be serializable \cite{fekete2004read}. The proof
 consists of a schedule of three transactions with one being read-only. The
-schedule is constructed in a way that only two but never all three
-transactions can execute without a conflict.
+schedule is constructed in a way that at most two but never all three
+transactions can execute serializably.
 
 Suppose a pair of data items $x = 0$ and $y = 0$ and transactions $t_1, t_2$,
 and a read-only transaction $t_{RO}$. Further, let $t_1$ compute $y = y - 10$
@@ -374,7 +374,7 @@ conflicts whenever the required access patterns are detected
 \cite{fekete2005making}. Others have found efficient ways to determine whether
 an item is included in a range query, thus improving validation time
 \cite{neumann2015fast}. Although intriguing, these approaches cannot be applied
-to \ac{KVS} since they operate through ad hoc queries instead of query
+to \ac{KVS} since they operate through ad-hoc queries instead of query
 languages.
 
 \subsubsection{Reducing Contention}

@@ -12,7 +12,7 @@ regard to concurrency, in particular.
 \paragraph{Definition}
 
 A transaction is a sequence of operations that is treated as a single atomic
-operation, i.e. it either succeeds if all its operations succeed or it fails.
+operation, i.e. it either succeeds if all its suboperations succeed or it fails.
 In general, an incomplete or failed transaction must not have any observable
 side effects. A transaction \emph{commits} when all its subordinate operations
 have completed. Once this process is complete, the transaction is
@@ -81,7 +81,7 @@ the associated transaction, respectively (see Figure
 
 \todo[inline]{timeline?}
 
-For the better readability, this work chooses to list operations for each transaction individually, while retaining their global chronological order as shown in Figure \ref{fig:schedule_projected}.
+For the better readability, this work chooses to list operations for each transaction invidually, while retaining their global chronological order as shown in Figure \ref{fig:schedule_projected}.
 
 \begin{figure}[h!]
     \centering
@@ -151,7 +151,7 @@ isolation is later dealt with in more detail.
 The last of the four ACID properties is \emph{durability}. It ensures that all
 side effects incurred by a committed transaction must be durable across any
 subsequent system failure. Durability can be very hard to enforce, especially in
-the face of catastrophic failures with failing backup media. Therefore its notion
+the face of catastropic failures with failing backup media. Therefore its notion
 is often relaxed to a reasonable extent.
 
 The ACID criteria have become the prevalent reference for characterizing
