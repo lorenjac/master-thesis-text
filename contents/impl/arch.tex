@@ -25,7 +25,7 @@ congruent to Figure \ref{fig:concept-struct-complete} from Section
 \paragraph{Overview}
 
 Section \ref{ch:impl-nvram} introduces PMDK and shows how it can be used to
-access and manage NVRAM. Based on the progamming model provided by PMDK, Section
+access and manage NVRAM. Based on the programming model provided by PMDK, Section
 \ref{ch:impl-data} presents the design of two containers classes that are used
 to handle data in NVRAM more efficiently. Finally, Section \ref{ch:impl-mvcc}
 provides details on transaction management and the serializable MVCC protocol.
@@ -54,10 +54,10 @@ implement NVRAM management.
 
 \subsubsection{NVRAM Access}
 
-In PMDK, NVRAM is accessed via ordinary filesystems such as \code{ext4} or
+In PMDK, NVRAM is accessed via ordinary file systems such as \code{ext4} or
 \code{tmpfs}. That way, NVRAM can be mapped into a process' address space via
 plain files. Using a kernel feature called \emph{Direct Access} (also DAX)
-filesystems can bypass the operating system's page cache. This enables true load
+file systems can bypass the operating system's page cache. This enables true load
 and store semantics. In addition, swapping is disabled for the respective memory
 region.
 
@@ -238,7 +238,7 @@ Essentially, the table consists of a single persistent array that is reallocated
 as needed. Each cell in the index is called slot or bucket. As with
 \code{NVList}, the API of \code{NVHashmap} is closely aligned to the C++
 standard library. Also, the class employs a policy-based template design which
-allows changing its behaviour through template parameters.
+allows changing its behavior through template parameters.
 
 \begin{figure}[h!]
     \centering
