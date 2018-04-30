@@ -42,7 +42,7 @@ and durability issues \cite{condit2009better}.
 \paragraph{Deferred Write-Back}
 
 In many modern processor architectures store operations may not immediately
-lead to an update in main memory. This behavior can be caused by intermediary
+lead to an update in main memory. This behaviour can be caused by intermediary
 buffers such as memory order buffers, caches, and memory controller buffers.
 While their individual purpose may vary, they all defer memory write-back
 operations. This is a known vulnerability for consistency in \ac{NVRAM} as the
@@ -79,7 +79,7 @@ this is not that updates are lost but that it is unclear which updates are lost,
 if any. The reason for this circumstance is the cache eviction policy trying to
 compensate for typically narrow cache volume. Depending on policy, cache
 content, and system load, a modified chunk may or may not be flushed to main
-memory. An example of an application scenario where such behavior is
+memory. An example of an application scenario where such behaviour is
 unacceptable is transactions. Imagine an updating transaction $t1$ that commits
 but is not evicted from cache. Then a transaction $t2$ based on the result of
 $t1$ commits and gets evicted from cache. If the system crashes at this point,
