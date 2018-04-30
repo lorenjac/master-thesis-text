@@ -350,7 +350,7 @@ cores whereas \midasopt manages to improve until 16 cores, albeit slightly.
 This is a significant result, because it shows that serializable MVCC can still
 perform well for workloads where SI is known to excel at. After all, \midasopt
 manages to surpass \echo by a large margin. However, Figure \ref{fig:ar-s3}
-shows that this scenario appears to be well-natured for strong isolation as
+shows that this scenario appears to be well-formed for strong isolation as
 abort rates are consistently below 1\%. A side effect is that \ttp values cannot
 be distorted by time savings from aborted transactions. Also, the unsynchronized
 index in \midasopt surely is too optimistic for an approximation of a concurrent
