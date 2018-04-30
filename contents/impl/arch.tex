@@ -295,9 +295,12 @@ template design.
 
 This section presents an outline of the transaction management in Midas.
 
-\subsubsection{Transactions}
+% \subsubsection{Transactions}
+\subsubsection{Components}
 
 Transaction management relies on two key data structures: transaction control blocks and the transaction table. This section documents the implementation of these structures.
+
+\todo[inline]{This section now deals with all components, not just transactions}
 
 \paragraph{Transaction Control Blocks}
 
@@ -317,26 +320,6 @@ The TID is required to lookup the associated transaction. The status code indica
     \item Failed
     \item Committed
 \end{itemize}
-
-% \begin{figure}
-%     \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=3.5cm,
-%         semithick]
-%         \tikzstyle{every state}=[fill=red,draw=none,text=white]
-%
-%         \node[initial,state] (A)                    {$Active$};
-%         \node[state]         (B) [right of=A]       {$Committed$};
-%         \node[state]         (C) [below right of=A] {$Failed$};
-%
-%         \path (A)   edge     node {commit}          (B)
-%                     edge     node {abort, conflict} (C);
-%         % (B) edge [loop above] node {1,1,L} (B)
-%         %     edge              node {0,1,L} (C)
-%         % (C) edge              node {0,1,L} (D)
-%         %     edge [bend left]  node {1,0,R} (E);
-%     \end{tikzpicture}
-%     \caption{}
-%     \label{}
-% \end{figure}
 
 The execution phase of a transaction $T$ is used by other transactions to determine $T$'s state if they encounter dirty versions of $T$. In addition, there are two timestamps that denote when $T$ started and when it ended. This information is vital to determine if the lifetimes of two transactions overlap. Since both transaction state and timestamps must be accessible and consistent to transactions from other threads, they are implemented as atomic variables.
 
@@ -363,10 +346,29 @@ TIDs and timestamps are represented by 64-bit unsigned integers. They are acquir
 
 As explained above, there are situations when transactions may need to determine the state of other concurrent transactions. Therefore, TCBs are stored in a global transaction table. In order to provide fast lookup, the transaction table is implemented as a hash table. Each TCB is hashed using its TID. However, the table is a globally shared resource that must be synchronized. In order to prevent a bottleneck, the concurrent hash table implementation \emph{libcuckoo} is used \cite{fan2013memc3, li2014algorithmic, libcuckoo2018home}.
 
-\subsubsection{Multiversioning}
+\paragraph{Index}
+
+
+\paragraph{Histories}
+
 
 \paragraph{Versions}
-\paragraph{Histories}
+
+
+\subsubsection{Transaction Processing}
+
+Unlike other KVS, Midas can only be operated through transactions. Transactions that are either terminated or were not created by the respective store instance are rejected. Once a transaction has been started, it can be used to modify the store with the following operations:
+
+\begin{itemize}
+    \item \code{read(tx, <key>, <result>)}
+    \item \code{write(tx, <key>, <value>)}
+    \item \code{drop(tx, <key>)}
+\end{itemize}
+
+In general, the control flow of these operations is structured in the same way. At first the operation checks its inputs for errors. Next, it looks up the history of the item associated with the specified key.
+
 \paragraph{Visibility}
 
-\subsubsection{Conflicts}
+\paragraph{Conflicts}
+
+\paragraph{Commits}
