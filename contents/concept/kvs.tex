@@ -58,7 +58,7 @@ must conform to the ACID properties to ensure data consistency. Nesting
 transactions is not supported as use cases are too few to justify the additional
 complexity.
 
-Providing ACID support requires a conjunction of preventing erroneous behaviour
+Providing ACID support requires a conjunction of preventing erroneous behavior
 and restoring a previously sane state if an error occurs.
 
 \paragraph{Isolation}
@@ -72,7 +72,7 @@ Each transaction is run in a separate thread. All modifications within a
 transaction are buffered in thread-local volatile memory as opposed to updating
 in-place. As a result, the database in \ac{NVRAM} does not reflect uncommitted
 changes and can therefore not be used to observe such activity. Technically,
-threads could spy on each others change buffers but such behaviour is neither
+threads could spy on each others change buffers but such behavior is neither
 required nor intended.
 
 Protecting transactions from observing concurrent updates, however, does not
@@ -96,13 +96,13 @@ only modifications of committing transactions are written to durable memory.
 That way, an incomplete or failed transaction cannot be globally observed. In
 addition, the \ac{SI} protocol allows the system to always retrieve the latest
 committed version of an item. Even if an update to \ac{NVRAM} fails, the
-\ac{KVS} can always go back to the lastest committed version without performing
+\ac{KVS} can always go back to the latest committed version without performing
 an actual rollback. However, in the event an update propagation to \ac{NVRAM} is
 interrupted, partial write-backs may become durable. A typical scenario would be
 a system crash or a power failure. In this case, the \ac{KVS} must ensure that
 torn writes do not harm the consistency of data. Possible solutions for this
 problem are recovery routines that locate and invalidate corrupted data or
-designated bitfields that are guaranteed to be set only after the entire payload
+designated bit fields that are guaranteed to be set only after the entire payload
 has been written. The concrete recovery method to be used is
 implementation-defined. For details, see Chapter \ref{ch:impl}.
 
