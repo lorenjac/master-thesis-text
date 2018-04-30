@@ -4,7 +4,7 @@ SDRAM running at 1066Mhz. For durable storage, the system relies on mechanical
 hard drives. The operating system is CentOS 7.4 based on Linux 3.10.
 
 Since NVRAM is not available, all benchmarks are carried out on volatile DRAM.
-In order to emulate persistency, each KVS stores its contents in a memory-mapped
+In order to emulate persistence, each KVS stores its contents in a memory-mapped
 file. To satisfy the consistency requirements shown in Chapter
 \ref{ch:nvram-consistency}, it is important to prevent potential buffering of
 data in kernel page caches. This is achieved by using a 127GB instance of
