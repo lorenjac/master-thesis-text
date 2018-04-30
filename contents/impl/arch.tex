@@ -288,25 +288,83 @@ template design.
 % =============================================================================
 % =============================================================================
 
-\subsection{Serializable MVCC}
+\newpage
+
+\subsection{Transaction Management}
 \label{ch:impl-mvcc}
+
+This section presents an outline of the transaction management in Midas.
 
 \subsubsection{Transactions}
 
-The transaction table should provide fast lookup capabilities and is therefore
-implemented as a hash table. However, it is also a shared resource that must be
-synchronized. In order to prevent a bottleneck, the concurrent hash table
-implementation \emph{libcuckoo} is used \cite{fan2013memc3, li2014algorithmic,
-libcuckoo2018home}.
+Transaction management relies on two key data structures: transaction control blocks and the transaction table. This section documents the implementation of these structures.
 
-Transaction control blocks, on the other hand, only share atomic timestamps
-while the remaining read and write sets are thread local. Read sets are plain
-vectors of versions accessed for reading. In contrast, write sets are
-implemented as hash maps because a transaction might update an item multiple
-times and looking up a previously written item is faster than repeatedly
-performing a linear search on its history.
+\paragraph{Transaction Control Blocks}
 
-\subsubsection{Versioning}
+Transactions are represented by transaction control blocks (TCBs). A TCB holds a unique transaction id (TID), a status code, two timestamps, as well as read and write sets. For historical reasons, a TCB is internally denoted as a \code{Transaction} (see Figure \ref{fig:tcb}).
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[scale=.75]{figures/impl/tx.pdf}
+    \caption{A transaction control block.}
+    \label{fig:tcb}
+\end{figure}
+
+The TID is required to lookup the associated transaction. The status code indicates the current execution phase of a transaction and can be one of the following:
+
+\begin{itemize}
+    \item Active
+    \item Failed
+    \item Committed
+\end{itemize}
+
+% \begin{figure}
+%     \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=3.5cm,
+%         semithick]
+%         \tikzstyle{every state}=[fill=red,draw=none,text=white]
+%
+%         \node[initial,state] (A)                    {$Active$};
+%         \node[state]         (B) [right of=A]       {$Committed$};
+%         \node[state]         (C) [below right of=A] {$Failed$};
+%
+%         \path (A)   edge     node {commit}          (B)
+%                     edge     node {abort, conflict} (C);
+%         % (B) edge [loop above] node {1,1,L} (B)
+%         %     edge              node {0,1,L} (C)
+%         % (C) edge              node {0,1,L} (D)
+%         %     edge [bend left]  node {1,0,R} (E);
+%     \end{tikzpicture}
+%     \caption{}
+%     \label{}
+% \end{figure}
+
+The execution phase of a transaction $T$ is used by other transactions to determine $T$'s state if they encounter dirty versions of $T$. In addition, there are two timestamps that denote when $T$ started and when it ended. This information is vital to determine if the lifetimes of two transactions overlap. Since both transaction state and timestamps must be accessible and consistent to transactions from other threads, they are implemented as atomic variables.
+
+When a transaction modifies the store with calls to \code{Store::put()} or \code{Store::drop()}, a designated change entry is stored in the associated TCB. Depending on the operation performed, a change entry contains the following items:
+
+\begin{itemize}
+    \item an operation descriptor
+    \item a pointer to the original version
+    \item the raw updated value
+    \item a pointer to the updated version
+\end{itemize}
+
+Based on the operation descriptor, knows how to perform the change. For instance, if the change resulted from a \code{Store::drop()}, then it only contains a pointer to the original version which has to be invalidated. Change sets are implemented as hash tables. This is because a transaction might update an item multiple times and looking up a previously written item is faster than repeatedly scanning an item's history. In order to detect read-write conflicts, and thus enable serializability, a TCB also has to record all items that were read. Because read sets can grow large in read-mostly environments, they are implemented as dynamic arrays to amortize allocation cost. Both read and change sets are thread local storage and are therefore not synchronized.
+
+When a transaction is started with \code{Store::begin()}, a TCB is created. During initialization the TCB is assigned a TID and a start timestamp.  Once the TCB is initialized, its TID is used as a key to insert it into the transaction table. The lifetime of a TCB, including its transaction, ends when it is removed from the transaction table. This happens when the associated transaction encounters a conflict or is aborted with \code{Store::abort()}.
+
+\todo[inline]{add algorithm listing?}
+
+\paragraph{TIDs and Timestamps}
+
+TIDs and timestamps are represented by 64-bit unsigned integers. They are acquired by incrementing a designated global counter, respectively. In order to ensure that the counters are consistent across all cores, they are incremented using atomic fetch-and-add instructions. Because there are situations where TIDs and timestamps must be distinguished from another, their value ranges are interleaved. TIDs are always odd numbers, whereas timestamps are always even. Each counter is incremented by two, accordingly. The reason for this design is explained in the next section.
+
+\paragraph{Transaction Table}
+
+As explained above, there are situations when transactions may need to determine the state of other concurrent transactions. Therefore, TCBs are stored in a global transaction table. In order to provide fast lookup, the transaction table is implemented as a hash table. Each TCB is hashed using its TID. However, the table is a globally shared resource that must be synchronized. In order to prevent a bottleneck, the concurrent hash table implementation \emph{libcuckoo} is used \cite{fan2013memc3, li2014algorithmic, libcuckoo2018home}.
+
+\subsubsection{Multiversioning}
+
 \paragraph{Versions}
 \paragraph{Histories}
 \paragraph{Visibility}
