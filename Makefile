@@ -18,16 +18,7 @@ EXTENSIONS:=aux bbl blg cut dvi log out pdfsync ps synctex.gz tdo toc tex~ backu
 default: pdf
 
 pdf:
-	@echo "pdflatex..."
-	@pdflatex -halt-on-error main.tex > /dev/null || true
-	@echo "makeglossaries..."
-	@makeglossaries -q main
-	@echo "bibtex..."
-	@bibtex -terse main | grep "Warning--" || true
-	@echo "pdflatex..."
-	@pdflatex -halt-on-error main.tex > /dev/null || true
-	@echo "pdflatex..."
-	@pdflatex -halt-on-error main.tex | grep -a3 ^! || true
+	latexmk -f -pdf main.tex
 
 clean:
 	@latexmk -silent -c main.tex 2> /dev/null
@@ -35,3 +26,15 @@ clean:
 	do \
 		for file in `find . -name "*.$$i"`; do rm $$file; done; \
 	done
+
+# pdf:
+# 	@echo "pdflatex..."
+# 	@pdflatex -halt-on-error main.tex > /dev/null || true
+# 	@echo "makeglossaries..."
+# 	@makeglossaries -q main
+# 	@echo "bibtex..."
+# 	@bibtex -terse main | grep "Warning--" || true
+# 	@echo "pdflatex..."
+# 	@pdflatex -halt-on-error main.tex > /dev/null || true
+# 	@echo "pdflatex..."
+# 	@pdflatex -halt-on-error main.tex | grep -a3 ^! || true
