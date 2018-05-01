@@ -28,7 +28,7 @@ described in more detail later in this chapter.
 Section \ref{ch:impl-nvram} introduces PMDK and shows how it can be used to
 access and manage NVRAM. Based on the programming model provided by PMDK, Section
 \ref{ch:impl-data} presents the design of two containers classes that are used
-to handle data in NVRAM more efficiently. Finally, Section \ref{ch:impl-mvcc}
+to handle data in NVRAM more efficiently. Finally, Section \ref{ch:impl-components}
 provides details on transaction management and the serializable MVCC protocol.
 
 \subsection{NVRAM Management}
@@ -290,13 +290,14 @@ template design.
 
 \newpage
 
-\subsection{Transaction Management}
-\label{ch:impl-mvcc}
+% \subsection{Transaction Management}
+\subsection{Components}
+\label{ch:impl-components}
 
 This section presents an outline of the transaction management in Midas.
 
 % \subsubsection{Transactions}
-\subsubsection{Components}
+% \subsubsection{Components}
 
 Transaction management relies on two key data structures: transaction control blocks and the transaction table. This section documents the implementation of these structures.
 
@@ -358,20 +359,134 @@ For each value of a key-value pair, there are several versions. The versions of 
 
 Another core data structure in Midas is the index. It accomplishes the mapping between the key of an item and the item's version history. Whenever a transactional operation wishes to access an item, it has to query the index with the corresponding key. The index must provide fast lookup and is therefore implemented as a hash table. For that purpose, the durable hash table \code{NVHashmap} from Section \ref{ch:impl-data} is used. The index is accessed by all concurrent transactions and must therefore be synchronized. Due to the complexity of concurrent data structure design, a lock is used to protect the index. This is likely to become a serious bottleneck and should be revised in future work.
 
-\subsubsection{Transaction Processing}
+\section{Transaction Processing}
 
-Unlike other KVS, Midas can only be operated through transactions. Transactions that are either terminated or were not created by the respective store instance are rejected. Once a transaction has been started, it can be used to modify the store with the following operations:
+Unlike other \ac{KVS}, Midas can only be operated through transactions. Transactions that are either terminated or belong to another store instance are rejected. Once a transaction has been started, it can be used to modify the store with the following operations:
 
 \begin{itemize}
-    \item \code{read(tx, <key>, <result>)}
-    \item \code{write(tx, <key>, <value>)}
-    \item \code{drop(tx, <key>)}
+    \item read: \code{read(<tx>, <key>, <result>)}
+    \item update: \code{write(<tx>, <key>, <value>)}
+    \item deletion: \code{drop(<tx>, <key>)}
 \end{itemize}
 
-In general, the control flow of these operations is structured in the same way. At first the operation checks its inputs for errors. Next, it looks up the history of the item associated with the specified key.
+Each operation has its own procedure. The control flow of all these procedures is structured in the same way. At first, inputs are checked for errors. Next, the history of the item associated with the specified key is looked up. While \code{read()} and \code{drop()} will fail if no history is found, \code{write()} will perform an insertion by adding a new pair to the transaction's change set. If a history is found, then it is scanned for a version that is visible to the specified transaction. If a valid version is found, the operation can perform its read, write, or deletion, respectively. Otherwise, the operation cannot continue and aborts the associated transaction with an error code. The subsequent sections give details about visibility, operations, and commits.
 
-\paragraph{Visibility}
+\subsection{Visibility}
 
-\paragraph{Conflicts}
+% TODO how is visibility determined (depending on the operation)
+% TODO what facilities do that
 
-\paragraph{Commits}
+\begin{algorithm}
+\begin{algorithmic}[1]
+\Procedure{isVisible}{tx, begin, end}
+\If {$\text{isTID}(\textit{begin})$}
+\State $\textit{otherTx} \gets \text{getTx}(\textit{begin})$
+\If {$\text{getStatus}(\textit{otherTx}) \neq \text{Committed} \lor \text{getEnd}(\textit{otherTx}) > \text{getBegin}(\textit{tx})$}
+\State \Return $\text{false}$
+\EndIf
+\Else
+\If {$\textit{begin} >= \text{getBegin}(tx)$}
+\State \Return $\text{false}$
+\EndIf
+\EndIf
+\State
+\If {$\text{isTID}(\textit{end})$}
+\State $\textit{otherTx} \gets \text{getTx}(\textit{end})$
+\If {$\text{getStatus}(\textit{otherTx}) = \text{Committed} \land \text{getEnd}(\textit{otherTx}) < \text{getBegin}(\textit{tx})$}
+\State \Return $\text{false}$
+\EndIf
+\Else
+\If {$\textit{end} < \text{getBegin}(tx)$}
+\State \Return $\text{false}$
+\EndIf
+\EndIf
+\State \Return $\text{true}$
+\EndProcedure
+\end{algorithmic}
+\caption{}
+\label{alg:vsb-read}
+\end{algorithm}
+
+\subsection{Reads}
+
+\begin{algorithm}
+\begin{algorithmic}[1]
+\Procedure{read}{tx, key, value}
+% \If {$\text{inReadSet}(\textit{tx, key})$}
+% \State $\textit{value} \gets \text{getReadEntry}(tx, key)$
+% \State \Return $\text{OK}$
+% \EndIf
+\State $\textit{history} \gets \text{getHistory}(\textit{key})$
+\If {$!\textit{history}$}
+\State \Return $\text{abort}(tx)$
+\EndIf
+\State $\textit{snapshot} \gets \text{getReadSnapshot}(\textit{tx, history})$
+\If {$!\textit{snapshot}$}
+\State \Return $\text{abort}(tx)$
+\EndIf
+\State $\text{updateReadSet}(\textit{tx, snapshot})$
+\State $\textit{value} \gets \text{getData}(snapshot)$
+\State \Return $\text{OK}$
+\EndProcedure
+\end{algorithmic}
+\caption{}
+\label{alg:read}
+\end{algorithm}
+
+\subsection{Updates}
+
+\begin{algorithm}
+\begin{algorithmic}[1]
+\Procedure{write}{tx, key, value}
+\If {$\text{inChangeSet}(\textit{tx, key})$}
+\State $\text{updateChangeSet}(tx, key, value)$
+\State \Return $\text{OK}$
+\EndIf
+\State $\textit{history} \gets \text{getHistory}(\textit{key})$
+\If {$!\textit{history}$}
+\State \Return $\text{insert}(\textit{tx, key, value})$
+\EndIf
+\State $\textit{snapshot} \gets \text{getWriteSnapshot}(\textit{tx, history})$
+\If {$!\textit{snapshot}$}
+\State \Return $\text{abort}(tx)$
+\EndIf
+\State $\text{setEndTS}(snapshot, \text{getId(tx)})$
+\State $\text{updateChangeSet}(\textit{tx, mode::update, snapshot, value})$
+\State \Return $\text{OK}$
+\EndProcedure
+\end{algorithmic}
+\caption{}
+\label{alg:update}
+\end{algorithm}
+
+\subsection{Deletions}
+
+\begin{algorithm}
+\begin{algorithmic}[1]
+\Procedure{drop}{tx, key}
+\If {$\text{inChangeSet}(\textit{tx, key})$}
+\State $\text{updateChangeSet}(tx, key, value)$
+\State \Return $\text{OK}$
+\EndIf
+\State $\textit{history} \gets \text{getHistory}(\textit{key})$
+\If {$!\textit{history}$}
+\State \Return $\text{abort}(tx)$
+\EndIf
+\State $\textit{snapshot} \gets \text{getWriteSnapshot}(\textit{tx, history})$
+\If {$!\textit{snapshot}$}
+\State \Return $\text{abort}(tx)$
+\EndIf
+\State $\text{setEndTS}(snapshot, \text{getId(tx)})$
+\State $\text{updateChangeSet}(\textit{tx, mode::remove, snapshot})$
+\State \Return $\text{OK}$
+\EndProcedure
+\end{algorithmic}
+\caption{}
+\label{alg:delete}
+\end{algorithm}
+
+\subsection{Commits}
+
+In order to manifest the changes of a transaction, the programmer must invoke \code{Store::commit()} to manifest its changes in the store. Instead of commiting, the transaction may be aborted with \code{Store::abort()} at any time.
+
+% TODO what happens during commit (persist / propagate)
