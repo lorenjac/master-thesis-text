@@ -322,7 +322,7 @@ The TID is required to lookup the associated transaction. The status code indica
     \item Committed
 \end{itemize}
 
-The execution phase of a transaction $T$ is used by other transactions to determine $T$'s state if they encounter dirty versions of $T$. In addition, there are two timestamps that denote when $T$ started and when it ended. This information is vital to determine if the lifetimes of two transactions overlap. Since both transaction state and timestamps must be accessible and consistent to transactions from other threads, they are implemented as atomic variables.
+The execution phase of a transaction $t$ is used by other transactions to determine $t$'s state if they encounter dirty versions of $t$. In addition, there are two timestamps that denote when $t$ started and when it ended. This information is vital to determine if the lifetimes of two transactions overlap. Since both transaction state and timestamps must be accessible and consistent to transactions from other threads, they are implemented as atomic variables.
 
 When a transaction modifies the store with calls to \code{Store::put()} or \code{Store::drop()}, a designated change entry is stored in the associated TCB. Depending on the operation performed, a change entry contains the following items:
 
@@ -373,15 +373,32 @@ Each operation has its own procedure. The control flow of all these procedures i
 
 \subsection{Visibility}
 
-% TODO how is visibility determined (depending on the operation)
-% TODO what facilities do that
+A transaction can only access an item if that item's history contains a version that is visible to the transaction. Therefore, transactions have to scan the histories of all items that they wish to access. During the linear search on a history, for each version, a visibility test is performed. There is at most one version visible to a transaction, if any.
+
+Since Midas is based on Snapshot Isolation, it features the same visibility
+conditions. Simply put, a version $v_0$ is visible to a transaction $t_1$, when
+$v_0$ was committed before $t_1$ started. There are several facets to this
+property. For instance, during $t_1$'s runtime, another transaction $t_2$ may
+have updated $v_0$ but has not yet committed. In this case, $t_1$ can still see
+$v_0$ because, $t_2$ may still fail or get aborted. For this to work, $t_1$ must
+be able to see that $v_0$ was touched by $t_2$. Therefore, when a transaction
+$t$ updates or deletes a version $v$, $t$ replaces $v$'s end timestamp with the
+TID of $t$. This way, $t_1$ can see that $v_0$ was updated, lookup $t_2$ in the
+transaction table, and inspect its current status. Likewise, if $t_2$ encounters
+a version $v_1$ that was created by $t_1$, then $t_2$ would find $t_1$'s TID in
+the begin timestamp field of $v_1$. When a transaction commits, it changes its
+status to \code{committed} and propagates its own end timestamp to all versions
+it has created or modified. But other transaction do not have to wait until the
+propagation is finished, because, using the deposited TID, they can always
+lookup the respective transaction and see that its status has changed to
+committed.
 
 \begin{algorithm}
 \begin{algorithmic}[1]
 \Procedure{isVisible}{tx, begin, end}
 \If {$\text{isTID}(\textit{begin})$}
-\State $\textit{otherTx} \gets \text{getTx}(\textit{begin})$
-\If {$\text{getStatus}(\textit{otherTx}) \neq \text{Committed} \lor \text{getEnd}(\textit{otherTx}) > \text{getBegin}(\textit{tx})$}
+\State $\textit{tx}^{*} \gets \text{getTx}(\textit{begin})$
+\If {$\text{getStatus}(\textit{tx}^{*}) \neq \text{Committed} \lor \text{getEnd}(\textit{tx}^{*}) > \text{getBegin}(\textit{tx})$}
 \State \Return $\text{false}$
 \EndIf
 \Else
@@ -391,8 +408,8 @@ Each operation has its own procedure. The control flow of all these procedures i
 \EndIf
 \State
 \If {$\text{isTID}(\textit{end})$}
-\State $\textit{otherTx} \gets \text{getTx}(\textit{end})$
-\If {$\text{getStatus}(\textit{otherTx}) = \text{Committed} \land \text{getEnd}(\textit{otherTx}) < \text{getBegin}(\textit{tx})$}
+\State $\textit{tx}^{*} \gets \text{getTx}(\textit{end})$
+\If {$\text{getStatus}(\textit{tx}^{*}) = \text{Committed} \land \text{getEnd}(\textit{tx}^{*}) < \text{getBegin}(\textit{tx})$}
 \State \Return $\text{false}$
 \EndIf
 \Else
@@ -404,8 +421,13 @@ Each operation has its own procedure. The control flow of all these procedures i
 \EndProcedure
 \end{algorithmic}
 \caption{}
-\label{alg:vsb-read}
+\label{alg:vsb}
 \end{algorithm}
+
+Visibility test of a single version first inspects its begin timestamp and then its end timestamp. As explained earlier, the value domains of TIDs and timestamps are disjoint in that the former are always odd while the latter are even. Therefore, it is sufficient for a transaction to test the least significant bit of the timestamp to distinguish TIDs from timestamps. A pseudo-code example of the visibility test in Midas is outlined in Algorithm \ref{alg:vsb}. The visibility properties implemented in Midas are based on
+the works of \cite{berenson1995critique, larson2011high}.
+
+\vfill
 
 \subsection{Reads}
 
