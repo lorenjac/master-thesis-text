@@ -12,7 +12,7 @@ the underlying system \cite{rudoff2017persistent, pmdk2018home}. As depicted in
 Figure \ref{fig:impl-arch}, Midas consists of two components: the key-value
 store and a set of durable container structures based on PMDK. The latter are
 used to provide the same level of abstraction of conventional containers for
-NVRAM. The store component of Midas is largely congruent to Figure
+NVRAM. The components of Midas are largely congruent to Figure
 \ref{fig:concept-struct-complete} from Section \ref{ch:concept-kvs} and is
 described in more detail later in this chapter.
 
@@ -346,14 +346,17 @@ TIDs and timestamps are represented by 64-bit unsigned integers. They are acquir
 
 As explained above, there are situations when transactions may need to determine the state of other concurrent transactions. Therefore, TCBs are stored in a global transaction table. In order to provide fast lookup, the transaction table is implemented as a hash table. Each TCB is hashed using its TID. However, the table is a globally shared resource that must be synchronized. In order to prevent a bottleneck, the concurrent hash table implementation \emph{libcuckoo} is used \cite{fan2013memc3, li2014algorithmic, libcuckoo2018home}.
 
-\paragraph{Index}
+\paragraph{Versions}
 
+With MVCC, concurrent access to data is managed by having multiple versions of an item. In this case, the value of each key-value pair is versioned. In Midas, a version is durable and consists of the actual data value and two timestamps indicating the lifetime of the version. The data value is represented by a durable dynamic array of characters, similar to \code{std::string} from the C++ standard library. Because all transactions must have a consistent view on the lifetime of a version, its timestamps are only accessed by means of atomic instructions. The timestamp fields can be used in several ways, as shown in the next section.
 
 \paragraph{Histories}
 
+For each value of a key-value pair, there are several versions. The versions of a single item are managed within a history. When a transaction wishes to access an item, the transaction management has to search the item's history for version that is \emph{visible} to the transaction. In Midas, a history is a durable linked list by means of \code{NVList} from Section \ref{ch:impl-data}. At startup, existing histories are truncated to contain only their most recent version. After that, histories are in append-only mode.
 
-\paragraph{Versions}
+\paragraph{Index}
 
+Another core data structure in Midas is the index. It accomplishes the mapping between the key of an item and the item's version history. Whenever a transactional operation wishes to access an item, it has to query the index with the corresponding key. The index must provide fast lookup and is therefore implemented as a hash table. For that purpose, the durable hash table \code{NVHashmap} from Section \ref{ch:impl-data} is used. The index is accessed by all concurrent transactions and must therefore be synchronized. Due to the complexity of concurrent data structure design, a lock is used to protect the index. This is likely to become a serious bottleneck and should be revised in future work.
 
 \subsubsection{Transaction Processing}
 
