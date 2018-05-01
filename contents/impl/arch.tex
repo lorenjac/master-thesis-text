@@ -425,14 +425,14 @@ committed.
 \label{alg:vsb}
 \end{algorithm}
 
-Visibility test of a single version first inspects its begin timestamp and then its end timestamp. As explained earlier, the value domains of TIDs and timestamps are disjoint in that the former are always odd while the latter are even. Therefore, it is sufficient for a transaction to test the least significant bit of the timestamp to distinguish TIDs from timestamps. A pseudo-code example of the visibility test in Midas is outlined in Algorithm \ref{alg:vsb}. The visibility properties implemented in Midas are based on
+Visibility test of a single version first inspects its begin timestamp and then its end timestamp. As explained earlier, the value domains of TIDs and timestamps are disjoint in that the former are always odd while the latter are even. Therefore, it is sufficient for a transaction to test the least significant bit of the timestamp to distinguish TIDs from timestamps. A pseudo code example of the visibility test in Midas is outlined in Algorithm \ref{alg:vsb}. The visibility properties implemented in Midas are based on
 the works of \cite{berenson1995critique, larson2011high}.
 
 % \vfill
 
 \subsection{Reads}
 
-The read operation is the simplest operation to perform with Midas. Still, with regard to serializability, reads are very important, because this is where Midas extends Snapshot Isolation. Reads are executed as follows. A pseudo-code example is given below (see Algorithm \ref{alg:read}). After initial input sanitization, it is checked whether the specified item has already been updated within the same transaction. In this case, the item's updated value is retrieved from the change set and the operation returns. Otherwise, the history associated with the given key is looked up. If no history is found, the current transaction is aborted.
+The read operation is the simplest operation to perform with Midas. Still, with regard to serializability, reads are very important, because this is where Midas extends Snapshot Isolation. Reads are executed as follows. A pseudo code example is given below (see Algorithm \ref{alg:read}). After initial input sanitization, it is checked whether the specified item has already been updated within the same transaction. In this case, the item's updated value is retrieved from the change set and the operation returns. Otherwise, the history associated with the given key is looked up. Note that the index is locked for the duration of the lookup. If no history is found, the current transaction is aborted.
 
 \begin{algorithm}[!ht]
 \begin{algorithmic}[1]
@@ -458,11 +458,11 @@ The read operation is the simplest operation to perform with Midas. Still, with 
 \label{alg:read}
 \end{algorithm}
 
-From the history, a readable version (i.e. \emph{snapshot}) of the target item is determined. The call to \code{getReadSnapshot()} is where the visibility test from Section \ref{ch:impl-vsb} comes into action. If this fails, the transaction has to abort. When a valid snapshot is found, it is registered in the read set of the transaction. This is necessary to detect potential read-write conflicts at the end of the transaction and thus enable serializability. After the read set has been updated, the snapshots payload can be retrieved and written to the output parameter \code{value}.
+From the history, a readable version (i.e. \emph{snapshot}) of the target item is determined. The call to \code{getReadSnapshot()} is where the visibility test from Section \ref{ch:impl-vsb} comes into action. If this fails, the transaction has to abort. Note that for the duration of \code{getReadSnapshot()}, the respective history is locked. When a valid snapshot is found, it is registered in the read set of the transaction. This is necessary to detect potential read-write conflicts at the end of the transaction and thus enable serializability. After the read set has been updated, the snapshots payload can be retrieved and written to the output parameter \code{value}.
 
 \subsection{Updates}
 
-
+The update operation in Midas is called \code{write()}. It can be used to update existing items and insert new items. Because there can be no duplicates, Midas can always determine which action to perform. A pseudo code example of how \code{write()} is implemented is given in Algorithm \ref{alg:update}. As before, it is first checked whether the specified item has already been modified in the context of the current transaction \code{tx}. If so, the change set is modified accordingly and return. In case the change entry indicates that the item was previously removed by \code{tx}, the entry mode is changed from \code{mode::remove} to \code{mode::update}. This is possible because, due to the two-level store architecture, all updates and deletions are buffered until commit. If the target item is not in the change set, Midas proceeds as usual and looks up the items version history.
 
 \begin{algorithm}
 \begin{algorithmic}[1]
@@ -488,7 +488,11 @@ From the history, a readable version (i.e. \emph{snapshot}) of the target item i
 \label{alg:update}
 \end{algorithm}
 
+Unlike for reads, a missing history is not a reason to abort but indicates that a new version must be inserted. If a history exists, then a writable snapshot is determined. Note that there is no insertion if \code{getWriteSnapshot()} fails because that indicates a write-write conflict. In this case, the most suitable version has been invalidated with a TID of a transaction other than the current \code{tx}. Therefore, \code{tx} must abort according to the first-updater-wins principle shown in Section \ref{ch:concept-kvs-tx}. If a valid snapshot is found, its end timestamp is atomically replaced with the TID of \code{tx}. Finally, a new change set entry is created and the operation is complete. Note that, apart from replacing the snapshots timestamp, no NVRAM is updated at this point.
+
 \subsection{Deletions}
+
+
 
 \begin{algorithm}
 \begin{algorithmic}[1]

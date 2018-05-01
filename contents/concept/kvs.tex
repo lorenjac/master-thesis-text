@@ -49,6 +49,7 @@ uncommitted data is guaranteed to be lost after a restart.
 \todo[inline]{phasen einer transaktion? genauer ablauf}
 
 \subsection{Transactions}
+\label{ch:concept-kvs-tx}
 
 The \ac{KVS} supports full-featured and ACID-compliant transactions. Unlike
 other works, this \ac{KVS} allows multiple operations to be enclosed in a single
@@ -84,7 +85,7 @@ serializing variant of \ac{SI} and serves two purposes: recovery and ensuring
 all transactions behave as if run serially. On the one hand, timestamped
 versions are used to keep track of modifications. On the other hand, a
 copy-on-write mechanism is used to enable recoverable version histories without
-logging.
+logging. In order to achieve serializability, all read operations are tracked in addition to the usual change sets. On commit, a validation phase ensures that no read versions have been modified by other transactions. If validation fails, so does the corresponding transaction. For write-write conflicts, the first-committer-wins strategy is applied. This helps aborting conflicting transactions before commit which saves time.
 
 \paragraph{Atomicity}
 
