@@ -57,7 +57,7 @@ implement NVRAM management.
 
 In PMDK, NVRAM is accessed via ordinary file systems such as \code{ext4} or
 \code{tmpfs}. That way, NVRAM can be mapped into a process' address space via
-plain files. Using a kernel feature called \emph{Direct Access} (also DAX) file
+plain files. Using the kernel feature \ac{DAX} file,
 systems can bypass the operating system's page cache \cite{oukid2017data,
 andrei2017sap, rudoff2017persistent}. This enables true load and store
 semantics. In addition, swapping is disabled for the respective memory region.
@@ -360,7 +360,7 @@ Another core data structure in Midas is the index. It accomplishes the mapping b
 
 \subsubsection{Transaction Processing}
 
-Unlike other KVS, Midas can only be operated through transactions. Transactions that are either terminated or were not created by the respective store instance are rejected. Once a transaction has been started, it can be used to modify the store with the following operations:
+Unlike other \acp{KVS}, Midas can only be operated through transactions. Transactions that are either terminated or were not created by the respective store instance are rejected. Once a transaction has been started, it can be used to modify the store with the following operations:
 
 \begin{itemize}
     \item \code{read(tx, <key>, <result>)}

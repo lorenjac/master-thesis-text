@@ -37,7 +37,7 @@ consistency are provided in Chapter \ref{ch:concept-consistency}
 
 When designing systems and transaction processors, in particular, it is helpful
 to know in advance which kind of workloads are expected or should be given
-priority. Given that many \ac{MMDB} are dominated by read operations
+priority. Given that many \acp{MMDB} are dominated by read operations
 \cite{andrei2017sap}, this work is intended for read-mostly workloads. While
 read-only transactions are supported, there seems to be no hard evidence on the
 importance or quantity of such transactions. Likewise, long-running transactions
@@ -55,7 +55,7 @@ latencies are limited to main memory rather than slower disk storage or
 
 \paragraph{Transactions}
 
-Contrary to full-grown \ac{MMDB}, a number of \ac{KVS} does not support
+Contrary to full-grown \ac{MMDB}, a number of \acp{KVS} do not support
 transactions that span multiple primitive operations. However, in order to allow
 conceptual conclusions to \ac{MMDB}, it is important to maintain sufficient
 generality. Therefore, the concept requires full-featured transactions as in
@@ -64,7 +64,7 @@ may be enclosed within a transaction. Likewise, full ACID support is required to
 guarantee sound transactional semantics. In order to guarantee strong
 consistency and isolation in the presence of concurrent transactions,
 serializability is a central requirement. Note that, in contrast to some
-\ac{KVS}, which are designed as caches, the target \ac{KVS} in this work
+\acp{KVS}, which are designed as caches, the target \ac{KVS} in this work
 supports durability. Concerning the nature of key-value pairs, this work imposes
 no restrictions on their data types. Still, implementations are free to limit
 the length of keys, for instance, if the underlying data structure requires it.

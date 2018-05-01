@@ -194,7 +194,7 @@ data structure of a \ac{KVS} and accessed by all transactions concurrently. As
 such, the index is a strong contention point that is also very critical for the
 performance of the \ac{KVS}. For that reason, selecting a suitable data
 structure is crucial. The domain analysis in Chapter \ref{ch:kvs-nvram} shows
-that many, if not most, \ac{KVS} rely on hash tables. Reasons are amortized
+that many, if not most, \acp{KVS} rely on hash tables. Reasons are amortized
 constant access, well-known array-like allocation schemes, and comparably low
 complexity. B-trees or radix trees, on the other hand, are slower and optimized
 for disk storage which was shown to be inappropriate for \ac{NVRAM}. Therefore,

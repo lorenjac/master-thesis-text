@@ -15,7 +15,7 @@ branches:
 
 \begin{itemize}
     \item Evaluation of programming facilities for \ac{NVRAM}
-    \item Evaluation of implications of \ac{NVRAM} for existing \ac{KVS}
+    \item Evaluation of implications of \ac{NVRAM} for existing \acp{KVS}
     \item Design of \ac{NVRAM}-aware \ac{KVS}
 \end{itemize}
 
@@ -44,12 +44,12 @@ aim of this work, focus is given to \ac{KVS} specifically designed for
 
 At the moment, there are only few designs for \ac{NVRAM}-aware \ac{KVS}: Echo
 \cite{bailey2013exploring}, NVHT \cite{zhou2016nvht}, and MetraDB
-\cite{marmol2016nonvolatile}. Below, the architecture of these \ac{KVS} is
+\cite{marmol2016nonvolatile}. Below, the architecture of these \acp{KVS} is
 outlined with an emphasis on transactions and concurrency control.
 
 \subsubsection{Echo}
 
-Echo is one of the earliest \ac{KVS} designed to leverage the benefits of
+Echo is one of the earliest \acp{KVS} designed to leverage the benefits of
 \ac{NVRAM} \cite{bailey2013exploring}. It aims to achieve scalable
 high-performance transactions through optimistic concurrency control and
 light-weight persistence management. For this purpose, Echo uses a two-level
@@ -78,7 +78,7 @@ main-memory \ac{KVS}. However, the evaluation is carried out on volatile
 the separation of worker and master threads is effectively removed, as workers
 \emph{become} masters and commit their own transactions.
 
-Being one of the most meticulously designed and documented \ac{KVS} for
+Being one of the most meticulously designed and documented \acp{KVS} for
 \ac{NVRAM}, Echo is a guiding example for this thesis. It achieves high
 performance through its two-level architecture and optimistic concurrency
 control. Drawbacks include non-serializing \ac{SI} and the first-committer-wins
@@ -102,7 +102,7 @@ written to \ac{NVRAM}. Similar to Echo, the key data structure of NVHT is an
 control concurrent operations. Instead, it applies half-coarse synchronization
 by locking individual partitions of the hash table upon access.
 
-Despite NVHT having shown good performance against prominent \ac{KVS}, there are
+Despite NVHT having shown good performance against prominent \acp{KVS}, there are
 some problems with its design. First, accessing an item in the hash map locks an
 entire partition. The authors point out that this design decision can increase
 lock contention, thus reducing concurrency. More importantly, NVHT does not
@@ -115,7 +115,7 @@ need to be flushed. Omitting these precautions could lead to inconsistent data.
 
 \subsubsection{MetraDB}
 
-In \cite{marmol2016nonvolatile} \ac{KVS} are proposed as a middleware for
+In \cite{marmol2016nonvolatile} \acp{KVS} are proposed as a middleware for
 \ac{NVRAM}. As an example, the authors present MetraDB, a solution for
 distributed storage based on \ac{NVRAM}. Like NVHT, MetraDB is a single-level
 store which means that changes are written to \ac{NVRAM} immediately. Since

@@ -196,7 +196,7 @@ The most widely used \ac{MVCC} protocol to date is \ac{SI} \cite{larson2011high,
 neumann2015fast}. Originally, \ac{SI} was developed as a response to the
 insufficient definition of serializability in the SQL standard
 \cite{berenson1995critique}. Since then, it has been deployed in numerous
-databases and \ac{KVS} \cite{cahill2009serializable, wu2017empirical}. In the
+databases and \acp{KVS} \cite{cahill2009serializable, wu2017empirical}. In the
 context of isolation levels, \ac{SI} defines a new isolation level that goes by
 the same name. Although \ac{SI} is weaker than serializability, it provides a
 good trade-off between performance and consistency. This section introduces the
@@ -374,7 +374,7 @@ conflicts whenever the required access patterns are detected
 \cite{fekete2005making}. Others have found efficient ways to determine whether
 an item is included in a range query, thus improving validation time
 \cite{neumann2015fast}. Although intriguing, these approaches cannot be applied
-to \ac{KVS} since they operate through ad hoc queries instead of query
+to \acp{KVS} since they operate through ad hoc queries instead of query
 languages.
 
 \subsubsection{Reducing Contention}

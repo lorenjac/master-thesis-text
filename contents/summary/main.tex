@@ -18,7 +18,7 @@ NVRAM and durable data structures is managed through PMDK, a state of the art
 library for programming against NVRAM.
 
 In order to evaluate the concept, a synthetic benchmark over \ttp was developed.
-In the experiment, \midas is compared to \echo, another NVRAM-resident KVS but
+In the experiment, \midas is compared to \echo, another NVRAM-resident \ac{KVS} but
 with non-serializable transactions. According to the results, \midas mostly
 performs much worse than \echo. Except at low contention, \midas has lower
 throughput, higher abort rates, and fails to utilize additional processors.
@@ -43,7 +43,7 @@ concept of powering serializability with NVRAM. For example, it should be
 investigated how \midas compares to other solutions, such as BerkeleyDB
 \cite{olson1999berkeley}, that support serializability but use disk storage for
 recovery. Ultimately, the concept of \midas could be evaluated for full-featured
-MMDB. Since many modern KVS and MMDB, such as DynamoDB \cite{decandia2007dynamo}
+MMDB. Since many modern \acp{KVS} and MMDB, such as DynamoDB \cite{decandia2007dynamo}
 or HANA \cite{lee2013sap}, are distributed systems, it would be interesting to
 see if the concept of \midas can be beneficial to distributed transactions.
 

@@ -1,6 +1,6 @@
 \ac{KVS} form an integral part in modern database technology
 \cite{fiebig2016one}. This section gives an overview of their properties,
-classes, and applications. Compared to other types of databases, \ac{KVS} are
+classes, and applications. Compared to other types of databases, \acp{KVS} are
 very simple databases that are sometimes better described by what they are not
 or do not provide:
 
@@ -12,18 +12,18 @@ or do not provide:
 
 In general, a \ac{KVS} consists of a single associative container, where each
 key is mapped to exactly one value. A key is an arbitrary string with possible
-restrictions on its length. In terms of relational databases, \ac{KVS} comprise
+restrictions on its length. In terms of relational databases, \acp{KVS} comprise
 a single table of two columns. As a result, much of the structural complexity
 adherent to relational \ac{DBMS} is omitted, thus making way for profound
 optimization and better response times. Common data structures for associativity
 in \ac{KVS} are hash tables and search trees, in particular B-trees.
 
-Unlike traditional databases, \ac{KVS} do not impose data schemas. Consequently,
+Unlike traditional databases, \acp{KVS} do not impose data schemas. Consequently,
 arbitrary chunks of data can be stored as values which is especially useful in
 scenarios with no fixed data format or when enforcing one is not a priority.
-Furthermore, \ac{KVS} do not provide query languages such as SQL to store and
-retrieve data. Instead, \ac{KVS} are accessed programmatically through a concise
-set of operations which is why \ac{KVS} are also referred to as \emph{embedded}
+Furthermore, \acp{KVS} do not provide query languages such as SQL to store and
+retrieve data. Instead, \acp{KVS} are accessed programmatically through a concise
+set of operations which is why \acp{KVS} are also referred to as \emph{embedded}
 databases. Although their \ac{API} is not standardized, it can be essentially
 broken down to the following operations:
 
@@ -36,12 +36,12 @@ broken down to the following operations:
 
 \paragraph{Applications}
 
-Traditional \ac{DBMS} are often based on complex architectures featuring query
+Traditional \acp{DBMS} are often based on complex architectures featuring query
 front ends and sophisticated storage mechanisms. While this works well in many
 cases, it severely limits the performance in situations where a simpler storage
 paradigm (e.g. key-value pairs) is sufficient. As a consequence, high access
 latencies and convoluted, error-prone concurrency schemes inhibit the
-scalability of storage systems. \ac{KVS} on the other hand are designed to
+scalability of storage systems. \acp{KVS} on the other hand are designed to
 compensate for these shortcomings. A driving force in this regard, are large
 internet platforms, e-commerce for instance, and cloud computing services.
 
@@ -56,9 +56,9 @@ environments. Web caches have received great attention as service providers
 struggle to scale with rising traffic where many requests target only a small
 amount of data \cite{xu2014characterizing}. With caching, a dedicated eviction
 policy ensures that \emph{relevant} items reside in memory. As a result, caching
-can improve response times significantly. For this purpose, \ac{KVS} provide an
+can improve response times significantly. For this purpose, \acp{KVS} provide an
 appropriate abstraction. Important representatives of this class are Redis and
-memcached \cite{redis2017home, memcached2017home}. Not only have these \ac{KVS}
+memcached \cite{redis2017home, memcached2017home}. Not only have these \acp{KVS}
 been deployed at companies such as Facebook or Twitter, but they have also
 formed the basis for considerable amounts of research in this area
 \cite{xu2014characterizing}. Examples include \ac{FPGA} acceleration
@@ -68,7 +68,7 @@ malinowski2017using, venkataraman2011consistent}. Still, large companies tend to
 maintain in-house solutions to suit their needs \cite{chang2008bigtable,
 decandia2007dynamo, lakshman2010cassandra, wang2015hydradb}.
 
-Beyond databases and caches, \ac{KVS} have also been proposed as a basis for
+Beyond databases and caches, \acp{KVS} have also been proposed as a basis for
 file systems. In the past, there have been several attempts to integrate
 database concepts into file systems, some of which are logging
 \cite{rosenblum1992design, tweedie1998journaling} and transactions
@@ -76,10 +76,10 @@ database concepts into file systems, some of which are logging
 studies even suggest that traditional hierarchical file systems may often be
 suboptimal \cite{stein2005stupid, seltzer2009hierarchical}. While databases in
 general are still considered too heavy-weight for use in file systems
-\cite{seltzer2009hierarchical}, \ac{KVS} may be a viable alternative. Examples
+\cite{seltzer2009hierarchical}, \acp{KVS} may be a viable alternative. Examples
 include the network file system DBFS which is based on BerkeleyDB
 \cite{murphy2002design} and FlatFS, a simple file system for \ac{NVRAM}
-\cite{volos2014aerie}. In addition, \ac{KVS} are also used to complement file
+\cite{volos2014aerie}. In addition, \acp{KVS} are also used to complement file
 systems, for example, to store metadata as in PVFS \cite{carns2009small}. Still,
 the predominant use case of \ac{KVS} is found in light-weight databases and
 caches on top of existing file systems.
@@ -93,7 +93,7 @@ and its side effects are rolled back.
 
 Transactions are a powerful mechanism that enables aggregated operations without
 worrying about inconsistencies even in case of failure. Given the prevalence of
-transactions, most \ac{KVS} support them. Due to their importance for this work,
+transactions, most \acp{KVS} support them. Due to their importance for this work,
 transactions are covered in more detail in the next section.
 
 \todo[inline]{Which KVS do not support transactions? -> memcached}
@@ -106,7 +106,7 @@ Apart from faster storage, this can be done by placing the entire database in
 main memory which enables speedups by multiple orders of magnitude. This
 approach, which dates back to the mid 1980s, has been adopted in many
 high-performance databases such as the more recent HANA database
-\cite{molina1992main, faerber2012hana}. Likewise, most \ac{KVS} are explicitly
+\cite{molina1992main, faerber2012hana}. Likewise, most \acp{KVS} are explicitly
 designed for in-memory operation. Notable exceptions are the popular BerkeleyDB
 or Apache's Cassandra where in-memory operation is only an option
 \cite{bdb2017doc, lakshman2010cassandra}.
@@ -119,7 +119,7 @@ performance, it is common for main-memory databases to also support concurrency
 \cite{grund2010hyrise, faerber2012hana, diaconu2013hekaton}. Further, it has
 been shown that \ac{KVS} can gain substantial performance benefits through
 concurrency \cite{fan2013memc3, li2015architecting, xu2014building}. In fact,
-most \ac{KVS} natively support concurrency with the exception of Redis
+most \acp{KVS} natively support concurrency with the exception of Redis
 \cite{redis2017home}. Unfortunately, concurrency also introduces new issues such
 as inconsistencies through race conditions on shared data. Mitigating this issue
 can degrade performance which is why many designs trade full consistency against
@@ -128,8 +128,8 @@ next section about transactions.
 
 \paragraph{Distributed Databases}
 
-As mentioned earlier, \ac{KVS} play a crucial role in big-data environments.
-Since availability is often a requirement in this area, \ac{KVS} are often
+As mentioned earlier, \acp{KVS} play a crucial role in big-data environments.
+Since availability is often a requirement in this area, \acp{KVS} are often
 implemented as distributed services \cite{decandia2007dynamo,
 lakshman2010cassandra, wang2015hydradb}. Distributed databases and their
 mechanisms such as distributed transactions are beyond the scope of this work.

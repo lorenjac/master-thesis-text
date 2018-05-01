@@ -44,18 +44,18 @@ For the time being, many applications will have to deal with a scarcity of
 \ac{NVRAM}. But as improving technologies achieve higher capacities with better
 parameters, new system architectures become feasible. In some cases, traditional
 storage may be eliminated altogether, making \ac{NVRAM} the primary storage
-medium. A prominent use case for this architecture are \ac{MMDB}. These
+medium. A prominent use case for this architecture are \acp{MMDB}. These
 databases reside entirely in main memory which drastically reduces latencies
 when accessing their data. However, they are also vulnerable to crashes, as main
-memory is still mostly volatile. In order to prevent data loss, \ac{MMDB} have
+memory is still mostly volatile. In order to prevent data loss, \acp{MMDB} have
 to mirror the entire database to non-volatile memory. For that, they perform
 logging or checkpointing to synchronize individual or groups of changes to
 non-volatile memory. When the database is restarted, for example in response to
 a crash, checkpoints and logging information are used to recover the most-recent
 state of the database that was durable at the time of the crash. That is,
-\ac{MMDB} require non-volatile memory for the sole purpose of recovery.
+\acp{MMDB} require non-volatile memory for the sole purpose of recovery.
 Recurring recovery measures such as logging have been a long-standing issue with
-\ac{MMDB} as they incur expensive disk \ac{IO}, thus limiting transaction
+\acp{MMDB} as they incur expensive disk \ac{IO}, thus limiting transaction
 throughput \cite{eich1986main, molina1992main, wust2012efficient,
 malviya2014rethinking}. In addition, restarts reduce the availability of a
 system as recovering large databases from slow storage can be time-consuming.
@@ -66,21 +66,21 @@ restarts \cite{oukid2015instant}. The concept of \ac{NVRAM}-based \ac{MMDB} is
 especially promising as some upcoming variants of \ac{NVRAM} are projected to
 feature larger capacities than conventional \ac{DRAM} \cite{lee2009architecting,
 zilberberg2013phase, dulloor2014system}. For that reason, recent research has
-investigated \ac{NVRAM}-aware designs for \ac{MMDB} ranging from \ac{KVS}
+investigated \ac{NVRAM}-aware designs for \ac{MMDB} ranging from \acp{KVS}
 \cite{bailey2013exploring, zhou2016nvht, wu2016nvmcached} to full-fledged
 database systems \cite{oukid2015instant, schwalb2016hyrise, andrei2017sap}.
 Research results in these areas are central to this work and are reflected in
 chapter \ref{ch:nvram} through \ref{ch:concept}. Given their importance for this
-thesis, existing \ac{KVS} for \ac{NVRAM} are looked into in more detail at the
+thesis, existing \acp{KVS} for \ac{NVRAM} are looked into in more detail at the
 end of chapter \ref{ch:kvs}.
 
 While most works aim to improve existing architectures, some explore different
 computation models. A recent example is a proposal to use \ac{NVRAM} to enable
 on-chip machine learning. The idea is to move away from the well-known Von
 Neumann architecture and implement \ac{ANN} by means of \ac{NVRAM}
-\cite{fumarola2016accelerating}. \ac{ANN} perform a weighted sum over their
+\cite{fumarola2016accelerating}. \acp{ANN} perform a weighted sum over their
 inputs before an activation function classifies the result. But before
-satisfiable results can be obtained, \ac{ANN} need to be trained by properly
+satisfiable results can be obtained, \acp{ANN} need to be trained by properly
 adjusting the scalar weights of their inputs. It has been suggested that with
 \ac{NVRAM} weight adjustment could be performed on-chip where updated weights
 would be durable without the need for write-back. However, neither artificial
@@ -105,7 +105,7 @@ and it is henceforth assumed that volatile \ac{RAM} will co-exist with
 As shown above, \ac{NVRAM} provides an opportunity to improve existing
 architectures and even create new computation models. Given sufficient
 parameters such as capacity and endurance, \ac{NVRAM} could resolve the \ac{IO}
-bottleneck of non-volatile storage media. Especially systems such as \ac{MMDB}
+bottleneck of non-volatile storage media. Especially systems such as \acp{MMDB}
 have shown considerable gains in transaction throughput and recovery times.
-Consequently, \ac{MMDB} and in particular \ac{KVS} are at the center of this
+Consequently, \acp{MMDB} and in particular \acp{KVS} are at the center of this
 work.

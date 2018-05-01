@@ -7,7 +7,7 @@ performance impact of serializability in NVRAM-based key-value stores.
 \subsection{Setup}
 
 In order to perform the experiment, there are two prerequisites to satisfy. At
-first, data are required to populate each KVS. Second, workloads of concrete
+first, data are required to populate each \ac{KVS}. Second, workloads of concrete
 transactions are needed to operate on the populated stores. Key-value pairs may
 not be too hard to come by but in this case synthetic data are fine as well.
 Workloads are more complicated because it is hard to acquire transaction traces
@@ -25,7 +25,7 @@ key-value pairs. The first data set contains 1K pairs, whereas the second holds
 100K entries. Lacking insights on meaningful layouts of key-value pairs, this
 evaluation relies on the same layout used in \cite{bailey2013exploring}.
 Accordingly, keys are 128-byte random strings and values are 1024-byte random
-strings. When the experiment starts, each individual KVS is populated with these
+strings. When the experiment starts, each individual \ac{KVS} is populated with these
 key-value pairs.
 
 \subsubsection{Workloads}
@@ -146,7 +146,7 @@ more likely to collide and abort.
 
 \subsection{Methodology}
 
-The benchmark is performed separately for each KVS. The general procedure is to
+The benchmark is performed separately for each \ac{KVS}. The general procedure is to
 execute each workload with a different number of cores. Since the underlying
 machine has 32 physical cores, the experiment is performed with 1, 2, 4, 8, 16,
 and 32 cores. During each run, several statistics such as the total time taken
@@ -155,7 +155,7 @@ outliers, each run, i.e. a combination of workload and core count, is performed
 10 times. As a result, for each store there is a total of 24 configurations
 which amounts to a total of 480 runs including repetitions.
 
-A single run of the benchmark works as follows. At first, the respective KVS is
+A single run of the benchmark works as follows. At first, the respective \ac{KVS} is
 initialized with dummy data and the workload decomposed so that it fits the
 number of cores of the current configuration. Then, for each core, a thread is
 created and pinned to that core. Each thread executes an equal share of the
@@ -187,7 +187,7 @@ canceled and the program proceeds to the next transaction in the workload.
 
 In this subsection the results of the benchmark are shown and discussed. The
 benchmark captures two metrics: transaction throughput and the transaction abort
-rate. In order to express the scalability of both KVS, throughput is expressed
+rate. In order to express the scalability of both \acp{KVS}, throughput is expressed
 in terms of speedup factor. This also helps comparing the performance of both
 stores even if absolute throughput differs significantly. The abort rate is
 given by the ratio of the number of aborted transactions and the number of
