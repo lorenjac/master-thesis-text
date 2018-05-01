@@ -333,11 +333,9 @@ When a transaction modifies the store with calls to \code{Store::put()} or \code
     \item a pointer to the updated version
 \end{itemize}
 
-Based on the operation descriptor, knows how to perform the change. For instance, if the change resulted from a \code{Store::drop()}, then it only contains a pointer to the original version which has to be invalidated. Change sets are implemented as hash tables. This is because a transaction might update an item multiple times and looking up a previously written item is faster than repeatedly scanning an item's history. In order to detect read-write conflicts, and thus enable serializability, a TCB also has to record all items that were read. Because read sets can grow large in read-mostly environments, they are implemented as dynamic arrays to amortize allocation cost. Both read and change sets are thread local storage and are therefore not synchronized.
+Using the operation descriptor, Midas knows how to perform a change on commit. For instance, if the change resulted from a \code{Store::drop()}, then it only contains a pointer to the original version which has to be invalidated. Change sets are implemented as hash tables. This is because a transaction might update an item multiple times and looking up a previously written item is faster than repeatedly scanning an item's history. In order to detect read-write conflicts, and thus enable serializability, a TCB also has to record all items that were read. Because read sets can grow large in read-mostly environments, they are implemented as dynamic arrays to amortize allocation cost. Both read and change sets are thread local storage and are therefore not synchronized.
 
 When a transaction is started with \code{Store::begin()}, a TCB is created. During initialization the TCB is assigned a TID and a start timestamp.  Once the TCB is initialized, its TID is used as a key to insert it into the transaction table. The lifetime of a TCB, including its transaction, ends when it is removed from the transaction table. This happens when the associated transaction encounters a conflict or is aborted with \code{Store::abort()}.
-
-\todo[inline]{add algorithm listing?}
 
 \paragraph{TIDs and Timestamps}
 
@@ -359,6 +357,8 @@ For each value of a key-value pair, there are several versions. The versions of 
 
 Another core data structure in Midas is the index. It accomplishes the mapping between the key of an item and the item's version history. Whenever a transactional operation wishes to access an item, it has to query the index with the corresponding key. The index must provide fast lookup and is therefore implemented as a hash table. For that purpose, the durable hash table \code{NVHashmap} from Section \ref{ch:impl-data} is used. The index is accessed by all concurrent transactions and must therefore be synchronized. Due to the complexity of concurrent data structure design, a lock is used to protect the index. This is likely to become a serious bottleneck and should be revised in future work.
 
+\todo[inline]{table with component and their data structure}
+
 \section{Transaction Processing}
 
 Unlike other \acp{KVS}, Midas can only be operated through transactions. Transactions that are either terminated or belong to another store instance are rejected. Once a transaction has been started, it can be used to modify the store with the following operations:
@@ -369,6 +369,22 @@ Unlike other \acp{KVS}, Midas can only be operated through transactions. Transac
     \item deletion: \code{drop(<tx>, <key>)}
 \end{itemize}
 
+\todo[inline]{consider adding a table or class diagram}
+
+%\begin{lstlisting}
+%class Store {
+%public:
+%    tx_ptr begin();
+%    int abort(tx_ptr tx, int reason);
+%    int commit(tx_ptr tx);
+%    int read(tx_ptr tx, const key_type& key, mapped_type& result);
+%    int write(tx_ptr tx, const key_type& key, const mapped_type& value);
+%    int drop(tx_ptr tx, const key_type& key);
+%
+%    // ...
+%};
+%\end{lstlisting}
+
 Each operation has its own procedure. The control flow of all these procedures is structured in the same way. At first, inputs are checked for errors. Next, the history of the item associated with the specified key is looked up. While \code{read()} and \code{drop()} will fail if no history is found, \code{write()} will perform an insertion by adding a new pair to the transaction's change set. If a history is found, then it is scanned for a version that is visible to the specified transaction. If a valid version is found, the operation can perform its read, write, or deletion, respectively. Otherwise, the operation cannot continue and aborts the associated transaction with an error code. The subsequent sections give details about visibility, operations, and commits.
 
 \subsection{Visibility}
@@ -376,30 +392,31 @@ Each operation has its own procedure. The control flow of all these procedures i
 
 A transaction can only access an item if that item's history contains a version that is visible to the transaction. Therefore, transactions have to scan the histories of all items that they wish to access. During the linear search on a history, for each version, a visibility test is performed. There is at most one version visible to a transaction, if any.
 
-Since Midas is based on Snapshot Isolation, it features the same visibility
-conditions. Simply put, a version $v_0$ is visible to a transaction $t_1$, when
-$v_0$ was committed before $t_1$ started. There are several facets to this
-property. For instance, during $t_1$'s runtime, another transaction $t_2$ may
-have updated $v_0$ but has not yet committed. In this case, $t_1$ can still see
-$v_0$ because, $t_2$ may still fail or get aborted. For this to work, $t_1$ must
-be able to see that $v_0$ was touched by $t_2$. Therefore, when a transaction
-$t$ updates or deletes a version $v$, $t$ replaces $v$'s end timestamp with the
-TID of $t$. This way, $t_1$ can see that $v_0$ was updated, lookup $t_2$ in the
-transaction table, and inspect its current status. Likewise, if $t_2$ encounters
-a version $v_1$ that was created by $t_1$, then $t_2$ would find $t_1$'s TID in
-the begin timestamp field of $v_1$. When a transaction commits, it changes its
-status to \code{committed} and propagates its own end timestamp to all versions
-it has created or modified. But other transaction do not have to wait until the
+Since Midas is based on SI, it features the same visibility conditions. Simply
+put, a version $v_0$ is visible to a transaction $t_1$, when $v_0$ was committed
+before $t_1$ started. There are several facets to this property. For instance,
+during $t_1$'s runtime, another transaction $t_2$ may have updated $v_0$ but has
+not yet committed. In this case, $t_1$ can still see $v_0$ because, $t_2$ may
+still fail or get aborted. For this to work, $t_1$ must be able to see that
+$v_0$ was touched by $t_2$. Therefore, when a transaction $t$ updates or deletes
+a version $v$, $t$ replaces $v$'s end timestamp with the TID of $t$. This way,
+$t_1$ can see that $v_0$ was updated, lookup $t_2$ in the transaction table, and
+inspect its current status. Likewise, if $t_2$ encounters a version $v_1$ that
+was created by $t_1$, then $t_2$ would find $t_1$'s TID in the begin timestamp
+field of $v_1$. When a transaction commits, it changes its status to
+\code{committed} and propagates its own end timestamp to all versions it has
+created or modified. But other transactions do not have to wait until the
 propagation is finished, because, using the deposited TID, they can always
 lookup the respective transaction and see that its status has changed to
-committed.
+\code{committed}.
 
 \begin{algorithm}
 \begin{algorithmic}[1]
 \Procedure{isVisible}{tx, begin, end}
 \If {$\text{isTID}(\textit{begin})$}
 \State $\textit{tx}^{*} \gets \text{getTx}(\textit{begin})$
-\If {$\text{getStatus}(\textit{tx}^{*}) \neq \text{Committed} \lor \text{getEnd}(\textit{tx}^{*}) > \text{getBegin}(\textit{tx})$}
+% \If {$\text{getStatus}(\textit{tx}^{*}) \neq \text{Committed} \lor \text{getEnd}(\textit{tx}^{*}) > \text{getBegin}(\textit{tx})$}
+\If {$\text{getStatus}(\textit{tx}^{*}) \neq \text{Committed} \textbf{ or } \text{getEnd}(\textit{tx}^{*}) > \text{getBegin}(\textit{tx})$}
 \State \Return $\text{false}$
 \EndIf
 \Else
@@ -410,7 +427,8 @@ committed.
 \State
 \If {$\text{isTID}(\textit{end})$}
 \State $\textit{tx}^{*} \gets \text{getTx}(\textit{end})$
-\If {$\text{getStatus}(\textit{tx}^{*}) = \text{Committed} \land \text{getEnd}(\textit{tx}^{*}) < \text{getBegin}(\textit{tx})$}
+% \If {$\text{getStatus}(\textit{tx}^{*}) = \text{Committed} \land \text{getEnd}(\textit{tx}^{*}) < \text{getBegin}(\textit{tx})$}
+\If {$\text{getStatus}(\textit{tx}^{*}) = \text{Committed} \textbf{ and } \text{getEnd}(\textit{tx}^{*}) < \text{getBegin}(\textit{tx})$}
 \State \Return $\text{false}$
 \EndIf
 \Else
@@ -428,11 +446,9 @@ committed.
 Visibility test of a single version first inspects its begin timestamp and then its end timestamp. As explained earlier, the value domains of TIDs and timestamps are disjoint in that the former are always odd while the latter are even. Therefore, it is sufficient for a transaction to test the least significant bit of the timestamp to distinguish TIDs from timestamps. A pseudo code example of the visibility test in Midas is outlined in Algorithm \ref{alg:vsb}. The visibility properties implemented in Midas are based on
 the works of \cite{berenson1995critique, larson2011high}.
 
-% \vfill
-
 \subsection{Reads}
 
-The read operation is the simplest operation to perform with Midas. Still, with regard to serializability, reads are very important, because this is where Midas extends Snapshot Isolation. Reads are executed as follows. A pseudo code example is given below (see Algorithm \ref{alg:read}). After initial input sanitization, it is checked whether the specified item has already been updated within the same transaction. In this case, the item's updated value is retrieved from the change set and the operation returns. Otherwise, the history associated with the given key is looked up. Note that the index is locked for the duration of the lookup. If no history is found, the current transaction is aborted.
+The read operation is the simplest operation to perform with Midas. Still, with regard to serializability, reads are very important, because this is where Midas extends SI. Reads are executed as follows. A pseudo code example is given below (see Algorithm \ref{alg:read}). After initial input sanitization, it is checked whether the specified item has already been updated within the same transaction. In this case, the item's updated value is retrieved from the change set and the operation returns. Otherwise, the history associated with the given key is looked up. Note that the index is locked for the duration of the lookup. If no history is found, the current transaction is aborted.
 
 \begin{algorithm}[!ht]
 \begin{algorithmic}[1]
@@ -462,7 +478,7 @@ From the history, a readable version (i.e. \emph{snapshot}) of the target item i
 
 \subsection{Updates}
 
-The update operation in Midas is called \code{write()}. It can be used to update existing items and insert new items. Because there can be no duplicates, Midas can always determine which action to perform. A pseudo code example of how \code{write()} is implemented is given in Algorithm \ref{alg:update}. As before, it is first checked whether the specified item has already been modified in the context of the current transaction \code{tx}. If so, the change set is modified accordingly and return. In case the change entry indicates that the item was previously removed by \code{tx}, the entry mode is changed from \code{mode::remove} to \code{mode::update}. This is possible because, due to the two-level store architecture, all updates and deletions are buffered until commit. If the target item is not in the change set, Midas proceeds as usual and looks up the items version history.
+The update operation in Midas is called \code{write()}. It can be used to update existing items and insert new items. Because there can be no duplicates, Midas can always determine which action to perform. A pseudo code example of how \code{write()} is implemented is given in Algorithm \ref{alg:update}. As before, it is first checked whether the specified item has already been modified in the context of the current transaction \code{tx}. If so, the change set is updated with the new value. In case the change entry indicates that the item was previously removed by \code{tx}, the operation descriptor is changed from \code{mode::remove} to \code{mode::update}. This is possible because, due to the two-level store architecture, all updates and deletions are buffered until commit. If the target item is not in the change set, Midas proceeds as usual and looks up the item's version history.
 
 \begin{algorithm}
 \begin{algorithmic}[1]
@@ -488,11 +504,11 @@ The update operation in Midas is called \code{write()}. It can be used to update
 \label{alg:update}
 \end{algorithm}
 
-Unlike for reads, a missing history is not a reason to abort but indicates that a new version must be inserted. If a history exists, then a writable snapshot is determined. Note that there is no insertion if \code{getWriteSnapshot()} fails because that indicates a write-write conflict. In this case, the most suitable version has been invalidated with a TID of a transaction other than the current \code{tx}. Therefore, \code{tx} must abort according to the first-updater-wins principle shown in Section \ref{ch:concept-kvs-tx}. If a valid snapshot is found, its end timestamp is atomically replaced with the TID of \code{tx}. Finally, a new change set entry is created and the operation is complete. Note that, apart from replacing the snapshots timestamp, no NVRAM is updated at this point.
+Unlike for reads, a missing history in \code{write()} is not a reason to abort but indicates that a new version must be inserted. If a history exists, then a writable snapshot is determined. Note that there is no insertion if \code{getWriteSnapshot()} fails, because that indicates a write-write conflict. In this case, the most suitable version must have been invalidated with the TID of a transaction other than the current \code{tx}. Therefore, \code{tx} must abort according to the \emph{first-updater-wins} principle seen in Section \ref{ch:kvs-cc-conflicts}. If a valid snapshot is found, its end timestamp is atomically replaced with the TID of \code{tx}. Finally, a new change set entry is created and the operation is complete. Note that, apart from replacing the snapshots timestamp, no NVRAM is updated at this point.
 
 \subsection{Deletions}
 
-
+An item can be deleted by invoking \code{drop()}. Deletion is very similar to updating. The corresponding pseudo code is shown in Algorithm \ref{alg:delete}. As with updates, the change set is first checked for an existing change entry. If an entry exists, then there are two possibilities: the entry denotes an insertion and is is deleted immediately or it denotes an update in which case the operation descriptor is changed from \code{mode::update} to \code{mode::remove}. In contrast to updating, deletion must abort if no history is found for the specified key. The rest of the function works like \code{write()} (see Section \ref{alg:update}).
 
 \begin{algorithm}
 \begin{algorithmic}[1]
