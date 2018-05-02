@@ -147,8 +147,8 @@ however, copies may not be necessary if entire values are updated.
 
 A central aspect of multiversioning is the concept of \emph{visibility}. Since
 there may be multiple versions of a single data item, an operation must first
-figure out to which version it should apply. For this purpose, the visibility
-property is introduced. It determines which versions can be accessed by the
+figure out to which version it should apply. For this purpose, a visibility
+property is defined. It determines which versions can be accessed by the
 operations of a transaction. In other words, a version is \emph{visible} to a
 transaction and its operations if and only if it satisfies the visibility
 property. In general, visibility is defined as a predicate over timestamps of
@@ -199,7 +199,7 @@ insufficient definition of serializability in the SQL standard
 databases and \acp{KVS} \cite{cahill2009serializable, wu2017empirical}. In the
 context of isolation levels, \ac{SI} defines a new isolation level that goes by
 the same name. Although \ac{SI} is weaker than serializability, it provides a
-good trade-off between performance and consistency. This section introduces the
+good trade-off between performance and consistency. This section describes the
 concept of \ac{SI} and its properties.
 
 The core principle of \ac{SI} is that a transaction $t$ only sees a private
