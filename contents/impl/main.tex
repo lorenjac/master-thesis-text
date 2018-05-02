@@ -1,19 +1,21 @@
 \chapter{Implementation}
 \label{ch:impl}
 
-In this chapter a prototypical implementation of the concept introduced in
-Chapter \ref{ch:concept} is presented. The chapter is divided in two sections.
-By showing a few usage examples, the first part gives an impression on how the
+In this chapter a prototype implementation of the concept introduced in Chapter
+\ref{ch:concept} is presented. The chapter is divided in three sections. By
+showing a few usage examples, the first part gives an impression on how the
 implemented \ac{KVS} can be used. The second part deals with the architecture of
-Midas and outlines selected implementation details. In order to make addressing
-the \ac{KVS} more convenient, it is henceforth referred to by its working title
-\emph{Midas} \footnotemark.
+Midas and outlines selected topics such as NVRAM handling and the components
+involved in transaction management. The last section delves into the details of
+transaction processing and the underlying algorithms. In order to make
+addressing the \ac{KVS} more convenient, it is henceforth referred to by its
+working title \emph{Midas} \footnotemark.
 
 \footnotetext{The name is taken from Greek mythology. According to the legend,
 King Midas was given the ability to turn everything he touches into gold. This
 resembles the idea of making information non-volatile as in \ac{NVRAM}.}
 
-\section{Usage}
+\section{Usage Examples}
 \label{ch:impl-usage}
 \input{contents/impl/usage.tex}
 
@@ -22,3 +24,7 @@ resembles the idea of making information non-volatile as in \ac{NVRAM}.}
 \section{Architecture}
 \label{ch:impl-arch}
 \input{contents/impl/arch.tex}
+
+\section{Transaction Processing}
+\label{ch:impl-tx}
+\input{contents/impl/tx.tex}
