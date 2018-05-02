@@ -44,7 +44,7 @@
 	<key>Creator</key>
 	<string>kodiak</string>
 	<key>DisplayScale</key>
-	<string>1 0/72 in = 1 0/72 in</string>
+	<string>1 0/72 in = 1.0000 in</string>
 	<key>GraphDocumentVersion</key>
 	<integer>8</integer>
 	<key>GraphicsList</key>
@@ -148,7 +148,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{50.000015, 268.5}, {434.33334, 144}}</string>
+					<string>{{50.000015, 268.5}, {434.33334, 162}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -198,6 +198,9 @@
 \f1\b erase
 \f0\b0 (it : iterator) : void\
 + 
+\f1\b iterator
+\f0\b0 () : iterator\
++ 
 \f1\b get
 \f0\b0 (pos : size_t) : T&amp;\
 + 
@@ -217,7 +220,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{50.000015, 412.5}, {434.33334, 36}}</string>
+					<string>{{50, 430.5}, {434.33337, 36}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -326,7 +329,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2018-04-22 16:40:39 +0000</string>
+	<string>2018-05-02 21:22:08 +0000</string>
 	<key>Modifier</key>
 	<string>kodiak</string>
 	<key>NotesVisible</key>

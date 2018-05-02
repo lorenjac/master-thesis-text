@@ -7,11 +7,9 @@ transaction. In other words, the scope in which isolation is required spans
 beyond critical sections. Therefore, a dedicated concurrency control is required
 to ensure isolation. Unfortunately, concurrency controls do not come without
 overhead which is why, in most cases, a compromise between isolation and
-performance must be found.
-
-This section deals with concurrency control strategies and outlines the state of
-the art with a focus on optimistic approaches, in particular multiversion
-concurrency control.
+performance must be found. This section deals with concurrency control
+strategies and outlines the state of the art with a focus on optimistic
+approaches, in particular multiversion concurrency control.
 
 \subsection{Strategies}
 
@@ -31,11 +29,10 @@ access. If the resource acquisition succeeds, then the transaction can freely
 operate on the temporarily owned data. Only when that transaction terminates,
 will this ownership be released. If a transaction fails to claim the exclusive
 ownership on its data then it has to wait until the required ownership is
-granted or abort.
-
-Pessimistic concurrency control is usually implemented with locks. Locking
-provides a solid mechanism to ensure serializability and most database systems
-implement it \cite{kung1981optimistic, berenson1995critique, larson2011high}.
+granted or abort. Pessimistic concurrency control is usually implemented with
+locks. Locking provides a solid mechanism to ensure serializability and most
+database systems implement it \cite{kung1981optimistic, berenson1995critique,
+larson2011high}.
 
 Despite their prevalence, pessimistic concurrency controls have notable
 drawbacks. Locking-based concurrency controls are prone to \emph{deadlocks}

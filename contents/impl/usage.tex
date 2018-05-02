@@ -43,10 +43,7 @@ in the context of the associated transaction. The available modifiers are
 \code{Store::put()}, \code{Store::get()}, and \code{Store::drop()}. As a
 compromise between usability and flexibility, the store supports strings as keys
 and values, exclusively. Unless a transaction is aborted prematurely, it must
-be concluded with a call to \code{Store::commit()}. The resulting return code
-denotes whether the transaction committed successfully or failed. The following
-example shows a transaction checking the balance of an account and applying an
-interest fee if the balance is negative (see Listing~\ref{lst:usage-single-tx}).
+be concluded with a call to \code{Store::commit()}.
 
 \begin{lstlisting}[caption={A single transaction on account data.},captionpos=b, label=lst:usage-single-tx]
 void run_single_transaction(midas::Store& store) {
@@ -61,6 +58,11 @@ void run_single_transaction(midas::Store& store) {
         // Error: transaction failed
 }
 \end{lstlisting}
+
+The resulting return code denotes whether the transaction committed successfully
+or failed. The following example shows a transaction checking the balance of an
+account and applying an interest fee if the balance is negative (see
+Listing~\ref{lst:usage-single-tx}).
 
 Running transactions in concurrent threads requires no additional setup other
 than creating the respective threads to begin with. Each thread only needs a

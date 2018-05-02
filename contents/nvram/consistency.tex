@@ -108,8 +108,10 @@ instructions. However, the problem with a cache line flush is that wanting to
 make a cache line durable does not always mean that is should be evicted.
 Therefore, there are proposals for instructions, such as \code{clwb}, that send
 a cache line to a memory controller without evicting it \cite{kolli2016high,
-oukid2017data}. Unfortunately, at the time of this writing, there is no evidence
-of a processor to implement this instruction.
+oukid2017data}.
+
+% Unfortunately, at the time of this writing, there is no evidence
+% of a processor to implement this instruction.
 
 \paragraph{\acp{WPQ}}
 

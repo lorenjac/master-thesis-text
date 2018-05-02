@@ -12,14 +12,20 @@ or device state.
 
 \paragraph{Information Security}
 
+% Other data such as passwords, encryption keys, or decrypted data may be
+% confidential and should not be durable. It has been shown that even volatile
+% \ac{RAM} holds its charge long enough so that a module can be moved to an
+% attacker's machine for read-out \cite{halderman2008lest}. Despite being
+% countered with hardware scramblers, researchers still managed to apply
+% variations of the technique and obtain vital information
+% \cite{yitbarek2017cold}. Such attacks would be trivial on \ac{NVRAM}
+% \cite{bailey2011operating}, but that is beyond the scope of this work.
 Other data such as passwords, encryption keys, or decrypted data may be
 confidential and should not be durable. It has been shown that even volatile
 \ac{RAM} holds its charge long enough so that a module can be moved to an
-attacker's machine for read-out \cite{halderman2008lest}. Despite being
-countered with hardware scramblers, researchers still managed to apply
-variations of the technique and obtain vital information
-\cite{yitbarek2017cold}. Such attacks would be trivial on \ac{NVRAM}
-\cite{bailey2011operating}, but that is beyond the scope of this work.
+attacker's machine for read-out \cite{halderman2008lest, yitbarek2017cold}. Such
+attacks would be trivial on \ac{NVRAM} \cite{bailey2011operating}, but that is
+beyond the scope of this work.
 
 % By cooling the module, capacitor
 % discharge can be slowed so that it can be moved to another machine where its

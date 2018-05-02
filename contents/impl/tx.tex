@@ -1,4 +1,4 @@
-Unlike other \acp{KVS}, Midas can only be operated through transactions. Transactions that are either terminated or belong to another store instance are rejected. Once a transaction has been started with \code{Store::begin()}, it can be used to access the store with \code{Store::read()}, \code{Store::write()}, and \code{Store::drop()}. For the full list of procedures, see Figure \ref{tab:procedures}.
+Unlike other \acp{KVS}, Midas can only be operated through transactions. Transactions that are either terminated or belong to another store instance are rejected. Once a transaction has been started with \code{Store::begin()}, it can be used to access the store with \code{Store::read()}, \code{Store::write()}, and \code{Store::drop()}. For the full list of procedures, see Table \ref{tab:procedures}.
 
 % \begin{itemize}
 %     \item read: \code{Store::read(<tx>, <key>, <value>)}
@@ -25,7 +25,8 @@ Unlike other \acp{KVS}, Midas can only be operated through transactions. Transac
 %     \label{tab:procedures}
 % \end{figure}
 
-\begin{figure}[!ht]
+% \begin{figure}[!ht]
+\begin{table}[!ht]
     \centering
     \begin{tabular}{|l|ll|}
         \hline
@@ -43,7 +44,8 @@ Unlike other \acp{KVS}, Midas can only be operated through transactions. Transac
     \end{tabular}
     \caption{An overview of all procedures provided by Midas.}
     \label{tab:procedures}
-\end{figure}
+% \end{figure}
+\end{table}
 
 %\begin{lstlisting}
 %class Store {
@@ -84,11 +86,6 @@ propagation is finished, because, using the deposited TID, they can always
 lookup the respective transaction and see that its status has changed to
 \code{Committed}.
 
-Visibility test of a single version first inspects its begin timestamp and then its end timestamp. As explained earlier, the value domains of TIDs and timestamps are disjoint in that the former are always odd while the latter are even. Therefore, it is sufficient for a transaction to test the least significant bit of the timestamp to distinguish TIDs from timestamps. A pseudo code example of the visibility test in Midas is outlined in Algorithm \ref{alg:vsb}. The visibility properties implemented in Midas are based on
-the works of \cite{berenson1995critique, larson2011high}.
-
-\vspace{0.5cm}
-
 \begin{algorithm}
 \begin{algorithmic}[1]
 \Procedure{isVisible}{tx, begin, end}
@@ -122,7 +119,12 @@ the works of \cite{berenson1995critique, larson2011high}.
 \label{alg:vsb}
 \end{algorithm}
 
-\vfill
+Visibility test of a single version first inspects its begin timestamp and then its end timestamp. As explained earlier, the value domains of TIDs and timestamps are disjoint in that the former are always odd while the latter are even. Therefore, it is sufficient for a transaction to test the least significant bit of the timestamp to distinguish TIDs from timestamps. A pseudo code example of the visibility test in Midas is outlined in Algorithm \ref{alg:vsb}. The visibility properties implemented in Midas are based on
+the works of \cite{berenson1995critique, larson2011high}.
+
+% \vspace{0.5cm}
+
+% \vfill
 
 \subsection{Reads}
 

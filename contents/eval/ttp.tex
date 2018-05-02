@@ -52,9 +52,11 @@ size could be increased at will.
 The length of a transaction is the number of operations enclosed in that
 transaction. Intuitively, the length of transactions should vary. Unfortunately,
 no reliable sources as to the absolute quantities of transaction lengths could
-be found. As a result, the following ranges are deemed meaningful:
+be found. Nevertheless, the following ranges in Table \ref{tab:tx-length} are
+deemed meaningful.
 
-\begin{figure}[!h]
+% \begin{figure}[!h]
+\begin{table}[!ht]
     \centering
     \begin{tabular}{|l|l|l|}
         \hline
@@ -68,7 +70,8 @@ be found. As a result, the following ranges are deemed meaningful:
     \end{tabular}
     \caption{Types of transactions in terms of length.}
     \label{tab:tx-length}
-\end{figure}
+% \end{figure}
+\end{table}
 
 Short transactions can be small updates like incrementing a numeric value,
 optionally based a small aggregation. Long transactions on the other hand, can
@@ -84,11 +87,15 @@ an incident reduces transaction throughput without an actual conflict which
 could distort results. The remaining two operations are selected based on the
 empirical analysis in \cite{andrei2017sap}. According to the source, read
 operations amount to 84\% of all operations. The remaining 16\% are subsumed as
-updates for this experiment. Each operation is programmed to act on a random key from the data set associated with the workload. Therefore, workloads are bound to the data set used during generation.
+updates for this experiment. Each operation is programmed to act on a random key
+from the data set associated with the workload. Therefore, workloads are bound
+to the data set used during generation.
 
 \subsubsection{Scenarios and Expectations}
 
-Resulting from the dimensions shown above, four unique scenarios  were derived:
+Resulting from the dimensions shown above, four unique scenarios are derived.
+The following scenarios are supposed to simulate both low and high contention in
+different forms (see Table~\ref{tab:eval-scenarios}).
 
 % \begin{figure}[!h]
 %     \centering
@@ -107,22 +114,24 @@ Resulting from the dimensions shown above, four unique scenarios  were derived:
 %     \label{tab:eval-scenarios}
 % \end{figure}
 
-\begin{figure}[!h]
-    \centering
-    \begin{tabular}{|l|l|l|}
-        \hline
-        \textbf{Name} & \textbf{Database Size} & \textbf{Transaction Length} \\
-        \hline
-        \hline
-        S1            & Small (1K)             & Short (2 - 32)  \\
-        S2            & Small (1K)             & Long (64 - 256) \\
-        S3            & Large (100K)           & Short (2 - 32)  \\
-        S4            & Large (100K)           & Long (64 - 256) \\
-        \hline
-    \end{tabular}
-    \caption{Scenarios are combinations of database size and transaction length.}
-    \label{tab:eval-scenarios}
-\end{figure}
+% \begin{figure}[!h]
+\begin{table}[!h]
+\centering
+\begin{tabular}{|l|l|l|}
+    \hline
+    \textbf{Name} & \textbf{Database Size} & \textbf{Transaction Length} \\
+    \hline
+    \hline
+    S1            & Small (1K)             & Short (2 - 32)  \\
+    S2            & Small (1K)             & Long (64 - 256) \\
+    S3            & Large (100K)           & Short (2 - 32)  \\
+    S4            & Large (100K)           & Long (64 - 256) \\
+    \hline
+\end{tabular}
+\caption{Scenarios are combinations of database size and transaction length.}
+\label{tab:eval-scenarios}
+% \end{figure}
+\end{table}
 
 % \setlength{\extrarowheight}{0.5cm}
 % % \begin{tabular}{|x{0.5cm}|x{0.5cm}|x{0.5cm}|}\hline
@@ -132,37 +141,36 @@ Resulting from the dimensions shown above, four unique scenarios  were derived:
 % 100K & S3 & S4\\ \hline
 % \end{tabular}
 
-These scenarios are supposed to simulate both low and high contention in
-different forms. In a database that is small compared to the number of
-concurrent transactions, it is very likely that multiple transactions operate on
-the same data which can cause conflicts. Likewise, longer transactions cause
-contention as they are more likely to access data of other transactions. That
-said, scenario S1 and especially S2 simulate high contention which is the
-worst-case for any concurrency control. The reason is that contention often
-causes conflicts which lead to aborts and reduced transaction throughput. With
-larger databases, short transactions are less likely to access the same data
-which reduces contention. However, as transactions become longer, they become
-more likely to collide and abort.
+In a database that is small compared to the number of concurrent transactions,
+it is very likely that multiple transactions operate on the same data which can
+cause conflicts. Likewise, longer transactions cause contention as they are more
+likely to access data of other transactions. That said, scenario S1 and
+especially S2 simulate high contention which is the worst-case for any
+concurrency control. The reason is that contention often causes conflicts which
+lead to aborts and reduced transaction throughput. With larger databases, short
+transactions are less likely to access the same data which reduces contention.
+However, as transactions become longer, they become more likely to collide and
+abort.
 
 \subsection{Methodology}
 
-The benchmark is performed separately for each \ac{KVS}. The general procedure is to
-execute each workload with a different number of cores. Since the underlying
-machine has 32 physical cores, the experiment is performed with 1, 2, 4, 8, 16,
-and 32 cores. During each run, several statistics such as the total time taken
-and the number of aborts are captured. In order to reduce the influence of
-outliers, each run, i.e. a combination of workload and core count, is performed
-10 times. As a result, for each store there is a total of 24 configurations
-which amounts to a total of 480 runs including repetitions.
+The benchmark is performed separately for each \ac{KVS}. The general procedure
+is to execute each workload with a different number of cores. Since the
+underlying machine has 32 physical cores, the experiment is performed with 1, 2,
+4, 8, 16, and 32 cores. During each run, several statistics such as the total
+time taken and the number of aborts are captured. In order to reduce the
+influence of outliers, each run, i.e. a combination of workload and core count,
+is performed 10 times. As a result, for each store there is a total of 24
+configurations which amounts to a total of 480 runs including repetitions.
 
-A single run of the benchmark works as follows. At first, the respective \ac{KVS} is
-initialized with dummy data and the workload decomposed so that it fits the
-number of cores of the current configuration. Then, for each core, a thread is
-created and pinned to that core. Each thread executes an equal share of the
-entire workload. The total time taken to execute the entire workload is measured
-by taking the difference of timestamps from before spawning the workers and
-after all workers have terminated. The general procedure of the experiment is
-depicted in Figure~\ref{fig:eval-host}. The procedure performed by a single
+A single run of the benchmark works as follows. At first, the respective
+\ac{KVS} is initialized with dummy data and the workload decomposed so that it
+fits the number of cores of the current configuration. Then, for each core, a
+thread is created and pinned to that core. Each thread executes an equal share
+of the entire workload. The total time taken to execute the entire workload is
+measured by taking the difference of timestamps from before spawning the workers
+and after all workers have terminated. The general procedure of the experiment
+is depicted in Figure~\ref{fig:eval-host}. The procedure performed by a single
 worker thread is shown in Figure~\ref{fig:eval-worker}. When a transaction
 fails, it is retried up to three times. If all retries fail, the transaction is
 canceled and the program proceeds to the next transaction in the workload.
@@ -187,29 +195,29 @@ canceled and the program proceeds to the next transaction in the workload.
 
 In this subsection the results of the benchmark are shown and discussed. The
 benchmark captures two metrics: transaction throughput and the transaction abort
-rate. In order to express the scalability of both \acp{KVS}, throughput is expressed
-in terms of speedup factor. This also helps comparing the performance of both
-stores even if absolute throughput differs significantly. The abort rate is
-given by the ratio of the number of aborted transactions and the number of
+rate. In order to express the scalability of both \acp{KVS}, throughput is
+expressed in terms of speedup factor. This also helps comparing the performance
+of both stores even if absolute throughput differs significantly. The abort rate
+is given by the ratio of the number of aborted transactions and the number of
 scheduled transactions. When interpreting throughput and speedup factors, it is
 important to take the abort rate into account because higher abort rates can
 lead to higher transaction throughput. The reason for this circumstance is that
 commits are very expensive and the resulting time saving of an abort has a
 stronger influence on throughput than reducing the number of committed
 transactions. This is also a direct consequence of the two-level store
-architecture and the additional measures to preserve consistency in NVRAM.
+architecture and the additional measures to preserve consistency in \ac{NVRAM}.
 
 \paragraph{Legend}
 
 The following analysis compares benchmark results of Echo (green), Midas (blue)
 and its optimized variant, denoted as Midas$^{*}$ (red). In the current
 implementation of Midas, the index is based on a naive hash table implementation
-for NVRAM. In order to protect critical sections in the hash table, a simple
-global locking mechanism is used. This approach forms a major bottleneck which
-can be addressed with a designated but often complicated concurrent design as in
-\cite{fan2013memc3}. However, this is an implementation detail, albeit crucial.
-In order to show the potential of Midas' design, a second variant of Midas
-without index locking was examined. This is possible because during the
+for \ac{NVRAM}. In order to protect critical sections in the hash table, a
+simple global locking mechanism is used. This approach forms a major bottleneck
+which can be addressed with a designated but often complicated concurrent design
+as in \cite{fan2013memc3}. However, this is an implementation detail, albeit
+crucial. In order to show the potential of Midas' design, a second variant of
+Midas without index locking was examined. This is possible because during the
 benchmark not the index but only histories are modified. This is a side effect
 of omitting insert and delete operations for simplicity.
 

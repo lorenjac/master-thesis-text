@@ -56,7 +56,7 @@
 			<array>
 				<dict>
 					<key>Bounds</key>
-					<string>{{121, 121}, {221.66666, 108}}</string>
+					<string>{{121.00002, 120.99999}, {316.33334, 108}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -94,11 +94,11 @@
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720
 
 \f0\fs24 \cf0 - mId : id_type\
-- mStatus : status_type\
-- mBegin : stamp_type\
-- mEnd : stamp_type\
-- mChangeSet : write_set_t\
-- mReadSet : read_set_t}</string>
+- mStatus : std::atomic&lt;status_type&gt;\
+- mBegin : std::atomic&lt;stamp_type&gt;\
+- mEnd : std::atomic&lt;stamp_type&gt;\
+- mChangeSet : std::unordered_map&lt;...&gt;\
+- mReadSet : std::vector&lt;...&gt;}</string>
 						<key>VerticalPad</key>
 						<integer>0</integer>
 					</dict>
@@ -107,7 +107,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{121, 101}, {221.66666, 20}}</string>
+					<string>{{121.00002, 101}, {316.33334, 20}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -142,7 +142,7 @@
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\qc
 
-\f0\b\fs24 \cf0 Transaction}</string>
+\f0\b\fs24 \cf0 TransactionControlBlock}</string>
 						<key>VerticalPad</key>
 						<integer>0</integer>
 					</dict>
@@ -151,7 +151,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{121, 229}, {221.66666, 36}}</string>
+					<string>{{121.00002, 229.00002}, {316.33334, 36}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -255,7 +255,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2018-04-30 18:07:06 +0000</string>
+	<string>2018-05-02 21:31:34 +0000</string>
 	<key>Modifier</key>
 	<string>kodiak</string>
 	<key>NotesVisible</key>
@@ -336,7 +336,7 @@
 			</dict>
 		</array>
 		<key>Frame</key>
-		<string>{{395, 404}, {1025, 925}}</string>
+		<string>{{153, 4}, {1025, 796}}</string>
 		<key>ListView</key>
 		<true/>
 		<key>OutlineWidth</key>
@@ -350,7 +350,7 @@
 		<key>SidebarWidth</key>
 		<integer>120</integer>
 		<key>VisibleRegion</key>
-		<string>{{-12, 0}, {584, 522}}</string>
+		<string>{{-12, 0}, {584, 436}}</string>
 		<key>Zoom</key>
 		<real>1.5</real>
 		<key>ZoomValues</key>

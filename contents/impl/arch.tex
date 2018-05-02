@@ -109,8 +109,12 @@ of type \code{T} is created inside a pool which has a graph root of type
 For that purpose, both creating of objects and incrementing the counter are
 consolidated in a transaction to form a single memory update.
 
-\begin{figure}[h!]
-\begin{lstlisting}
+% \newpage
+
+\vspace{0.5cm}
+
+% \begin{figure}[h!]
+\begin{lstlisting}[caption={Consistent updates to NVM using PMDK transactions.},captionpos=b, label=lst:pmdk-tx]
 #include "libpmemobj++/persistent_ptr.hpp"
 #include "libpmemobj++/transaction.hpp"
 #include "libpmemobj++/pool.hpp"
@@ -133,9 +137,9 @@ pmdk::persistent_ptr<T> create(pmdk::pool<Root> pop)
     return obj;
 }
 \end{lstlisting}
-\caption{Consistent updates to NVM using PMDK transactions.}
-\label{lst:pmdk-tx}
-\end{figure}
+% \caption{Consistent updates to NVM using PMDK transactions.}
+% \label{lst:pmdk-tx}
+% \end{figure}
 
 Even though object creation is always transactional in PMDK, initialization is
 not. Instead, the memory of an object is only nulled. As a result, each class
@@ -149,6 +153,8 @@ Chapter \ref{ch:nvram-consistency}. That means, modified data is flushed from
 memory order buffers and caches. In some situations, non-temporal writes are
 used which make use of write combine buffers. When it comes to flushing
 write-pending queues inside the memory controller, PMDK relies on ADR.
+
+% \vfill
 
 % =============================================================================
 % =============================================================================
@@ -193,21 +199,24 @@ and an element counter. All these attributes must be durable in order to recover
 the list after a restart. Therefore, they are declared as persistent pointers or
 properties in terms of PMDK. The API of \code{NVList} is closely related to the
 C++ standard library containers. It also provides iterator facilities for
-traversal.
+traversal (see class diagram in Figure \ref{fig:impl-list}).
 
-\begin{figure}[h!]
+\begin{figure}[!ht]
     \centering
     \includegraphics[scale=0.66]{figures/impl/list.pdf}
-    \caption{Class diagram for the class \code{NVList}}
+    \caption{Class diagram for the class \code{NVList}.}
     \label{fig:impl-list}
 \end{figure}
 
 An important aspect of implementing durable data structures is to preserve
 consistency. This is done by consolidating related allocations and operations on
 durable objects in a transaction as shown in Chapter \ref{ch:impl-nvram}.
+Listing \ref{lst:impl-list-tx} shows the implementation of the function
+\code{push\_back}, which is used to append an item to the back of the list.
 
-\begin{figure}[h!]
-\begin{lstlisting}
+% \begin{figure}[h!]
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[caption={Implementation of \code{push\_back()} with transactional updates to NVRAM.},captionpos=b, label=lst:impl-list-tx]
 void push_back(const elem_type& elem)
 {
     pmdk::transaction::exec_tx(pool, [&,this](){
@@ -218,9 +227,10 @@ void push_back(const elem_type& elem)
     });
 }
 \end{lstlisting}
-\caption{Implementation of \code{push\_back()} as an example for transactional updates to NVRAM}
-\label{lst:impl-list-tx}
-\end{figure}
+\end{minipage}
+% \caption{Implementation of \code{push\_back()} as an example for transactional updates to NVRAM.}
+% \label{lst:impl-list-tx}
+% \end{figure}
 
 An additional feature of \code{NVList} is a zero-copy mechanism for migrating
 individual list nodes between different lists. This is useful when nodes from a
@@ -236,12 +246,12 @@ Essentially, the table consists of a single persistent array that is reallocated
 as needed. Each cell in the index is called slot or bucket. As with
 \code{NVList}, the API of \code{NVHashmap} is closely aligned to the C++
 standard library. Also, the class employs a policy-based template design which
-allows changing its behavior through template parameters.
+allows changing its behavior through template parameters (see Figure \ref{fig:impl-map}).
 
 \begin{figure}[h!]
     \centering
     \includegraphics[scale=0.66]{figures/impl/map.pdf}
-    \caption{Class diagram for the class \code{NVHashmap}}
+    \caption{Class diagram for the class \code{NVHashmap}.}
     \label{fig:impl-map}
 \end{figure}
 
@@ -299,7 +309,7 @@ Transactions are represented by transaction control blocks (TCBs). A TCB holds a
 \begin{figure}[h!]
     \centering
     \includegraphics[scale=.75]{figures/impl/tx.pdf}
-    \caption{A transaction control block.}
+    \caption{Class diagram of a transaction control block.}
     \label{fig:tcb}
 \end{figure}
 
@@ -344,9 +354,10 @@ For each value of a key-value pair, there are several versions. The versions of 
 
 \paragraph{Index}
 
-Another core data structure in Midas is the index. It accomplishes the mapping between the key of an item and the item's version history. Whenever a transactional operation wishes to access an item, it has to query the index with the corresponding key. The index must provide fast lookup and is therefore implemented as a hash table. For that purpose, the durable hash table \code{NVHashmap} from Section \ref{ch:impl-data} is used. The index is accessed by all concurrent transactions and must therefore be synchronized. Due to the complexity of concurrent data structure design, a lock is used to protect the index. This is likely to become a serious bottleneck and should be revised in future work. For a list of all components in Midas and their underlying data structures, see Figure \ref{tab:component-data}.
+Another core data structure in Midas is the index. It accomplishes the mapping between the key of an item and the item's version history. Whenever a transactional operation wishes to access an item, it has to query the index with the corresponding key. The index must provide fast lookup and is therefore implemented as a hash table. For that purpose, the durable hash table \code{NVHashmap} from Section \ref{ch:impl-data} is used. The index is accessed by all concurrent transactions and must therefore be synchronized. Due to the complexity of concurrent data structure design, a lock is used to protect the index. This is likely to become a serious bottleneck and should be revised in future work. For a list of all components in Midas and their underlying data structures, see Table \ref{tab:component-data}.
 
-\begin{figure}[!ht]
+% \begin{figure}[!ht]
+\begin{table}[!ht]
     \centering
     \begin{tabular}{|l|l|l|}
         \hline
@@ -368,4 +379,5 @@ Another core data structure in Midas is the index. It accomplishes the mapping b
     \end{tabular}
     \caption{An overview of all components and their underlying data structures.}
     \label{tab:component-data}
-\end{figure}
+% \end{figure}
+\end{table}
