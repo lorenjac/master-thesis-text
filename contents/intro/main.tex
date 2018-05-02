@@ -13,9 +13,10 @@ throughput}.
 
 There are several ways to increase transaction throughput. One approach is to
 hold large portions of data or even the entire database in fast volatile memory
-as in \acp{MMDB}. In this case, recovery is crucial as all data in volatile
-memory is lost in a crash. Therefore, recovery usually involves access to
-non-volatile, yet slower, storage media which impairs throughput.
+as in \acp{MMDB} \cite{grund2010hyrise, lee2013sap, diaconu2013hekaton}. In
+this case, recovery is crucial as all data in volatile memory is lost in a
+crash. Therefore, recovery usually involves access to non-volatile, yet slower,
+storage media which impairs throughput.
 
 Another approach to improve transaction throughput is to utilize multi-core
 architectures by allowing transactions to execute concurrently. This way, an
@@ -24,12 +25,14 @@ terminates. However, race conditions between concurrent transactions may result
 in inconsistent data. Therefore, concurrent transactions must be isolated by
 means of a dedicated \emph{concurrency control}. There are different
 \emph{isolation levels} but only \emph{serializability} guarantees that no
-sequence of concurrent transactions can yield inconsistent data. Although
+sequence of concurrent transactions can yield inconsistent data
+\cite{berenson1995critique, larson2011high, neumann2015fast}. Although
 desirable, serializability is often unsupported or discouraged due to lower
 transaction throughput.
 
 An important class of databases that often feature both in-memory operation and
-concurrent transactions are \emph{\kvsp}. Unlike relational databases, a \kvs
+concurrent transactions are \emph{\kvsp} \cite{decandia2007dynamo,
+chang2008bigtable, lakshman2010cassandra}. Unlike relational databases, a \kvs
 consists of a single associative collection. Lacking query languages and data
 schemas, \kvsp avoid a lot of overhead that may not be required in certain
 circumstances.
@@ -37,30 +40,32 @@ circumstances.
 % Byte-Addressable Non-Volatile Memory
 
 Recent research suggests that byte-addressable \ac{NVM} with parameters close to
-\ac{DRAM} will be available in the near future. Notable technologies currently
-in research are \ac{PCM}, \ac{MRAM}, and 3D XPoint. It is suggested that, due to
-their characteristics. these technologies are strong candidates for non-volatile
-main memories. Commonly accepted terms for such memory are \ac{NVRAM} and
-\ac{SCM}.
+\ac{DRAM} will be available in the near future \cite{dulloor2014system,
+oukid2017data, andrei2017sap}. Notable technologies currently in research are
+\ac{PCM}, \ac{MRAM}, and 3D XPoint. It is suggested that, due to their
+characteristics. these technologies are strong candidates for non-volatile main
+memories. Commonly accepted terms for such memory are \ac{NVRAM} and \ac{SCM}.
 
 The integration of \ac{NVRAM} can have many implications on both operating
-systems and applications. With projected densities higher than \ac{DRAM},
-\ac{NVRAM} is suggested to replace disk storage in some cases. This could
-significantly reduce recovery overhead in \acp{MMDB}. For one, databases would
-no longer have to move their data from non-volatile storage to main memory, thus
-enabling instant restarts. More importantly, persisting data would be faster by
-multiple orders of magnitude.
+systems and applications \cite{condit2009better, bailey2011operating,
+pelley2013storage, boehm2016persistence}. With projected densities higher than
+\ac{DRAM}, \ac{NVRAM} is suggested to replace disk storage in some cases. This
+could significantly reduce recovery overhead in \acp{MMDB}. For one, databases
+would no longer have to move their data from non-volatile storage to main
+memory, thus enabling instant restarts. More importantly, persisting data would
+be faster by multiple orders of magnitude.
 
 % Motivation
 
 Recent research indicates that NVRAM-resident \ac{MMDB} and \kvsp can achieve
-higher transaction throughput than conventional systems. However, these works
-still rely on non-serializable transactions and do not address the opportunity
-to enable stronger isolation. Serializability is a desirable property to
-guarantee data integrity and should not be traded in favor of performance. In
-the end, \ac{NVRAM} could be an opportunity to satisfy both demands. Therefore,
-this thesis aims to provide affordable serializable transactions by leveraging
-the superior performance of \ac{NVRAM} over disks.
+higher transaction throughput than conventional systems
+\cite{bailey2013exploring, zhou2016nvht}. However, these works still rely on
+non-serializable transactions and do not address the opportunity to enable
+stronger isolation. Serializability is a desirable property to guarantee data
+integrity and should not be traded in favor of performance. In the end,
+\ac{NVRAM} could be an opportunity to satisfy both demands. Therefore, this
+thesis aims to provide affordable serializable transactions by leveraging the
+superior performance of \ac{NVRAM} over disks.
 
 % Task
 
