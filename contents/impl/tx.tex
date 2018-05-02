@@ -214,8 +214,7 @@ An item can be deleted by invoking \code{Store::drop()}. Deletion is very simila
 
 \subsection{Commits}
 
-In order to manifest the changes of a transaction in the store, the transaction must be committed using \code{Store::commit()}. Its implementation is outlined as pseudo code in Algorithm \ref{alg:commit}. A commit works as follows. At first, the transaction receives an end timestamp. In the next step, the read sets of the transaction are validated against read-write conflicts. If at least one read version has been updated or deleted, then the transaction aborts. This implementation could be too pessimistic but it preserves serializability. Once the validation succeeds, all change sets of the transaction are translated into durable changes. As a result, durable versions are allocated or deallocated, and histories are modified accordingly. After this step, all changes are durable and the transaction status is changed from \code{Active} to \code{Committed}. At this point, the TID of the committed transaction is still deposited on all the versions that it has modified or created. This is not a problem because other transaction can still inspect the committed transaction. In order to be able to remove the transaction at some point, its end timestamp must be propagated to all these versions and thus replace its deposited TID.
-The transaction's end timestamp will be installed as: end timestamp in updated or deleted versions or begin timestamp for newly inserted versions. Finally, the transaction is complete and its control block can be removed from the transaction table.
+In order to manifest the changes of a transaction in the store, the transaction must be committed using \code{Store::commit()}. Its implementation is outlined as pseudo code in Algorithm \ref{alg:commit}. A commit works as follows. At first, the transaction receives an end timestamp. In the next step, the read sets of the transaction are validated against read-write conflicts. If at least one read version has been updated or deleted, then the transaction aborts. This implementation could be too pessimistic but it preserves serializability. Once the validation succeeds, all change sets of the transaction are translated into durable changes. As a result, durable versions are allocated or deallocated, and histories are modified accordingly. After this step, all changes are durable and the transaction status is changed from \code{Active} to \code{Committed}.
 
 \vspace{0.5cm}
 
@@ -236,3 +235,14 @@ The transaction's end timestamp will be installed as: end timestamp in updated o
 \caption{}
 \label{alg:commit}
 \end{algorithm}
+
+At this point, the TID of the committed transaction is still deposited on all the versions that it has modified or created. This is not a problem because other transactions can still inspect the committed transaction. In order to be able to remove the transaction at some point, its TID must be removed from all these versions. This is done by replacing the deposited TID with the transaction's end timestamp. The timestamp will be installed as: end timestamp for updated or deleted versions or begin timestamp for newly inserted versions. Finally, the transaction is complete and its control block can be removed from the transaction table.
+
+% A concluding example on how timestamps of updates are installed in Midas is given in Figure \ref{fig:mvcc-updates} below.
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[scale=0.7]{figures/impl/mvcc.pdf}
+%     \caption{Replacing the TID with end timestamp when committing an update.}
+%     \label{fig:mvcc-updates}
+% \end{figure}
