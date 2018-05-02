@@ -7,26 +7,26 @@ performance impact of serializability in NVRAM-based key-value stores.
 \subsection{Setup}
 
 In order to perform the experiment, there are two prerequisites to satisfy. At
-first, data are required to populate each \ac{KVS}. Second, workloads of concrete
+first, data is required to populate each \ac{KVS}. Second, workloads of concrete
 transactions are needed to operate on the populated stores. Key-value pairs may
-not be too hard to come by but in this case synthetic data are fine as well.
+not be too hard to come by but in this case synthetic inputs are fine as well.
 Workloads are more complicated because it is hard to acquire transaction traces
 and determine their relevance. For that reason, the experiment is synthetic and
 relies exclusively on randomly generated data and workloads. All pseudo-random
 numbers were generated using uniform distributions. However, each random choice
-is reproducible as the generated data are stored on disk prior to the
-experiment. Hence, the only non-deterministic behavior is induced by
-multi-threading, the operating system, and the underlying hardware.
+is reproducible as the generated data is stored on disk prior to the experiment.
+Hence, the only non-deterministic behavior is induced by multi-threading, the
+operating system, and the underlying hardware.
 
 \subsubsection{Key-Value Data}
 
-The data used in the experiment comprise two distinct sets of randomly generated
-key-value pairs. The first data set contains 1K pairs, whereas the second holds
-100K entries. Lacking insights on meaningful layouts of key-value pairs, this
-evaluation relies on the same layout used in \cite{bailey2013exploring}.
-Accordingly, keys are 128-byte random strings and values are 1024-byte random
-strings. When the experiment starts, each individual \ac{KVS} is populated with these
-key-value pairs.
+The data used in the experiment comprises two distinct sets of randomly
+generated key-value pairs. The first data set contains 1K pairs, whereas the
+second holds 100K entries. Lacking insights on meaningful layouts of key-value
+pairs, this evaluation relies on the same layout used in
+\cite{bailey2013exploring}. Accordingly, keys are 128-byte random strings and
+values are 1024-byte random strings. When the experiment starts, each individual
+\ac{KVS} is populated with these key-value pairs.
 
 \subsubsection{Workloads}
 

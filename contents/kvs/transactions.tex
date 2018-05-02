@@ -136,7 +136,7 @@ already completed operation of a transaction must be undone should the latter
 fail. Reverting the affected data to their previous state is often referred to
 as \emph{rollback}.
 
-The property of \emph{consistency} asserts that if the underlying data are in a
+The property of \emph{consistency} asserts that if the underlying data is in a
 consistent state, then any transaction must preserve consistency. For example,
 an ACID-compliant database cannot be transitioned into an illegal state by means
 of a transaction. If  a transaction is bound to break the consistency of the
@@ -178,7 +178,13 @@ issues, transactions can be allowed to run concurrently.
 
 \paragraph{Concurrent Transactions}
 
-Concurrent transaction execution can largely remove the shortcomings outlined above. Now, an incoming transaction does not need to wait for an in-flight transaction to complete. In addition to increasing transaction throughput, it also enables better resource utilization. This works as long as data are read but not written. Allowing concurrent updates however, bears potential conflicts that threaten the consistency of data and must therefore be addressed. Possible conflicts are:
+Concurrent transaction execution can largely remove the shortcomings outlined
+above. Now, an incoming transaction does not need to wait for an in-flight
+transaction to complete. In addition to increasing transaction throughput, it
+also enables better resource utilization. This works as long as data is read but
+not written. Allowing concurrent updates however, bears potential conflicts that
+threaten the consistency of data and must therefore be addressed. Possible
+conflicts are:
 
 \begin{itemize}
     \item write-write
@@ -207,7 +213,8 @@ A \emph{write-read} conflict occurs when a transaction reads data that has not
 been committed yet. Imagine a transaction $t_1$ that reads a record $A$ that was
 previously updated but not committed by another transaction $t_2$. If $t_2$
 updates the same item again or fails, then $t_1$ has processed a value that was
-never committed. This situation is also called \emph{dirty read}. For an example see Figure \ref{fig:wr-conflict}.
+never committed. This situation is also called \emph{dirty read}. For an example
+see Figure \ref{fig:wr-conflict}.
 
 \begin{figure}[h!]
     \centering

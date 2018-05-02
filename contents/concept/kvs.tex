@@ -173,18 +173,19 @@ contains transaction control blocks which are explicitly volatile.
 
 \subsubsection{Non-Volatile Section}
 
-The non-volatile section stores all data that are durable across restarts. It
+The non-volatile section stores all data that is durable across restarts. It
 holds a control block, the index structure, and all data items mapped by the
 index.
 
 \paragraph{Control Block}
 
-The control block is used to store a few essential metadata and for locating the
-index after a restart. For that purpose, the control block is placed in a fixed
-position of the \ac{KVS}' non-volatile region. Possible locations are the front
-or rear end of the memory region. The index can be found by storing an offset or
-pointer. Either way, the underlying system must provide a way to reuse or
-recover a previous memory mapping, so both location methods are sufficient.
+The control block is used to store a small set of essential metadata and for
+locating the index after a restart. For that purpose, the control block is
+placed in a fixed position of the \ac{KVS}' non-volatile region. Possible
+locations are the front or rear end of the memory region. The index can be found
+by storing an offset or pointer. Either way, the underlying system must provide
+a way to reuse or recover a previous memory mapping, so both location methods
+are sufficient.
 
 \paragraph{Index}
 

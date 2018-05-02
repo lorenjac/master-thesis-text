@@ -21,7 +21,7 @@ With the exception of \ac{ADR}, all of these methods can significantly increase
 execution latencies as they work against many aspects of modern microprocessors.
 Deferred write-backs for example are useful to decrease access times for
 recently written data. Flushing store buffers, however, also affects data that
-are not involved in transactions. In addition, enforcing strict program order
+is not involved in transactions. In addition, enforcing strict program order
 usually results in pipeline stalls. Since there are no other options at the
 moment, programmers have to meticulously manage and optimize updates to
 \ac{NVRAM}.

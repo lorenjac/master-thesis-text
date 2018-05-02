@@ -62,7 +62,7 @@ semantics. In addition, swapping is disabled for the respective memory region.
 \subsubsection{Programming Model}
 
 Apart from its core, the essential part of PMDK used in this work is called
-\code{pmemobj}. With it, a persistent object pool holds all data that are meant
+\code{pmemobj}. With it, a persistent object pool holds all data that is meant
 to be durable. Memory inside the object pool is managed by a designated memory
 allocator. For each object which is meant to be durable, it allocates the
 required amount of memory and registers the resulting object in the object pool.
@@ -145,7 +145,7 @@ initialize an instance of the class. Otherwise, the programmer has to use custom
 initialization procedures.
 
 Internally, PMDK uses largely the same mechanism for consistency as described in
-Chapter \ref{ch:nvram-consistency}. That means, modified data are flushed from
+Chapter \ref{ch:nvram-consistency}. That means, modified data is flushed from
 memory order buffers and caches. In some situations, non-temporal writes are
 used which make use of write combine buffers. When it comes to flushing
 write-pending queues inside the memory controller, PMDK relies on ADR.
