@@ -4,10 +4,8 @@ operating systems. With transactions, multiple operations, such as reading or
 updating a record, can be grouped into a single unit that succeeds if and only
 if neither of its operations fails. Especially in high-performance computing
 environments, the utilization of computing resources through concurrent
-transactions plays an essential role.
-
-This section describes the concept of transactions and its properties with
-regard to concurrency, in particular.
+transactions plays an essential role. This section describes the concept of
+transactions and its properties with regard to concurrency, in particular.
 
 \paragraph{Definition}
 
@@ -61,14 +59,14 @@ operations are denoted by shorthands as shown in Table
         a    & Abort            \\
         \hline
     \end{tabular}
-    \caption{}
+    \caption{Shorthands for transactional operations in schedule notations.}
     \label{tab:schedule_notation}
 \end{figure}
 
 There are several ways to print a schedule. A common method is to render a
 linear list containing shorthands of indexed operations where the indices denote
 the associated transaction, respectively (see Figure
-\ref{fig:schedule_interleaved}).
+\ref{fig:schedule_interleaved}). Schedules are read from left to right.
 
 \begin{figure}[h!]
     \centering
@@ -79,9 +77,9 @@ the associated transaction, respectively (see Figure
     \label{fig:schedule_interleaved}
 \end{figure}
 
-\todo[inline]{timeline?}
-
-For the better readability, this work chooses to list operations for each transaction individually, while retaining their global chronological order as shown in Figure \ref{fig:schedule_projected}.
+For the better readability, this work chooses to list operations for each
+transaction individually, while retaining their global chronological order (see
+Figure \ref{fig:schedule_projected}).
 
 \begin{figure}[h!]
     \centering
@@ -124,10 +122,10 @@ precisely. The predominant characterization of transactional semantics is ACID
 \cite{gray1981transaction, haerder1983principles}. It comprises a set of necessary properties:
 
 \begin{itemize}
-    \item Atomicity
-    \item Consistency
-    \item Isolation
-    \item Durability
+    \item atomicity
+    \item consistency
+    \item isolation
+    \item durability
 \end{itemize}
 
 \emph{Atomicity} captures the all-or-nothing notion of a transaction, i.e.
@@ -264,7 +262,7 @@ if there exists a serial schedule of the same transactions that produces the
 same output. A transaction processing system provides serializability if and
 only if it guarantees that all its concurrent schedules are serializable.
 
-\todo[inline]{Insert example for serializable vs. non-serializable schedules}
+% \todo[inline]{Insert example for serializable vs. non-serializable schedules}
 
 In order to enforce serializability, a decidable classification for serial
 transaction schedules is required. An early definition of serializability
@@ -276,9 +274,9 @@ were defined. In terms of ANSI SQL, a transaction is serializable if none of the
 following anomalies was present:
 
 \begin{itemize}
-    \item Dirty Read
-    \item Non-Repeatable Read
-    \item Phantom
+    \item dirty read
+    \item non-repeatable read
+    \item phantom
 \end{itemize}
 
 A \emph{phantom} is similar to a non-repeatable read but differs in that the

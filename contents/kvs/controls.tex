@@ -241,6 +241,8 @@ based on this strategy, \ac{SI} can be implemented without validation on commit.
 It can also reduce the size of individual rollbacks as write-write conflicts are
 detected immediately.
 
+\vfill
+
 \subsubsection{Shortcomings}
 
 Under \ac{SI} reads can always be satisfied, provided the requested item exists.
@@ -318,7 +320,7 @@ $t_1$ and $t_2$.
     \label{fig:bad_read_only}
 \end{figure}
 
-\todo[inline]{make intermediate values more visible..}
+% \todo[inline]{make intermediate values more visible..}
 
 Both symptoms can be attributed to the fact, that \ac{SI} fails to observe
 read-write conflicts. When a transaction requests an item, it reads the latest

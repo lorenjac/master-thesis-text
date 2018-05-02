@@ -5,9 +5,9 @@ very simple databases that are sometimes better described by what they are not
 or do not provide:
 
 \begin{itemize}
-    \item Non-relational data model
-    \item No data schemas
-    \item No query languages
+    \item non-relational data model
+    \item no data schemas
+    \item no query languages
 \end{itemize}
 
 In general, a \ac{KVS} consists of a single associative container, where each
@@ -28,10 +28,9 @@ databases. Although their \ac{API} is not standardized, it can be essentially
 broken down to the following operations:
 
 \begin{itemize}
-    \item Open/Close
-    \item Insertion
-    \item Retrieval
-    \item Removal
+    \item insertion
+    \item retrieval
+    \item removal
 \end{itemize}
 
 \paragraph{Applications}
@@ -93,10 +92,9 @@ and its side effects are rolled back.
 
 Transactions are a powerful mechanism that enables aggregated operations without
 worrying about inconsistencies even in case of failure. Given the prevalence of
-transactions, most \acp{KVS} support them. Due to their importance for this work,
-transactions are covered in more detail in the next section.
-
-\todo[inline]{Which KVS do not support transactions? -> memcached}
+transactions, most \acp{KVS} support them. A notable exception is memcached
+\cite{wu2016nvmcached}. Due to their importance for this work, transactions are
+covered in more detail in the next section.
 
 \paragraph{In-Memory Operation}
 

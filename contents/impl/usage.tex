@@ -72,6 +72,8 @@ that is read by all concurrent transactions, many transactions are bound to fail
 due to read-write conflicts. The example is shown in
 Listing~\ref{lst:usage-concurrent-tx}.
 
+\vspace{0.5cm}
+
 \begin{lstlisting}[caption={Several concurrent accounting transactions on the same store.},captionpos=b, label=lst:usage-concurrent-tx]
 void run_concurrent_transactions(midas::Store& store) {
     std::vector<std::thread> threads;

@@ -82,6 +82,9 @@ changes and can therefore not be used to observe such activity. Technically,
 threads could spy on each others change buffers but such behavior is neither
 required nor intended.
 
+\vfill
+\newpage
+
 Protecting transactions from observing concurrent updates, however, does not
 imply transactionally consistent data. For this purpose, the \ac{KVS} employs a
 serializing \ac{MVCC} protocol. When compared to locking-based approaches,
@@ -117,6 +120,8 @@ implementation-defined. For details, see Chapter \ref{ch:impl}.
 
 Ensuring durability and consistency with \ac{NVRAM} requires special attention
 and is covered in Chapter \ref{ch:concept-consistency}.
+
+\vfill
 
 \subsection{Structure}
 
@@ -238,7 +243,7 @@ overview of all the components of this section, see Figure
 
 \begin{figure}[!ht]
     \centering
-    \includegraphics[width=0.8\textwidth]{figures/concept/store-structure.pdf}
+    \includegraphics[width=0.7\textwidth]{figures/concept/store-structure.pdf}
     \caption{Components of the store and their interconnections.}
     \label{fig:concept-struct-complete}
 \end{figure}

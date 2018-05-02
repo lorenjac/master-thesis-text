@@ -33,6 +33,8 @@ methods. It is further assumed that target systems provide sufficient hardware
 and software facilities to manage \ac{NVRAM}. Details concerning crash
 consistency are provided in Chapter \ref{ch:concept-consistency}
 
+\vfill
+
 \paragraph{Workloads}
 
 When designing systems and transaction processors, in particular, it is helpful
@@ -104,7 +106,7 @@ This \ac{API} is sufficient to power a basic database with transactional
 semantics. Listing \ref{lst:api_ex} shows an example where a transaction checks
 whether the balance is negative and, if so, applies a penalty.
 
-\begin{lstlisting}[caption={}, captionpos=b, label=lst:api_ex]
+\begin{lstlisting}[caption={An example program showcasing the intended API of the KVS.}, captionpos=b, label=lst:api_ex]
 kvstore kvs;
 
 /* ... lots of transactions ... */
