@@ -31,12 +31,12 @@ system. Processors usually coordinate their work by communicating via some form
 of chip interconnect. In order to preserve generality, this work makes no
 assumptions concerning the nature of such interconnect networks.
 
-\begin{figure}[h!]
-    \centering
-    \includegraphics[scale=0.5]{figures/drafts/concept-sys-cpu.pdf}
-    \caption{}
-    \label{fig:concept-sys-cpu}
-\end{figure}
+% \begin{figure}[h!]
+%     \centering
+%     \includegraphics[scale=0.5]{figures/drafts/concept-sys-cpu.pdf}
+%     \caption{}
+%     \label{fig:concept-sys-cpu}
+% \end{figure}
 
 \subsubsection{Memory Architecture}
 
@@ -49,11 +49,17 @@ it is expected that these issues will be resolved in the near future. Therefore,
 in an effort to combine the benefits of both technologies, the memory subsystem
 is required to feature both volatile \ac{RAM} and \ac{NVRAM}. In accordance with
 recent research it is assumed that both kinds of memory can be accessed through
-the same memory interface. This work assumes a shared memory architecture. That
-is, processors may have one or more private cache levels but main memory is
-accessible to all processors. Conceptually, cache coherence is not required but
-has the advantage that less effort is spent on coordinating concurrent access to
-shared data.
+the same memory interface (see Figure \ref{fig:concept-sys-mem}). This work assumes a shared memory architecture. That is, processors may have one
+or more private cache levels but main memory is accessible to all processors.
+Conceptually, cache coherence is not required but has the advantage that less
+effort is spent on coordinating concurrent access to shared data.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[scale=0.8]{figures/concept/sys-mem.pdf}
+    \caption{Simplified example of expected system architecture.}
+    \label{fig:concept-sys-mem}
+\end{figure}
 
 The \ac{KVS} is designed to exclusively reside in main memory. All data that is
 not required across restarts is stored in volatile \ac{RAM}, whereas all other
@@ -68,13 +74,6 @@ very well be present in a system, they are never used to store any data of the
 restarts do not have to fetch data from slower storage devices. In return,
 candidate systems must provide sufficient \ac{NVRAM} capacity to hold the entire
 database.
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[scale=0.5]{figures/drafts/concept-sys-mem.pdf}
-    \caption{}
-    \label{fig:concept-sys-mem}
-\end{figure}
 
 A disadvantage of this approach is that the size of the database is bounded by
 the amount of available \ac{NVRAM}. In contrast, \acp{MMDB} usually allow for

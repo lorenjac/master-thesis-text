@@ -26,7 +26,15 @@ when a transaction commits, all its updates are propagated to \ac{NVRAM}.
 Otherwise, no user data is written to \ac{NVRAM}. Read operations are not
 directly affected by the two-level store paradigm. In some cases, however, an
 implementation may choose to buffer read operations, for instance to determine
-serialization order.
+serialization order. A draft of the architecture is depicted in Figure
+\ref{fig:concept-two-level-store}.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.6\textwidth]{figures/concept/two-level-store.pdf}
+    \caption{Transactional data flow in the two-level store.}
+    \label{fig:concept-two-level-store}
+\end{figure}
 
 The aim of the two-level store architecture is to reduce the impact of
 \ac{NVRAM}-related latencies. Buffering updates to \ac{NVRAM} in volatile memory
@@ -39,14 +47,14 @@ volatile memory can be accessed with lower latencies, which is true for both
 read and write operations. In the end, buffering updates also aids recovery, as
 uncommitted data is guaranteed to be lost after a restart.
 
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=\textwidth]{figures/drafts/concept-sys-two-level-store.pdf}
-    \caption{}
-    \label{fig:concept-two-level-store}
-\end{figure}
+% \begin{figure}[h!]
+%     \centering
+%     \includegraphics[width=\textwidth]{figures/drafts/concept-sys-two-level-store.pdf}
+%     \caption{}
+%     \label{fig:concept-two-level-store}
+% \end{figure}
 
-\todo[inline]{phasen einer transaktion? genauer ablauf}
+% \todo[inline]{phasen einer transaktion? genauer ablauf}
 
 \subsection{Transactions}
 \label{ch:concept-kvs-tx}
@@ -57,10 +65,8 @@ transaction. The primary motivation behind this decision is to preserve
 generality with regard to more complex \ac{DBMS}. Likewise, all transactions
 must conform to the ACID properties to ensure data consistency. Nesting
 transactions is not supported as use cases are too few to justify the additional
-complexity.
-
-Providing ACID support requires a conjunction of preventing erroneous behavior
-and restoring a previously sane state if an error occurs.
+complexity. Providing ACID support requires a conjunction of preventing
+erroneous behavior and restoring a previously sane state if an error occurs.
 
 \paragraph{Isolation}
 
@@ -112,11 +118,13 @@ implementation-defined. For details, see Chapter \ref{ch:impl}.
 Ensuring durability and consistency with \ac{NVRAM} requires special attention
 and is covered in Chapter \ref{ch:concept-consistency}.
 
-\subsection{Structures}
+\subsection{Structure}
 
 The \ac{KVS} resides entirely in main memory, that is, both volatile and
 non-volatile memory. According to the two-level store architecture, the \ac{KVS}
-is partitioned into two sections: a volatile and a non-volatile section.
+is partitioned into two sections: a volatile and a non-volatile section. An
+overview of the store's components is given at the end of this section in Figure
+\ref{fig:concept-struct-complete}.
 
 \subsubsection{Volatile Section}
 
@@ -164,12 +172,12 @@ transactions may not be automatically removed from the table but collected by a
 garbage collector. The transaction table is volatile by implication as it only
 contains transaction control blocks which are explicitly volatile.
 
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=\textwidth]{figures/drafts/concept-struct-volatile.pdf}
-    \caption{}
-    \label{fig:concept-struct-volatile}
-\end{figure}
+% \begin{figure}[h!]
+%     \centering
+%     \includegraphics[width=\textwidth]{figures/drafts/concept-struct-volatile.pdf}
+%     \caption{}
+%     \label{fig:concept-struct-volatile}
+% \end{figure}
 
 \subsubsection{Non-Volatile Section}
 
@@ -224,13 +232,22 @@ simpler allocation patterns compared to lists. Problems arise with garbage
 collection which could perform random-access modifications to the history. Since
 garbage collection would break the scope of this work, it is assumed to be
 absent or as non-invasive as possible. The concrete data structure used for
-histories is left to the implementation (see Chapter \ref{ch:impl}).
+histories is left to the implementation (see Chapter \ref{ch:impl}). For an
+overview of all the components of this section, see Figure
+\ref{fig:concept-struct-complete} below.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/concept/store-structure.pdf}
+    \caption{Components of the store and their interconnections.}
+    \label{fig:concept-struct-complete}
+\end{figure}
 
 \todo[inline]{arrays are not so optimal for histories (lists are better for concurrency)}
 
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=\textwidth]{figures/drafts/concept-struct-complete.pdf}
-    \caption{}
-    \label{fig:concept-struct-complete}
-\end{figure}
+% \begin{figure}[h!]
+%     \centering
+%     \includegraphics[width=\textwidth]{figures/drafts/concept-struct-complete.pdf}
+%     \caption{}
+%     \label{fig:concept-struct-complete}
+% \end{figure}
