@@ -58,8 +58,6 @@ necessary to force write-back in all of these cases.
     \label{fig:memory-interface}
 \end{figure}
 
-% \ac{MOB}
-% \paragraph{Memory Order Buffers}
 \paragraph{\acp{MOB}}
 
 In conjunction with instruction scheduling and cache coherency protocols a
@@ -72,7 +70,6 @@ overhead. However, if memory barriers are already used for enforcing program
 order, then flushing store buffers is a desirable side effect and incurs no
 overhead.
 
-% caches
 \paragraph{Caches}
 
 Processor caches help avoid access latencies and reduce memory bus traffic for
@@ -83,18 +80,22 @@ this is not that updates are lost but that it is unclear which updates are lost,
 if any. The reason for this circumstance is the cache eviction policy trying to
 compensate for typically narrow cache volume. Depending on policy, cache
 content, and system load, a modified chunk may or may not be flushed to main
-memory. An example of an application scenario where such behavior is
-unacceptable is transactions. Imagine an updating transaction $t1$ that commits
-but is not evicted from cache. Then a transaction $t2$ based on the result of
-$t1$ commits and gets evicted from cache. If the system crashes at this point,
-$t2$'s result will be durable while $t1$'s initial update is lost.
+memory. An application scenario where such behavior is unacceptable is
+transactions. In the example in Figure \ref{fig:nvram-cache-crash}, two stores are cached. One store becomes durable because its cache line is evicted, while the other remains in cache and is lost in a crash.
 
-\todo[inline]{Insert figure showing inconsistency due to crash}
+% \todo[inline]{Insert figure showing inconsistency due to crash}
 
-\begin{lstlisting}
-T1: r(A) w(A) c*   -- Cache ------------------------ (crash)
-T2: -------------- r(A) w(B) c -- Cache -- NVRAM --- (crash)
-\end{lstlisting}
+%\begin{lstlisting}
+%T1: r(A) w(A) c*   -- Cache ------------------------ (crash)
+%T2: -------------- r(A) w(B) c -- Cache -- NVRAM --- (crash)
+%\end{lstlisting}
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.70\textwidth]{figures/nvram/cache-crash.pdf}
+    \caption{A sitation where only one of two cached stores reaches durability.}
+    \label{fig:nvram-cache-crash}
+\end{figure}
 
 An approach to prevent such inconsistencies is to disable caching for selected
 memory regions but that could introduce considerable overhead for frequently
@@ -108,7 +109,6 @@ a cache line to a memory controller without evicting it \cite{kolli2016high,
 oukid2017data}. Unfortunately, at the time of this writing, there is no evidence
 of a processor to implement this instruction.
 
-% memory controller queues
 \paragraph{\acp{WPQ}}
 
 Once a cache line is flushed, it is propagated to a memory controller where it
@@ -121,11 +121,10 @@ in the past \cite{condit2009better, dulloor2014system, kolli2016high}. Some
 authors proposed a designated instruction for flushing \acp{WPQ}. An example is
 the meanwhile deprecated \code{pcommit} instruction (formerly known as
 \code{pm\_wbarrier}) \cite{dulloor2014system, oukid2015instant,
-schwalb2015nvm_malloc, volos2017whisper}. Others have developed more general
-mechanisms for preserving consistency in \ac{NVRAM} that also address this issue
-\cite{condit2009better, pelley2014memory}. The dotted rectangle in Figure
-\ref{fig:wpq} indicates the domain in the memory subsystem that must be
-protected from power failures.
+volos2017whisper}. Others have developed more general mechanisms for preserving
+consistency in \ac{NVRAM} that also address this issue \cite{condit2009better,
+pelley2014memory}. The dotted rectangle in Figure \ref{fig:wpq} indicates the
+domain in the memory subsystem that must be protected from power failures.
 
 \begin{figure}[h!]
     \centering
