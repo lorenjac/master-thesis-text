@@ -1,68 +1,56 @@
-In the past, there have been multiple attempts to produce non-volatile
-equivalents of main memory. One way is to emulate non-volatility by providing
-backup power supplies or combining volatile \ac{DRAM} and conventional
-non-volatile storage in a single module. Another promising approach is to
-develop alternative memory techniques that provide the features of \ac{NVRAM}.
+The design and integration of fast \ac{NVRAM} is not a new research area. In the
+past, there have been multiple attempts to produce non-volatile equivalents of
+main memory. While earlier approaches were mainly designed to make systems more
+tolerant to crashes \cite{molina1992main}, recent research suggests \ac{NVRAM}
+to hold entire \acp{MMDB} and speed up recovery \cite{oukid2015instant,
+schwalb2016hyrise, andrei2017sap}.
 
-% This section presents notable developments in the field of \ac{NVRAM}.
+One way to achieve byte-addressable \ac{NVM} is to attach \ac{DRAM} or \ac{SRAM}
+to backup power supplies as in \cite{liskov1991replication, wang2002conquest}.
+In other cases, conventional non-volatile storage, such as flash memory, is
+directly attached to the \ac{DRAM} module \cite{shi2010write, huang2014design,
+oe2016feasibility}. However, these approaches rely on batteries, which must be
+maintained, or block-oriented memory which is still much slower than DRAM. A
+more promising approach is to develop alternative memory techniques that provide
+the features of \ac{NVRAM}, natively.
 
-\todo[inline]{Present Phase-Change Memory (Concept/History/Parameters)}
+Among a range of recent \ac{NVRAM} designs, the most promising are \ac{PCM} and
+\ac{STT-RAM}\cite{zilberberg2013phase, mittal2016survey, jain2017computing}.
+These technologies vary according to the following parameters:
 
-% \paragraph{Early Approaches}
-%
-% Initially, the intention was to make systems more tolerant to failures, although
-% opportunities for storage systems were also discussed \cite{molina1992main,
-% wang2002conquest}. The main issue with \ac{DRAM} is that, in order to retain its
-% data, it needs to refresh its cells which requires a power supply. Therefore,
-% early non-volatile main memories were equipped with batteries or \ac{UPS} which
-% allowed to hold information for a limited time in case of a power failure.
-% Notable examples for systems using battery-backed \ac{DRAM} are the file systems
-% \emph{Harp} \cite{liskov1991replication} and \emph{Conquest}
-% \cite{wang2002conquest} as well as the file cache \emph{Rio} \cite{chen1996rio}.
-%
-% In another approach, researchers used battery-backed \ac{SRAM} as a write buffer
-% which is flushed to an interconnected flash memory when full or in case of a
-% power failure \cite{wu1994envy}. By limiting access to the \ac{SRAM}, the
-% non-volatile yet slower flash device is effectively shadowed. Still, since flash
-% operates in block mode, the byte-addressable nature of \ac{SRAM} cannot be exploited
-% in this setup. This is an early example of hybrid memory solutions for fast mass
-% storage. However, backup power supplies have also been subject to criticism.
-% Arguments are that batteries are not inherently reliable and introduce
-% additional maintenance overhead \cite{molina1992main}. Therefore experiments
-% were conducted, where flash memory was directly attached to the memory interface
-% \cite{shi2010write}. Similar ideas were later consolidated in the JEDEC NV\ac{DIMM}
-% specification, which defines several configurations for \ac{DIMM}s consisting of
-% flash memory and \ac{DRAM} \cite{oe2016feasibility, huang2014design}.
-%
-% % This marks a shift in the development of \ac{NVRAM} as reliability becomes second
-% % to fast high-capacity storage.
-%
-% \paragraph{Modern Approaches}
-%
-% Early approaches for practical \ac{NVRAM} were focused on making volatile \ac{DRAM} retain its information across power outages. There are however promising alternatives such as \ac{PCM}, \ac{MRAM} or \ac{RRAM} which are both byte-addressable and non-volatile by design. Although their underlying principles have been known for a while, further research was required to reach practical designs for manufacturing. Recent research suggests that these \ac{NVM} technologies will see broad availability in the near future \todo{cite}.
+\begin{itemize}
+    \item density
+    \item endurance
+    \item latency
+    \item power consumption
+\end{itemize}
 
-% technologies
-    % \ac{PCM} (also \ac{PRAM})
-    %     phase-change memory
-    %     based on properties of chalcogenide glasses
-    %     discovered in 1955
-    %     first prototype in 1969
-    % STT-\ac{MRAM} (also ST[T]-[M]RAM)
-    %     advanced type of \ac{MRAM}
-    %         magnetoresistive RAM
-    %         similar to magnetic core memory (1955)
-    %         GMR effect discovered in 1984
-    %         developed since 1995 (Motorola)
-    %     spin-transfer torque proposed in 1996
-    % \ac{RRAM} (also ReRam)
-    %     resistive RAM
-    %     resistive switching discovered in 1967
-    %     disputed to be a memristor
-    % memristors
-    %     ???
-    % FeRAM
+While \ac{PCM} is projected to have the highest density of all, including
+\ac{DRAM}, it is also features a lower endurance. In terms of endurance,
+\ac{STT-RAM} fares better than \ac{PCM} but is still surpassed by \ac{DRAM}.
+Also, \ac{STT-RAM} has a very low density which prevents high capacity memory
+modules. \ac{NVRAM} is known to incur higher access latency that \ac{DRAM}. This
+is certainly true for \ac{PCM} which can have up to 10\% latency than \ac{DRAM}.
+\ac{STT-RAM}, on the other hand, is projected to the on a par with \ac{DRAM}.
+Concerning power consumption, \ac{STT-RAM} appears to have advantages over both
+\ac{DRAM} and \ac{PCM}. In this case, \ac{PCM} registers an even higher
+consumption than \ac{DRAM} \cite{mittal2016survey}.
 
-% density: \ac{DRAM} < STT-RAM < \ac{PCM} (higher is better)
-% endurance: \ac{PCM} < STT-RAM < \ac{DRAM} (higher is better)
-% latency: \ac{DRAM} <= STT-RAM < \ac{PCM} (lower is better)
-% dypower: STT-RAM < \ac{DRAM} < \ac{PCM} (lower is better)
+In total, \ac{STT-RAM} poses a very promising technology but provides suboptimal
+capacities and is also less enduring than \ac{DRAM}. \ac{PCM}, on the other
+hand, provides a higher capacity but at the cost of higher latencies. Still,
+recent research suggests \ac{PCM} to be the first fast high-capacity \ac{NVRAM}
+to be ready to manufacture \cite{zilberberg2013phase, dulloor2014system,
+mittal2016survey}. Nevertheless, this work is independent of the underlying
+NVRAM technology.
+
+%\subsection{Promising NVRAM Technologies}
+
+% mittal2016survey
+
+%\paragraph{PCM}
+
+% lee2009architecting
+% zilberberg2013phase
+
+%\paragraph{STT-MRAM}

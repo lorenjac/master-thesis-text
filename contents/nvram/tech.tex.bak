@@ -1,0 +1,55 @@
+\subsection{Early Approaches}
+
+Initially, the intention was to make systems more tolerant to failures, although
+opportunities for storage systems were also discussed \cite{molina1992main,
+wang2002conquest}. The main issue with \ac{DRAM} is that, in order to retain its
+data, it needs to refresh its cells which requires a power supply. Therefore,
+early non-volatile main memories were equipped with batteries or \ac{UPS} which
+allowed to hold information for a limited time in case of a power failure.
+Notable examples for systems using battery-backed \ac{DRAM} are presented in
+\cite{liskov1991replication, wang2002conquest, chen1996rio}.
+
+In another approach, researchers used battery-backed \ac{SRAM} as a write buffer
+which is flushed to an interconnected flash memory when full or in case of a
+power failure \cite{wu1994envy}. By limiting access to the \ac{SRAM}, the
+non-volatile yet slower flash device is effectively shadowed. Still, since flash
+operates in block mode, the byte-addressable nature of \ac{SRAM} cannot be
+exploited in this setup. This is an early example of hybrid memory solutions for
+fast mass storage. However, backup power supplies have also been subject to
+criticism. Arguments are that batteries are not inherently reliable and
+introduce additional maintenance overhead \cite{molina1992main}. Therefore
+experiments were conducted, where flash memory was directly attached to the
+memory interface \cite{shi2010write}. Similar ideas were later consolidated in
+the JEDEC NV\ac{DIMM} specification, which defines several configurations for
+\ac{DIMM}s consisting of flash memory and \ac{DRAM} \cite{oe2016feasibility,
+huang2014design}.
+
+% technologies
+    % \ac{PCM} (also \ac{PRAM})
+    %     phase-change memory
+    %     based on properties of chalcogenide glasses
+    %     discovered in 1955
+    %     first prototype in 1969
+    % STT-\ac{MRAM} (also ST[T]-[M]RAM)
+    %     advanced type of \ac{MRAM}
+    %         magnetoresistive RAM
+    %         similar to magnetic core memory (1955)
+    %         GMR effect discovered in 1984
+    %         developed since 1995 (Motorola)
+    %     spin-transfer torque proposed in 1996
+    % \ac{RRAM} (also ReRam)
+    %     resistive RAM
+    %     resistive switching discovered in 1967
+    %     disputed to be a memristor
+    % memristors
+    %     ???
+    % FeRAM
+
+% density:
+%     \ac{DRAM} < STT-RAM < \ac{PCM} (higher is better)
+% endurance:
+%     \ac{PCM} < STT-RAM < \ac{DRAM} (higher is better)
+% latency:
+%     \ac{DRAM} <= STT-RAM < \ac{PCM} (lower is better)
+% dypower:
+%     STT-RAM < \ac{DRAM} < \ac{PCM} (lower is better)
