@@ -107,12 +107,12 @@ no evident consensus regarding the programming model to use for \ac{NVRAM}
 \cite{boehm2016persistence}. Still, the middleware PMDK (formerly known as NVML)
 appears to be gaining the upper hand \cite{oukid2017data, volos2017whisper,
 malinowski2017using, andrei2017sap}. Figure \ref{fig:pmdk-sys} depicts how PMDK
-operates by mapping files into a process' address space to enable load-store
-semantics.
+sits between the application and the file system. It operates by mapping files
+into a process' address space to enable load-store semantics.
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[scale=1]{figures/pmdk-sys-arch-extract.pdf}
+    \includegraphics[scale=1]{figures/nvram/pmdk-sys-arch-extract.pdf}
     \caption{System architecture with PMDK to manage NVRAM \cite{rudoff2017persistent}.}
     \label{fig:pmdk-sys}
 \end{figure}

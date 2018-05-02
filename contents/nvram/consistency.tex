@@ -49,11 +49,13 @@ While their individual purpose may vary, they all defer memory write-back
 operations. This is a known vulnerability for consistency in \ac{NVRAM} as the
 mentioned buffers are volatile and deferred stores may be lost when power fails
 \cite{condit2009better, oukid2017data}. In order to preserve consistency, it is
-necessary to force write-back in all of these cases.
+necessary to force write-back in all of these cases. Figure
+\ref{fig:memory-interface} shows a typical memory hierarchy with several layers
+by which stores can be deferred.
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[scale=0.75]{figures/nvram-memory-subsystem.pdf}
+    \includegraphics[scale=0.9]{figures/nvram/memory-subsystem.pdf}
     \caption{Architecture of memory subsystem \cite{bhandari2012implications}.}
     \label{fig:memory-interface}
 \end{figure}
@@ -128,7 +130,7 @@ domain in the memory subsystem that must be protected from power failures.
 
 \begin{figure}[h!]
     \centering
-    \includegraphics{figures/adr-example.pdf}
+    \includegraphics{figures/nvram/adr-example.pdf}
     \captionsetup{justification=centering}
     \caption{The memory domain to be protected against power failures \cite{rudoff2017persistent}.}
     \label{fig:wpq}

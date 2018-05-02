@@ -138,7 +138,7 @@ transaction. With redo logging, log entries only need to be flushed on commit
 which can be optimized, for example with non-temporal stores. In an evaluation,
 MetraDB has shown superior performance when compared to several lookup data
 structures contained in NVML (currently known as PMDK). Given that NVML provides
-general-purpose \ac{NVRAM} facilities, as opposed to MetraDB's use-case
+general-purpose \ac{NVRAM} facilities, as opposed to MetraDB's use case
 optimizations, the comparison is not always fair. Still, the evaluation exposes
 scalability issues related to the operating system rather than the \ac{KVS}
 itself. Upon finding scalability to falter when increasing the number of

@@ -239,7 +239,7 @@ store(A) is durable}</string>
 				<key>stroke</key>
 				<dict>
 					<key>HeadArrow</key>
-					<string>DimensionArrow</string>
+					<string>StickArrow</string>
 					<key>Pattern</key>
 					<integer>1</integer>
 					<key>TailArrow</key>
@@ -2049,7 +2049,7 @@ store(A) is durable}</string>
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2018-05-02 18:03:08 +0000</string>
+	<string>2018-05-02 18:22:25 +0000</string>
 	<key>Modifier</key>
 	<string>kodiak</string>
 	<key>NotesVisible</key>

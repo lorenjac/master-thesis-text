@@ -3,6 +3,8 @@ often considered \ac{NVRAM} as a way to improve fault tolerance, recent research
 suggests a broader range of applications. This development is especially driven
 by recent advances in the manufacture of standalone \ac{NVRAM}.
 
+\paragraph{Fault-Tolerance}
+
 As pointed out earlier, a well-known use case of \ac{NVRAM} is to increase fault
 tolerance towards crashes. The goal is to retain main memory content even in
 case of a crash, for instance by an abrupt power loss \cite{molina1992main,
@@ -15,6 +17,8 @@ durability. Also, batteries degrade over time and need to be maintained to
 prevent unexpected failure \cite{molina1992main}. Therefore, modern \ac{NVRAM}
 solutions which no longer require peripherals are a welcome improvement in this
 area.
+
+\paragraph{Disk Caches}
 
 A significant amount of research on \ac{NVRAM} is dedicated to mitigating the
 \ac{IO} bottleneck imposed by traditional disk storage. One way to do so is to
@@ -29,6 +33,8 @@ that volatile caches need to be flushed at some point which requires careful
 resource management. \ac{NVRAM} caches on the other hand, only need to evict
 items when there is no slot for an incoming item.
 
+\paragraph{Disk Replacement}
+
 Another approach is to treat \ac{NVRAM} as an equivalent to traditional disk
 storage. Early works, which were strongly influenced by the lack of
 high-capacity \ac{NVRAM}, proposed hybrid storage systems where disk storage was
@@ -39,6 +45,8 @@ disk. While this does not remove disk access as a common bottleneck, it
 certainly alleviates latency for some frequently accessed files. In that regard,
 \ac{NVRAM}-complemented disk storage systems are similar to those with
 \ac{NVRAM} disk caches.
+
+\paragraph{Modern Use Cases}
 
 For the time being, many applications will have to deal with a scarcity of
 \ac{NVRAM}. But as improving technologies achieve higher capacities with better
@@ -56,7 +64,7 @@ state of the database that was durable at the time of the crash. That is,
 \acp{MMDB} require non-volatile memory for the sole purpose of recovery.
 Recurring recovery measures such as logging have been a long-standing issue with
 \acp{MMDB} as they incur expensive disk \ac{IO}, thus limiting transaction
-throughput \cite{eich1986main, molina1992main, wust2012efficient,
+throughput \cite{molina1992main, wust2012efficient,
 malviya2014rethinking}. In addition, restarts reduce the availability of a
 system as recovering large databases from slow storage can be time-consuming.
 With \ac{NVRAM} on the other hand, any \ac{MMDB} would be implicitly durable,
@@ -73,6 +81,8 @@ Research results in these areas are central to this work and are reflected in
 chapter \ref{ch:nvram} through \ref{ch:concept}. Given their importance for this
 thesis, existing \acp{KVS} for \ac{NVRAM} are looked into in more detail at the
 end of chapter \ref{ch:kvs}.
+
+\paragraph{Experimental Use Cases}
 
 While most works aim to improve existing architectures, some explore different
 computation models. A recent example is a proposal to use \ac{NVRAM} to enable
