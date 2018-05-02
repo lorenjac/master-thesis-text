@@ -1,19 +1,17 @@
 The benchmarks are conducted on a platform of four Intel Xeon E7-4830 processors
 with a total of 32 cores running at 2.13GHz. Main memory consists of 256GB DDR3
-SDRAM running at 1066Mhz. For durable storage, the system relies on mechanical
-hard drives. The operating system is CentOS 7.4 based on Linux 3.10.
+\ac{DRAM} running at 1066Mhz. For durable storage, the system relies on
+mechanical hard drives. The operating system is CentOS 7.4 based on Linux 3.10.
 
-Since NVRAM is not available, all benchmarks are carried out on volatile DRAM.
-In order to emulate persistence, each KVS stores its contents in a memory-mapped
-file. To satisfy the consistency requirements shown in Chapter
+Since \ac{NVRAM} is not available, all benchmarks are carried out on volatile
+\ac{DRAM}. In order to emulate persistence, each \ac{KVS} stores its contents in
+a memory-mapped file. To satisfy the consistency requirements shown in Chapter
 \ref{ch:nvram-consistency}, it is important to prevent potential buffering of
 data in kernel page caches. This is achieved by using a 127GB instance of
-\emph{tmpfs} as RAM disk. However, even with this setup, memory pages may still
-be swapped at will by the OS. In order to prevent this, swapping is disabled. As
-a result, the hard disk is never used and no write operation within the mapped
-region is deferred.
-
-Promising NVRAM technologies such as PCM do incur higher latencies than DRAM. In
-accordance with \cite{bailey2013exploring, zhou2016nvht}, this work refrains
-from emulating access latencies for the same reasons given in Chapter
+\emph{tmpfs} as \ac{RAM} disk. However, even with this setup, memory pages may
+still be swapped at will by the operating system. In order to prevent this,
+swapping is disabled. As a result, the hard disk is never used and no write
+operation within the mapped region is deferred. In accordance with
+\cite{bailey2013exploring, zhou2016nvht}, this work refrains from emulating
+\ac{NVRAM} latencies for the same reasons given in Chapter
 \ref{ch:eval-challenges}.
