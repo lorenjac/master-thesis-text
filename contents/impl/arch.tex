@@ -290,18 +290,10 @@ template design.
 
 \newpage
 
-% \subsection{Transaction Management}
 \subsection{Components}
 \label{ch:impl-components}
 
-This section presents an outline of the transaction management in Midas.
-
-% \subsubsection{Transactions}
-% \subsubsection{Components}
-
-Transaction management relies on two key data structures: transaction control blocks and the transaction table. This section documents the implementation of these structures.
-
-\todo[inline]{This section now deals with all components, not just transactions}
+This section presents an outline of all components involved in the transaction management of Midas.
 
 \paragraph{Transaction Control Blocks}
 
@@ -355,21 +347,80 @@ For each value of a key-value pair, there are several versions. The versions of 
 
 \paragraph{Index}
 
-Another core data structure in Midas is the index. It accomplishes the mapping between the key of an item and the item's version history. Whenever a transactional operation wishes to access an item, it has to query the index with the corresponding key. The index must provide fast lookup and is therefore implemented as a hash table. For that purpose, the durable hash table \code{NVHashmap} from Section \ref{ch:impl-data} is used. The index is accessed by all concurrent transactions and must therefore be synchronized. Due to the complexity of concurrent data structure design, a lock is used to protect the index. This is likely to become a serious bottleneck and should be revised in future work.
+Another core data structure in Midas is the index. It accomplishes the mapping between the key of an item and the item's version history. Whenever a transactional operation wishes to access an item, it has to query the index with the corresponding key. The index must provide fast lookup and is therefore implemented as a hash table. For that purpose, the durable hash table \code{NVHashmap} from Section \ref{ch:impl-data} is used. The index is accessed by all concurrent transactions and must therefore be synchronized. Due to the complexity of concurrent data structure design, a lock is used to protect the index. This is likely to become a serious bottleneck and should be revised in future work. For a list of all components in Midas and their underlying data structures, see Figure \ref{tab:component-data}.
 
-\todo[inline]{table with component and their data structure}
+\begin{figure}[!ht]
+    \centering
+    \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{Component} & \textbf{Data Structures} & \textbf{Memory Domain} \\
+        \hline
+        \hline
+        % Transaction Control Block & \code{std::vector}, \code{std::unordered\_map}, integrals & volatile \\
+        % Transaction Table         & \code{libcuckoo\_map}                                     & volatile \\
+        % Index                     & \code{NVHashmap}, \code{NVList}                           & non-volatile \\
+        % History                   & \code{NVList}                                             & non-volatile \\
+        % Version                   & \code{NVString}, integrals                                & non-volatile \\
+        Transaction Control Block & \code{std::vector},             & volatile \\
+                                  & \code{std::unordered\_map}      & volatile \\
+        Transaction Table         & \code{libcuckoo\_map}           & volatile \\
+        Index                     & \code{NVHashmap}, \code{NVList} & non-volatile \\
+        History                   & \code{NVList}                   & non-volatile \\
+        Version                   & \code{NVString}                 & non-volatile \\
+        \hline
+    \end{tabular}
+    \caption{An overview of all components and their underlying data structures.}
+    \label{tab:component-data}
+\end{figure}
 
 \section{Transaction Processing}
 
-Unlike other \acp{KVS}, Midas can only be operated through transactions. Transactions that are either terminated or belong to another store instance are rejected. Once a transaction has been started with \code{Store::begin()}, it can be used to modify the store with the following operations:
+Unlike other \acp{KVS}, Midas can only be operated through transactions. Transactions that are either terminated or belong to another store instance are rejected. Once a transaction has been started with \code{Store::begin()}, it can be used to access the store with \code{Store::read()}, \code{Store::write()}, and \code{Store::drop()}. For the full list of procedures, see Figure \ref{tab:procedures}.
 
-\begin{itemize}
-    \item read: \code{Store::read(<tx>, <key>, <value>)}
-    \item update: \code{Store::write(<tx>, <key>, <value>)}
-    \item deletion: \code{Store::drop(<tx>, <key>)}
-\end{itemize}
+% \begin{itemize}
+%     \item read: \code{Store::read(<tx>, <key>, <value>)}
+%     \item update: \code{Store::write(<tx>, <key>, <value>)}
+%     \item deletion: \code{Store::drop(<tx>, <key>)}
+% \end{itemize}
 
-\todo[inline]{consider adding a table or class diagram}
+% \begin{figure}[!ht]
+%     \centering
+%     \begin{tabular}{|l|l|}
+%         \hline
+%         \textbf{Operation} & \textbf{Procedure} \\
+%         \hline
+%         \hline
+%         Begin  & \code{begin() : tx\_ptr} \\
+%         Abort  & \code{abort(tx\_ptr) : int} \\
+%         Commit & \code{commit(tx\_ptr) : int} \\
+%         Read   & \code{read(tx\_ptr, const key\_type\&, value\_type\&) : int} \\
+%         Update & \code{write(tx\_ptr, const key\_type\&, value\_type\&) : int} \\
+%         Delete & \code{drop(tx\_ptr, const key\_type\&) : int} \\
+%         \hline
+%     \end{tabular}
+%     \caption{An overview of all procedures provided by Midas.}
+%     \label{tab:procedures}
+% \end{figure}
+
+\begin{figure}[!ht]
+    \centering
+    \begin{tabular}{|l|ll|}
+        \hline
+        \textbf{Operation} & \textbf{Procedure} & \\
+        \hline
+        \hline
+        Begin  & \code{begin()} & \code{: tx\_ptr} \\
+        Abort  & \code{abort(tx\_ptr)} & \code{: int} \\
+        Commit & \code{commit(tx\_ptr)} & \code{: int} \\
+        \hline
+        Read   & \code{read(tx\_ptr, const key\_type\&, value\_type\&)} & \code{: int} \\
+        Update & \code{write(tx\_ptr, const key\_type\&, value\_type\&)} & \code{: int} \\
+        Delete & \code{drop(tx\_ptr, const key\_type\&)} & \code{: int} \\
+        \hline
+    \end{tabular}
+    \caption{An overview of all procedures provided by Midas.}
+    \label{tab:procedures}
+\end{figure}
 
 %\begin{lstlisting}
 %class Store {
@@ -385,7 +436,7 @@ Unlike other \acp{KVS}, Midas can only be operated through transactions. Transac
 %};
 %\end{lstlisting}
 
-Each operation has its own procedure. The control flow of all these procedures is structured in the same way. At first, inputs are checked for errors. Next, the history of the item associated with the specified key is looked up. While \code{Store::read()} and \code{Store::drop()} will fail if no history is found, \code{Store::write()} will perform an insertion by adding a new pair to the transaction's change set. If a history is found, then it is scanned for a version that is visible to the specified transaction. If a valid version is found, the operation can perform its read, write, or deletion, respectively. Otherwise, the operation cannot continue and aborts the associated transaction with an error code. Finally, a transaction must be committed with \code{store::commit()} to make its changes durable. Until then, it can always be aborted with \code{Store::abort()}. The subsequent sections give details about the implementations of visibility, operations, and commits.
+Each operation has its own procedure. The control flow of most procedures is structured in the same way. At first, inputs are checked for errors. Next, the history of the item associated with the specified key is looked up. While \code{Store::read()} and \code{Store::drop()} will fail if no history is found, \code{Store::write()} will perform an insertion by adding a new pair to the transaction's change set. If a history is found, then it is scanned for a version that is visible to the specified transaction. If a valid version is found, the operation can perform its read, write, or deletion, respectively. Otherwise, the operation cannot continue and aborts the associated transaction with an error code. Finally, a transaction must be committed with \code{store::commit()} to make its changes durable. Until then, it can always be aborted with \code{Store::abort()}. The subsequent sections give details about the implementations of visibility, operations, and commits.
 
 \subsection{Visibility}
 \label{ch:impl-vsb}
@@ -542,6 +593,8 @@ An item can be deleted by invoking \code{Store::drop()}. Deletion is very simila
 
 In order to manifest the changes of a transaction in the store, the transaction must be committed using \code{Store::commit()}. Its implementation is outlined as pseudo code in Algorithm \ref{alg:commit}. A commit works as follows. At first, the transaction receives an end timestamp. In the next step, the read sets of the transaction are validated against read-write conflicts. If at least one read version has been updated or deleted, then the transaction aborts. This implementation could be too pessimistic but it preserves serializability. Once the validation succeeds, all change sets of the transaction are translated into durable changes. As a result, durable versions are allocated or deallocated, and histories are modified accordingly. After this step, all changes are durable and the transaction status is changed from \code{Active} to \code{Committed}. At this point, the TID of the committed transaction is still deposited on all the versions that it has modified or created. This is not a problem because other transaction can still inspect the committed transaction. In order to be able to remove the transaction at some point, its end timestamp must be propagated to all these versions and thus replace its deposited TID.
 The transaction's end timestamp will be installed as: end timestamp in updated or deleted versions or begin timestamp for newly inserted versions. Finally, the transaction is complete and its control block can be removed from the transaction table.
+
+\vspace{0.5cm}
 
 \begin{algorithm}
 \begin{algorithmic}[1]
