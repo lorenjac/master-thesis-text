@@ -142,7 +142,7 @@
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\qc
 
-\f0\b\fs24 \cf0 TransactionControlBlock}</string>
+\f0\b\fs24 \cf0 Transaction}</string>
 						<key>VerticalPad</key>
 						<integer>0</integer>
 					</dict>
@@ -255,7 +255,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2018-05-02 21:31:34 +0000</string>
+	<string>2018-05-02 21:57:03 +0000</string>
 	<key>Modifier</key>
 	<string>kodiak</string>
 	<key>NotesVisible</key>

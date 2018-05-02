@@ -153,7 +153,7 @@ Throughout its lifetime, a transaction usually transitions through several
 execution phases. Beginning with an \code{active} state once a transaction has
 started, it may transition to \code{try\_commit} upon commit and finally
 \code{committed} when it succeeds. Upon failure, a transaction could indicate a
-\code{failed} state. The concrete set of phases is left to the implementation (see Chapter \ref{ch:impl}).
+\code{failed} state. The concrete set of phases is left to the implementation (see Chapter~\ref{ch:impl}).
 
 Change sets are required to buffer all modifications that a transaction carries
 out. When a transaction commits all modifications are propagated to durable
@@ -248,7 +248,8 @@ overview of all the components of this section, see Figure
     \label{fig:concept-struct-complete}
 \end{figure}
 
-\todo[inline]{arrays are not so optimal for histories (lists are better for concurrency)}
+\vfill
+% \todo[inline]{arrays are not so optimal for histories (lists are better for concurrency)}
 
 % \begin{figure}[h!]
 %     \centering

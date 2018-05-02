@@ -332,20 +332,19 @@ read-write conflicts.
 
 \subsection{Serializable MVCC}
 
-The previous section describes the \ac{MVCC} protocol \ac{SI}. \ac{SI} provides
-affordable isolation but fails to preclude all non-serializable schedules such
-as write skew. Nevertheless, \ac{SI} is the most widely adopted \ac{MVCC}
-implementation \cite{larson2011high, bailey2013exploring, neumann2015fast}. In
-some cases, serializing alternatives are available but disabled by default. This
-policy is often motivated by significant performance benefits compared to
-strictly serializing concurrency control \cite{cahill2009serializable}. Others
-argue that \ac{SI} anomalies may be negligible as even renowned ACID-compliant
-benchmarks such as TPC-C do not expose them \cite{fekete2005making}. However,
-the need for data integrity should not depend on benchmarks failing to prove
-it. Therefore, there are efforts to overcome the weaknesses of \ac{SI} and
-provide strong consistency without falling back to pessimistic approaches. This
-section presents an overview of approaches to make serializing \ac{MVCC}
-affordable.
+\acl{SI} provides affordable isolation but fails to preclude all
+non-serializable schedules such as write skew. Nevertheless, \ac{SI} is the most
+widely adopted \ac{MVCC} implementation \cite{larson2011high,
+bailey2013exploring, neumann2015fast}. In some cases, serializing alternatives
+are available but disabled by default. This policy is often motivated by
+significant performance benefits compared to strictly serializing concurrency
+control \cite{cahill2009serializable}. Others argue that \ac{SI} anomalies may
+be negligible as even renowned ACID-compliant benchmarks such as TPC-C do not
+expose them \cite{fekete2005making}. However, the need for data integrity should
+not depend on benchmarks failing to prove it. Therefore, there are efforts to
+overcome the weaknesses of \ac{SI} and provide strong consistency without
+falling back to pessimistic approaches. This section presents an overview of
+approaches to make serializing \ac{MVCC} affordable.
 
 The main reason for non-serializable schedules in \ac{SI} is that it cannot
 detect read-write conflicts. While \ac{SI} keeps track of each transactions'

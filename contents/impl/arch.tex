@@ -149,7 +149,7 @@ initialize an instance of the class. Otherwise, the programmer has to use custom
 initialization procedures.
 
 Internally, PMDK uses largely the same mechanism for consistency as described in
-Chapter \ref{ch:nvram-consistency}. That means, modified data is flushed from
+Chapter~\ref{ch:nvram-consistency}. That means, modified data is flushed from
 memory order buffers and caches. In some situations, non-temporal writes are
 used which make use of write combine buffers. When it comes to flushing
 write-pending queues inside the memory controller, PMDK relies on ADR.
@@ -280,7 +280,7 @@ zero-copy list node migration of \code{NVList} is used. Parameters such as the
 maximum load factor or the growth factor can be adjusted using the policy-based
 template design.
 
-\todo[inline]{impl: elaborate on volatile/non-volatile key dissonance (optional)}
+% \todo[inline]{impl: elaborate on volatile/non-volatile key dissonance (optional)}
 
 % * policy-based design for
 %     * hashing volatile and non-volatile keys
@@ -350,7 +350,7 @@ With MVCC, concurrent access to data is managed by having multiple versions of a
 
 \paragraph{Histories}
 
-For each value of a key-value pair, there are several versions. The versions of a single item are managed within a history. When a transaction wishes to access an item, the transaction management has to search the item's history for version that is \emph{visible} to the transaction. In Midas, a history is a durable linked list by means of \code{NVList} from Section \ref{ch:impl-data}. At startup, existing histories are truncated to contain only their most recent version. After that, histories are in append-only mode.
+For each value of a key-value pair, there are several versions. The versions of a single item are managed within a history. When a transaction wishes to access an item, the transaction management has to search the item's history for version that is \emph{visible} to the transaction. In Midas, a history is a durable linked list by means of \code{NVList} from Section~\ref{ch:impl-data}. At startup, existing histories are truncated to contain only their most recent version. After that, histories are in append-only mode.
 
 \paragraph{Index}
 
