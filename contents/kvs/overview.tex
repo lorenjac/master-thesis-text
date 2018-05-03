@@ -88,9 +88,7 @@ caches on top of existing file systems.
 An essential feature of most databases are transactions. Transactions enable a
 sequence of database operations to appear as a single atomic operation. If a
 single operation involved in a transaction fails, the entire transaction fails
-and its side effects are rolled back.
-
-Transactions are a powerful mechanism that enables aggregated operations without
+and its side effects are rolled back. Transactions are a powerful mechanism that enables aggregated operations without
 worrying about inconsistencies even in case of failure. Given the prevalence of
 transactions, most \acp{KVS} support them. A notable exception is memcached
 \cite{wu2016nvmcached}. Due to their importance for this work, transactions are
